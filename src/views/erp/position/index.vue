@@ -265,7 +265,7 @@ function getList() {
   });
 }
 
-/** 查询部门下拉树结构 */
+/** 查询仓库下拉树结构 */
 function getWarehouseTree() {
   warehouseTreeSelect().then(response => {
     warehouseOptions.value = response.data;

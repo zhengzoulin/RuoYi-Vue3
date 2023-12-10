@@ -357,7 +357,6 @@
 <script setup name="Product">
 import { listProduct, getProduct, delProduct, addProduct, updateProduct } from "@/api/erp/product";
 import {ref} from "vue";
-import {warehouseTreeSelect} from "../../../../api/erp/position";
 import {catalogTreeSelect} from "../../../../api/erp/catalog";
 import {addBrand, listBrand} from "../../../../api/erp/brand";
 
@@ -435,7 +434,7 @@ const filterNode = (value, data) => {
 watch(catalogName, val => {
   proxy.$refs["catalogTreeRef"].filter(val);
 });
-/** 查询部门下拉树结构 */
+/** 查询目录下拉树结构 */
 function getCatalogTree() {
   catalogTreeSelect().then(response => {
     catalogOptions.value = response.data;
