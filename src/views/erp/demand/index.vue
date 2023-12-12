@@ -89,7 +89,8 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="demandList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="demandList" @selection-change="handleSelectionChange"
+              >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="需求编号" align="center" prop="demandCode" />
       <el-table-column label="商品" align="center">
@@ -216,7 +217,9 @@
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="loading" :data="productList" @selection-change="handleDemandSelectionChange">
+          <el-table v-loading="loading" :data="productList" @selection-change="handleDemandSelectionChange"
+                    style="height: 350px"
+                    :row-key="getRowKeys" >
             <el-table-column type="selection" width="55" align="center" />
             <el-table-column label="商品编号" align="center" prop="productCode" />
             <el-table-column label="商品名称" align="center" prop="productName" />
@@ -273,7 +276,9 @@
           </el-form-item>
         </div>
         <div v-show="active === 3">
-          <el-table v-loading="loading" :data="demandForm.demandProductsList" @cell-click="tabClick">
+          <el-table v-loading="loading" :data="demandForm.demandProductsList" :rules="demandRules"   @cell-click="tabClick">
+<!--            <el-table-column type="selection" width="55" align="center" />-->
+
             <el-table-column label="商品编号" align="center" prop="productCode" />
             <el-table-column label="商品名称" align="center" prop="productName" />
             <el-table-column label="商品图片" prop="productImage" align="center" >
@@ -302,12 +307,15 @@
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
               <template #default="scope">
                 <el-button link type="primary" icon="list" @click="handleDetail(scope.row)" v-hasPermi="['erp:product:edit']">详细</el-button>
+                <el-button link type="danger" icon="delete" @click="removeRow(scope.row)">移除</el-button>
               </template>
             </el-table-column>
           </el-table>
 
         </div>
+<!--        <button @click="handleClearSelection">清除选中记录</button>-->
 
+<!--        <el-button v-if="active === 3" style="margin-top: 12px" @click="handleClearSelection">清除选中记录</el-button>-->
 
       </el-form>
 
@@ -316,6 +324,7 @@
 
       <el-button v-if="active < 3" style="margin-top: 12px" @click="nextStep">下一步</el-button>
       <el-button v-if="active === 3" style="margin-top: 12px" @click="submitDemandForm">确 定</el-button>
+
 
 
 
@@ -450,6 +459,9 @@ import {getProduct} from "../../../api/erp/product";
 import {catalogTreeSelect} from "../../../api/erp/catalog";
 import {warehouseTreeSelect} from "../../../api/erp/position";
 
+
+
+
 const { proxy } = getCurrentInstance();
 
 const demandList = ref([]);
@@ -510,6 +522,11 @@ const data = reactive({
     demandStatus: null,
     status: null,
   },
+  demandRules: {
+    // 规则定义
+    // 需求数量字段必填
+    demandNumber: [{ required: true, message: '需求数量不能为空', trigger: 'blur' }]
+  },
   rules: {
     demandCode: [
       { required: true, message: "需求编号不能为空", trigger: "blur" }
@@ -536,10 +553,48 @@ const data = reactive({
 });
 
 const { queryParams,queryProductParams, form,demandForm,
-  productForm,rules } = toRefs(data);
+  productForm,rules ,demandRules} = toRefs(data);
 
 
 
+// const multipleTableRef = ref();
+const select_order_number = ref(''); // 表格select选中的条数
+const select_orderId = ref([]); // 表格select复选框选中的id
+const multipleSelection = ref([]);
+// 选中的list
+const getRowKeys = (row) => {
+// 记录每行的key值
+return row;
+}
+
+// 当表格选择项发生变化时会触发该事件
+const handleDemandSelectionChange = (val) => {
+if (val) {
+val.forEach((row) => {
+  if (row && !productIds.value.some(item => item.productId === row.productId)) {
+    productIds.value.push(row);
+  }
+  });
+}
+  }
+
+const selection = ref();
+
+const removeRow = (row) => {
+  const confirmResult = confirm('确定要移除这一行吗？');
+  if (confirmResult) {
+    alert(row)
+    const index = demandForm.value.demandProductsList.findIndex(item => item.productId === row.productId);
+    if (index !== -1) {
+      demandForm.value.demandProductsList.splice(index, 1);
+      alert('成功移除该行');
+    } else {
+      alert('未找到对应行');
+    }
+  } else {
+    alert('已取消移除');
+  }
+};
 
 function tableRowClassName ({ row, rowIndex }) {
   // 把每一行的索引放进row
@@ -562,8 +617,6 @@ function inputBlur (row) {
   tabClickIndex.value = null
   tabClickLabel.value = ''
 }
-
-
 
 
 // 步骤条下一步的方法
@@ -699,28 +752,29 @@ function resetProductQuery() {
   handleProductQuery();
 }
 
-// 多选框选中数据
-function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.demandId);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
-}
-
-// 商品多选框选中数据
-function handleDemandSelectionChange(selection) {
-  productIds.value = selection;
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
-}
 
 /** 新增按钮操作 */
 function handleAdd() {
   reset();
+  resetProductQuery();
   active.value=1
   getProductList();
   openProduct.value = true;
+  handleLogout();
   title.value = "添加采购需求";
 }
+
+// 在退出功能触发时调用的方法
+const handleLogout = () => {
+  // 清除选中记录
+  multipleSelection.value = []; // 清空选中列表
+  select_order_number.value = ''; // 清空选中条数
+  select_orderId.value = []; // 清空选中的 ID 数组
+  productIds.value = [];
+  // 其他清理操作...
+  // 进行退出操作...
+}
+
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
