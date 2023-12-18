@@ -183,85 +183,15 @@
 
 <!--        //第三步:定义4个盒子对象active => 1 到 4-->
         <div v-show="active === 1">
-<!--         放置表单项-->
-          <el-form :model="queryProductParams" ref="queryProductRef" :inline="true" v-show="showSearch" label-width="68px">
+<!--         商品选择组件-->
 
-            <el-form-item label="商品编号" prop="productCode">
-              <el-input
-                  v-model="queryProductParams.productCode"
-                  placeholder="请输入商品编号"
-                  clearable
-                  @keyup.enter="handleProductQuery"
-              />
-            </el-form-item>
-            <el-form-item label="商品名称" prop="productName">
-              <el-input
-                  v-model="queryProductParams.productName"
-                  placeholder="请输入商品名称"
-                  clearable
-                  @keyup.enter="handleProductQuery"
-              />
-            </el-form-item>
-            <el-form-item label="商品来源" prop="productSource">
-              <el-input
-                  v-model="queryProductParams.productSource"
-                  placeholder="请输入商品来源"
-                  clearable
-                  @keyup.enter="handleProductQuery"
-              />
-            </el-form-item>
+          <ProductTable  :productList="productList"
+                         @queryProduct="childProductQuery"
+                         @getSelectProduct="getChildProductList"
+                         @getProductDetail="getChildProductDetail"
+          >
 
-            <el-form-item>
-              <el-button type="primary" icon="Search" @click="handleProductQuery">搜索</el-button>
-              <el-button icon="Refresh" @click="resetProductQuery">重置</el-button>
-            </el-form-item>
-          </el-form>
-
-          <el-table v-loading="loading" :data="productList" @selection-change="handleDemandSelectionChange"
-                    style="height: 350px"
-                    :row-key="getRowKeys" >
-            <el-table-column type="selection" width="55" align="center" />
-            <el-table-column label="商品编号" align="center" prop="productCode" />
-            <el-table-column label="商品名称" align="center" prop="productName" />
-            <el-table-column label="商品图片" prop="productImage" align="center" >
-              <template  #default="scope" width="100">
-                <ImagePreview style="width:70px;height:60px;" :src="scope.row.productImage" />
-              </template>
-            </el-table-column>
-            <el-table-column label="品牌" align="center" prop="brand.brandName" />
-            <el-table-column label="描述" align="center" prop="productIntro" />
-            <el-table-column label="厂家型号" align="center" prop="productModel" />
-            <el-table-column label="商品来源" align="center" prop="productSource" />
-            <el-table-column label="录入方式" align="center" prop="productAddOrigin" />
-            <el-table-column label="重量" align="center" prop="productWeight" />
-            <el-table-column label="封装规格" align="center" prop="encapStandard" />
-            <el-table-column label="成本价" align="center" prop="costPrice" />
-            <el-table-column label="售价" align="center" prop="salePrice" />
-            <el-table-column label="包装单位" align="center" prop="minpacketUnit" />
-            <!--          <el-table-column label="包装数量" align="center" prop="minpacketNumber" />-->
-            <el-table-column align="center" label="商品状态" prop="status">
-              <template #default="scope">
-                <el-tag :type="scope.row.status == '0' ?'success':'warning'"> {{ formatStatus(scope.row.status) }} </el-tag>
-              </template>
-            </el-table-column>
-            <!--          <el-table-column label="备注" align="center" prop="remark" />-->
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220px">
-              <template #default="scope">
-                <el-button link type="primary" icon="list" @click="handleDetail(scope.row)" v-hasPermi="['erp:product:edit']">详细</el-button>
-<!--                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:product:edit']">修改</el-button>-->
-<!--                <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:product:remove']">删除</el-button>-->
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <pagination
-              v-show="total>0"
-              :total="total"
-              v-model:page="queryProductParams.pageNum"
-              v-model:limit="queryProductParams.pageSize"
-              @pagination="getProductList"
-          />
-
+          </ProductTable>
         </div>
         <div v-show="active === 2">
           <el-form-item label="选择目标仓库" prop="warehouseId">
@@ -458,6 +388,7 @@ import {ref,reactive} from "vue";
 import {getProduct} from "../../../api/erp/product";
 import {catalogTreeSelect} from "../../../api/erp/catalog";
 import {warehouseTreeSelect} from "../../../api/erp/position";
+import ProductTable from "../../../components/zerp/table/productTable";
 
 
 
@@ -838,6 +769,36 @@ function handleExport() {
     ...queryParams.value
   }, `demand_${new Date().getTime()}.xlsx`)
 }
+
+//************************************************************
+function childProductQuery(data){
+  queryProductParams.value = data
+  console.log(queryProductParams.value)
+  handleProductQuery();
+}
+function getChildProductDetail(data){
+  reset();
+  getCatalogTree();
+
+  const _productId = data.productId
+  getProduct(_productId).then(response => {
+    productForm.value = response.data;
+    openProductDetail.value = true;
+    title.value = "商品详情";
+  });
+}
+function getChildProductList(data){
+
+  openProduct.value=false;
+  form.value.demandProductsList = data
+
+}
+
+
+
+
+
+
 
 getList();
 getWarehouseTree();

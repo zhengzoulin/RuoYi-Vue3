@@ -26,6 +26,23 @@ export function addOrder(data) {
   })
 }
 
+// 新增采购订单
+export function addOrderAudit(data) {
+  return request({
+    url: '/erp/order/addOrderAudit',
+    method: 'post',
+    data: data
+  })
+}
+// 查询订单审核记录
+export function getOrderAuditRecord(purchaseOrderId) {
+  return request({
+    url: '/erp/order/getOrderAuditRecord/' + purchaseOrderId,
+    method: 'get'
+  })
+}
+
+
 // 修改采购订单
 export function updateOrder(data) {
   return request({
