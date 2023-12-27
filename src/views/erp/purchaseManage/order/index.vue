@@ -52,7 +52,6 @@
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
-            check-strictly
             @change="handleChange"
         />
       </el-form-item>
@@ -90,7 +89,7 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
-          type="primary"
+          type="success"
           plain
           icon="Plus"
           @click="handleAdd"
@@ -100,7 +99,7 @@
 
       <el-col :span="1.5">
         <el-button
-          type="success"
+          type="warning"
           plain
           icon="Edit"
           :disabled="single"
@@ -110,103 +109,55 @@
       </el-col>
 
       <el-col :span="1.5">
-        <el-select v-model="auditValue"  placeholder="审核"  style="width: 80px;"
-                   :disabled="auditDisabled"
-                   @change="auditOrder">
+        <el-dropdown class="el-dropdown-order" trigger="click"  @command="handleAuditCommand">
+          <el-button type="primary" :disabled="auditDisabled"  style="width: 80px;">
+             审核订单<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="1">审核通过</el-dropdown-item>
+              <el-dropdown-item command="2">审核不通过</el-dropdown-item>
 
-          <el-option
-              v-for="item in AuditOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-          />
-        </el-select>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </el-col>
+
+
       <el-col :span="1.5">
         <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['erp:order:remove']"
+            type="danger"
+            plain
+            icon="Delete"
+            :disabled="multiple"
+            @click="handleDelete"
+            v-hasPermi="['erp:order:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['erp:order:export']"
+            type="primary"
+            plain
+            icon="Download"
+            @click="handleExport"
+            v-hasPermi="['erp:order:export']"
         >导出</el-button>
-      </el-col>
 
+      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="orderList"  @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center"  />
-      <el-table-column label="订单编号" align="center"  >
-        <template #default="scope">
-          <!-- 使用 <a> 标签来包装数据，并添加样式 -->
-          <a
-              href="#"
-              style="color: rgba(40,177,232,0.83); text-decoration: underline;"
-              @click="handleOrderDetailClick(scope.row)"
-          >
-            {{ scope.row.purchaseOrderCode }}
-          </a>
-        </template>
-      </el-table-column>
-      <el-table-column label="单据名称" align="center" prop="purchaseOrderName" />
-      <el-table-column label="供应商" align="center" prop="unit.unitName" />
-      <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
+    <order-table
+        :loading="loading"
+        :orderList="orderList"
+        :tooltipAuditContent="tooltipAuditContent"
+        @handleSelectionChange="handleSelectionChange"
+        @handleOrderDetailClick="handleOrderDetailClick"
+        @showAuditTooltip="showAuditTooltip"
+        @handleUpdate="handleUpdate"
+    />
 
-          <el-table-column align="center" label="审核状态" prop="auditId">
-        <template #default="scope">
-          <el-tooltip
-              class="box-item"
-              effect="dark"
-              :content="tooltipAuditContent"
-              placement="right"
-              :style="{ 'max-height': '200px', 'overflow-y': 'auto' }"
-          >
-          <el-tag :type="{
-            '0': 'info',       // 未审核状态
-            '1': 'success',    // 审核通过状态
-            '2': 'danger'      // 审核未通过状态
-          }[scope.row.auditId]"
-                  @mouseover="showAuditTooltip(scope.row)"> {{ orderAuditStatus(scope.row.auditId) }} </el-tag>
-          </el-tooltip>
 
-        </template>
-      </el-table-column>
-      <el-table-column label="订单交货日期" align="center" prop="purchaseOrderTime" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.purchaseOrderTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="采购订单总金额" align="center" prop="purchaseAllAmount" />
-      <el-table-column align="center" label="付款状态" prop="paymentId">
-        <template #default="scope">
-          <el-tag :type="{
-            '0': 'info',       // 未审核状态
-            '1': 'success',    // 审核通过状态
-            '2': 'danger'      // 审核未通过状态
-          }[scope.row.paymentId]"> {{ orderPayStatus(scope.row.paymentId) }} </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="订单进度" align="center" prop="orderProgress" />
-
-      <el-table-column label="订单备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row.purchaseOrderId)" v-hasPermi="['erp:order:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:order:remove']">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
     
     <pagination
       v-show="total>0"
@@ -220,9 +171,9 @@
     <el-dialog :title="title" v-model="open"
                 append-to-body class="dialog-addOrder">
       <span > 采购订单基本信息
-        <el-button link type="primary" icon="list" @click="changeOrderShow()" > {{ orderDetailShow ? '收起' : '详细' }}</el-button>
+        <el-button link type="primary" icon="list" @click="changeOrderShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
-      <el-form ref="orderRef" v-show="orderDetailShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
+      <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
                style="border-top: dashed 1.3px rgba(187,199,191,0.35) ;padding: 8px">
       <el-row>
         <el-form-item label="订单编号" prop="purchaseOrderCode" class="select-container" >
@@ -239,7 +190,6 @@
               :props="{ value: 'id', label: 'label', children: 'children' }"
               value-key="id"
               placeholder="请选择仓库"
-              check-strictly
               class="readonly-tree-select"
               style="width: 160px;"
           />
@@ -349,7 +299,6 @@
 
       <el-table v-loading="loading"
                 :data="form.demandProductsList"
-                :rules="rules"
                 height="450"
                 @cell-click="tabClick">
 
@@ -490,9 +439,10 @@
       />
     </el-dialog>
 
-
     <!--  商品选择框-->
     <el-dialog :title="title" v-model="openProduct" width="950px"  append-to-body >
+      <!-- 查看商品详细对话框 -->
+      <el-button style="margin-right: 10px" @click="submitProductList">确 定</el-button>
       <!--      //第二步:定义form表单-->
       <ProductTable  :productList="productList"
                      :productRows="productRows"
@@ -514,172 +464,48 @@
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
-            check-strictly
             @change="handleChange"
         />
       </el-form-item>
       <el-button type="primary" @click="nextStep">确 定</el-button>
     </el-dialog>
 
-    <!-- 查看商品详细对话框 -->
-    <el-dialog :title="title" v-model="openProductDetail" width="750px"  append-to-body>
-      <el-form ref="productRef" :model="productForm" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品编号" prop="productCode" >
-              <el-input v-model="productForm.productCode" placeholder="请输入商品编号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="选择目录" prop="catalogName">
-              <el-tree-select
-                  v-model="productForm.catalogId"
-                  :data="catalogOptions"
-                  :props="{ value: 'id', label: 'label', children: 'children' }"
-                  value-key="isd"
-                  placeholder="请选择目录分类"
-                  check-strictly
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品名称" prop="productName">
-              <el-input v-model="productForm.productName" placeholder="请输入商品名称" />
-            </el-form-item>
-          </el-col>
-
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品介绍" prop="productIntro">
-              <el-input v-model="productForm.productIntro" placeholder="请输入商品介绍" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="厂家型号" prop="productModel">
-              <el-input v-model="productForm.productModel" placeholder="请输入厂家型号" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品来源" prop="productSource">
-              <el-input v-model="productForm.productSource" placeholder="请输入商品来源" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="录入方式" prop="productAddOrigin">
-              <el-input v-model="productForm.productAddOrigin" placeholder="请输入商品重量" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品重量" prop="productWeight">
-              <el-input v-model="productForm.productWeight" placeholder="请输入商品重量" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="封装规格" prop="encapStandard">
-              <el-input v-model="productForm.encapStandard" placeholder="请输入封装规格" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="成本价" prop="costPrice">
-              <el-input v-model="productForm.costPrice" placeholder="请输入成本价" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="售价" prop="salePrice">
-              <el-input v-model="productForm.salePrice" placeholder="请输入售价" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="包装单位" prop="minpacketUnit">
-              <el-input v-model="productForm.minpacketUnit" placeholder="请输入包装单位" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="包装数量" prop="minpacketNumber">
-              <el-input v-model="productForm.minpacketNumber" placeholder="请输入最小包装数量" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="22">
-            <el-form-item label="备注">
-              <el-input v-model="productForm.remark" type="textarea" placeholder="请输入内容"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="16" class="add-label">
-            <el-form-item label="商品图片" prop="productImage">
-              <image-upload v-model="productForm.productImage"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
 
 
+    <ProductDetail
+        :title="title"
+        :openProductDetail="openProductDetail"
+        :productForm = "productForm"
+        :catalogOptions="catalogOptions"
+    />
 
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="">确 定</el-button>
-          <el-button @click="cancelProductDetail">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <AuditDialog
+        :auditAddDTO="auditAddDTO"
+        :openAudit = "openAudit"
+        :AuditTitle="AuditTitle"
+        @submitOrderAudit="submitOrderAudit"
+    />
 
-    <el-dialog
-        v-model="openAudit"
-        :title="AuditTitle"
-        width="30%"
-        align-center
-    >
-
-
-      <span>审核备注</span>
-      <el-input
-          v-model="auditAddDTO.auditRemark"
-          placeholder="请输入审核备注"
-          clearable
-          style="height: 100px"
-      />
-      <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="openAudit.value = false">取消</el-button>
-        <el-button type="primary" @click="submitOrderAudit">
-          确认
-        </el-button>
-      </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup name="Order">
 import { listOrder, getOrder, delOrder, addOrder, updateOrder } from "@/api/erp/order";
 import {ref} from "vue";
-import {warehouseTreeSelect} from "../../../../api/erp/position";
+import {warehouseParentTreeSelect, warehouseTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
 import {getProduct, listProduct} from "../../../../api/erp/product";
 import {catalogTreeSelect} from "../../../../api/erp/catalog";
+import { ElMessage } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import Subassembly from "../../../../components/zerp/table/subassembly";
 import ProductTable from "../../../../components/zerp/table/productTable";
 import ChildTOParent from "../../../../components/zerp/table/childTOParent";
 import OrderDetail from "./orderDetail";
 import {addOrderAudit,getOrderAuditRecord} from "../../../../api/erp/order";
+import AuditDialog from "../../../../components/zerp/public/auditDialog";
+import ProductDetail from "../../productManage/product/productDetail";
+import OrderTable from "./orderTable";
 
 const { proxy } = getCurrentInstance();
 
@@ -709,24 +535,18 @@ const total = ref(0);
 const title = ref("");
 const AuditTitle = ref("");
 
-const orderDetailShow = ref(true);
+const orderDetailFormShow = ref(true);
 const productRows = ref([]);
+const selection = ref([{}]);
+
 const catalogOptions = ref(undefined);
 const productListSize=ref(0);
-const auditValue = ref(1)
+const auditValue = ref("审核")
 const auditDisabled = ref(true);
 const auditAddDTO = ref({})
 const tooltipAuditContent = ref({})
 
-const AuditOptions = ref([
-  {
-    value: '1',
-    label: '审核通过',
-  },
-  {
-    value: '2',
-    label: '审核不通过',
-  }])
+
 const data = reactive({
   form: {
     createTime: "",
@@ -913,6 +733,11 @@ function getProductList() {
   });
 }
 
+/** 搜索按钮操作 */
+function changeOrderShow() {
+  orderDetailFormShow.value = !(orderDetailFormShow.value);
+}
+
 // 取消按钮
 function cancel() {
   open.value = false;
@@ -980,12 +805,23 @@ function resetQuery() {
 }
 
 // 多选框选中数据
-function handleSelectionChange(selection) {
+function handleSelectionChange(data) {
 
-  ids.value = selection.map(item => item.purchaseOrderId);
-  single.value = selection.length != 1;
-  auditDisabled.value = selection.length != 1 ;
-  multiple.value = !selection.length;
+  selection.value = Array.from(data);
+
+  ids.value = selection.value.map(item => item.purchaseOrderId);
+  single.value = selection.value.length != 1;
+  auditDisabled.value = selection.value.length != 1 ;
+  if(selection.value.length ==1){
+    if(selection.value.map(item => item.auditId) == 0){
+      auditDisabled.value = false;
+      single.value = false;
+    }else{
+      auditDisabled.value = true;
+      single.value = true
+    }
+  }
+  multiple.value = !selection.value.length;
 }
 
 /** 新增采购订单按钮操作，第一步选择仓库 */
@@ -1027,15 +863,15 @@ function tabClick (row, column, cell, event) {
 }
 
 // 当表格选择项发生变化时会触发该事件
-const handleDemandSelectionChange = (val) => {
-  if (val) {
-    val.forEach((row) => {
-      if (row && !productRows.value.some(item => item.productId === row.productId)) {
-        productRows.value.push(row);
-      }
-    });
-  }
-}
+// const handleDemandSelectionChange = (val) => {
+//   if (val) {
+//     val.forEach((row) => {
+//       if (row && !productRows.value.some(item => item.productId === row.productId)) {
+//         productRows.value.push(row);
+//       }
+//     });
+//   }
+// }
 // 在退出功能触发时调用的方法
 const handleLogout = () => {
   // 清除选中记录
@@ -1049,9 +885,10 @@ const handleLogout = () => {
 
 
 /** 修改按钮操作 */
-function handleUpdate(purchaseOrderId) {
+function handleUpdate(row) {
   reset();
-  const _purchaseOrderId = purchaseOrderId
+  const _purchaseOrderId = row.purchaseOrderId || ids.value
+  console.log(_purchaseOrderId)
   getOrder(_purchaseOrderId).then(response => {
     form.value = response.data;
     form.value.demandProductsList =response.data.productList;
@@ -1110,7 +947,7 @@ function handleExport() {
 
 /** 查询仓库下拉树结构 */
 function getWarehouseTree() {
-  warehouseTreeSelect().then(response => {
+  warehouseParentTreeSelect().then(response => {
     warehouseOptions.value = response.data;
   });
 };
@@ -1120,18 +957,6 @@ function getUnitList() {
   listUnit().then(response => {
     unitOptions.value = response.rows;
   });
-}
-//状态显示
-function orderAuditStatus(auditId) {
-  if (auditId === '0') {
-    return '未审核'
-  } else if (auditId === '1') {
-    return '审核通过'
-  } else if(auditId === '2'){
-    return '审核不通过'
-  }else {
-    return '错误状态'
-  }
 }
 
 //状态显示
@@ -1148,31 +973,22 @@ function orderPayStatus(paymentId) {
 }
 
 //审核订单
-function auditOrder(){
-  auditAddDTO.value.auditType = auditValue.value;
+const handleAuditCommand = (command) => {
+  auditAddDTO.value.auditType = command;
   ids.value.forEach((id) => {
     // 遍历 ids 数组中的每个元素，并赋值给 orderId
     auditAddDTO.value.orderId = id;
   });
-
   openAudit.value = true;
-  alert(auditAddDTO.value.auditType)
-
-  if(auditAddDTO.value.auditType == 1){
+  if(auditAddDTO.value.auditType === 1){
     AuditTitle.value = "审核通过"
   }else{
     AuditTitle.value = "审核不通过"
-
   }
-  // addOrderAudit(auditAddDTO.value).then(response => {
-  //   proxy.$modal.msgSuccess("审核成功");
-  //   getList();
-  // })
 }
-
 //提交审核
-function submitOrderAudit(){
-
+function submitOrderAudit(data){
+  auditAddDTO.value = data
   addOrderAudit(auditAddDTO.value).then(response => {
     proxy.$modal.msgSuccess("审核成功");
     getList();
@@ -1239,12 +1055,8 @@ function getChildProductDetail(data){
   });
 }
 function getChildProductList(data){
-
   openProduct.value=false;
-  console.log("////////////////////////////////////////")
   form.value.demandProductsList = data
-  console.log(form.value.demandProductsList)
-
 }
 
 getList();
@@ -1299,5 +1111,11 @@ getWarehouseTree();
 }
 .dialog-footer button:first-child {
   margin-right: 10px;
+}
+
+
+.el-dropdown-order{
+  margin-right: 10px;
+  display: flex;
 }
 </style>

@@ -126,38 +126,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改采购需求对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="demandRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="需求编号" prop="demandCode">
-          <el-input v-model="form.demandCode" placeholder="请输入需求编号" />
-        </el-form-item>
-        <el-form-item label="商品id" prop="productId">
-          <el-input v-model="form.productId" placeholder="请输入商品id" />
-        </el-form-item>
-        <el-form-item label="所属仓库" prop="warehouseId">
-          <el-input v-model="form.warehouseId" placeholder="请输入所属仓库" />
-        </el-form-item>
-        <el-form-item label="采购需求数量" prop="demandNumber">
-          <el-input v-model="form.demandNumber" placeholder="请输入采购需求数量" />
-        </el-form-item>
-        <el-form-item label="需求来源" prop="demandSource">
-          <el-input v-model="form.demandSource" placeholder="请输入需求来源" />
-        </el-form-item>
-        <el-form-item label="删除标志" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标志" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
+
 
 
 
@@ -186,6 +155,7 @@
 <!--         商品选择组件-->
 
           <ProductTable  :productList="productList"
+                         :productRows="productRows"
                          @queryProduct="childProductQuery"
                          @getSelectProduct="getChildProductList"
                          @getProductDetail="getChildProductDetail"
@@ -201,7 +171,6 @@
                 :props="{ value: 'id', label: 'label', children: 'children' }"
                 value-key="id"
                 placeholder="请选择仓库"
-                check-strictly
             />
           </el-form-item>
         </div>
@@ -243,10 +212,6 @@
           </el-table>
 
         </div>
-<!--        <button @click="handleClearSelection">清除选中记录</button>-->
-
-<!--        <el-button v-if="active === 3" style="margin-top: 12px" @click="handleClearSelection">清除选中记录</el-button>-->
-
       </el-form>
 
 <!--      第五步:设置上一步和下一步的按钮-->
@@ -255,128 +220,18 @@
       <el-button v-if="active < 3" style="margin-top: 12px" @click="nextStep">下一步</el-button>
       <el-button v-if="active === 3" style="margin-top: 12px" @click="submitDemandForm">确 定</el-button>
 
-
-
-
     </el-dialog>
 
 
     <!-- 查看商品详细对话框 -->
-    <el-dialog :title="title" v-model="openProductDetail" width="750px"  append-to-body>
-      <el-form ref="productRef" :model="productForm" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品编号" prop="productCode" >
-              <el-input v-model="productForm.productCode" placeholder="请输入商品编号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="选择目录" prop="catalogName">
-              <el-tree-select
-                  v-model="productForm.catalogId"
-                  :data="catalogOptions"
-                  :props="{ value: 'id', label: 'label', children: 'children' }"
-                  value-key="isd"
-                  placeholder="请选择目录分类"
-                  check-strictly
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+    <ProductDetail
+        :title="title"
+        :openProductDetail="openProductDetail"
+        :productForm = "productForm"
+        :catalogOptions="catalogOptions"
+    />
 
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品名称" prop="productName">
-              <el-input v-model="productForm.productName" placeholder="请输入商品名称" />
-            </el-form-item>
-          </el-col>
 
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品介绍" prop="productIntro">
-              <el-input v-model="productForm.productIntro" placeholder="请输入商品介绍" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="厂家型号" prop="productModel">
-              <el-input v-model="productForm.productModel" placeholder="请输入厂家型号" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品来源" prop="productSource">
-              <el-input v-model="productForm.productSource" placeholder="请输入商品来源" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="录入方式" prop="productAddOrigin">
-              <el-input v-model="productForm.productAddOrigin" placeholder="请输入商品重量" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="商品重量" prop="productWeight">
-              <el-input v-model="productForm.productWeight" placeholder="请输入商品重量" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="封装规格" prop="encapStandard">
-              <el-input v-model="productForm.encapStandard" placeholder="请输入封装规格" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="成本价" prop="costPrice">
-              <el-input v-model="productForm.costPrice" placeholder="请输入成本价" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="售价" prop="salePrice">
-              <el-input v-model="productForm.salePrice" placeholder="请输入售价" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="包装单位" prop="minpacketUnit">
-              <el-input v-model="productForm.minpacketUnit" placeholder="请输入包装单位" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="10" class="add-label">
-            <el-form-item label="包装数量" prop="minpacketNumber">
-              <el-input v-model="productForm.minpacketNumber" placeholder="请输入最小包装数量" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="22">
-            <el-form-item label="备注">
-              <el-input v-model="productForm.remark" type="textarea" placeholder="请输入内容"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="16" class="add-label">
-            <el-form-item label="商品图片" prop="productImage">
-              <image-upload v-model="productForm.productImage"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -387,7 +242,7 @@ import { listProduct } from "@/api/erp/product";
 import {ref,reactive} from "vue";
 import {getProduct} from "../../../api/erp/product";
 import {catalogTreeSelect} from "../../../api/erp/catalog";
-import {warehouseTreeSelect} from "../../../api/erp/position";
+import {warehouseParentTreeSelect, warehouseTreeSelect} from "../../../api/erp/position";
 import ProductTable from "../../../components/zerp/table/productTable";
 
 
@@ -409,7 +264,7 @@ const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
 const productIds = ref([]);
-
+const productRows = ref([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -553,7 +408,7 @@ function inputBlur (row) {
 // 步骤条下一步的方法
 function nextStep() {
 
-  demandForm.value.demandProductsList = productIds.value
+  demandForm.value.demandProductsList = productRows.value
 
   active.value += 1;
   if (active > 3){
@@ -628,7 +483,7 @@ function getCatalogTree() {
 };
 /** 查询仓库下拉树结构 */
 function getWarehouseTree() {
-  warehouseTreeSelect().then(response => {
+  warehouseParentTreeSelect().then(response => {
     warehouseOptions.value = response.data;
   });
 };
@@ -687,6 +542,7 @@ function resetProductQuery() {
 /** 新增按钮操作 */
 function handleAdd() {
   reset();
+  productRows.value = [];
   resetProductQuery();
   active.value=1
   getProductList();

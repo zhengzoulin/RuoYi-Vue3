@@ -224,7 +224,7 @@ function handleSwitchChange(value){
 
 }
 /** 查询仓库管理1下拉树结构 */
-function getTreeselect() {
+function getTreeSelect() {
   listWarehouse().then(response => {
     warehouseOptions.value = [];
     const data = { warehouseId: 0, warehouseName: '顶级节点', children: [] };
@@ -278,7 +278,7 @@ function resetQuery() {
 /** 新增按钮操作 */
 function handleAdd(row) {
   reset();
-  getTreeselect();
+  getTreeSelect();
   if (row != null && row.warehouseId) {
     form.value.parentId = row.warehouseId;
   } else {
@@ -300,7 +300,7 @@ function toggleExpandAll() {
 /** 修改按钮操作 */
 async function handleUpdate(row) {
   reset();
-  await getTreeselect();
+  await getTreeSelect();
   if (row != null) {
     form.value.parentId = row.parentId;
   }

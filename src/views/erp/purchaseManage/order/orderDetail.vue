@@ -172,10 +172,7 @@ function handleProductDetail(row){
 }
 
 
-/** 搜索按钮操作 */
-function changeOrderShow() {
-  orderDetailShow.value = !orderDetailShow.value;
-}
+
 </script>
 
 <style scoped>

@@ -9,7 +9,6 @@
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
-            check-strictly
         />
       </el-form-item>
       <el-form-item label="所属货架" prop="storageRackCode">
@@ -425,7 +424,6 @@ function submitFileForm() {
 
 /** 获取当前仓库*/
 function getCurrentHouse(){
-  // alert(warehouseOptions.value);
   const _warehouseId = queryParams.value.warehouseId
   getWarehouse(_warehouseId).then(response => {
     currentHouse.value.warehousePath = response.data.warehousePath;

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <el-button  style="margin-right: 10px" @click="submitProductList">确 定</el-button>
 
     <el-form :model="queryProductParams" ref="queryProductRef"
              :inline="true"
@@ -145,9 +144,7 @@ function handleProductQuery1 () {
   //调用父组件传递过来的方法，传入参数修改父组件的值
   emit('queryProduct', queryProductParams.value)
 }
-function submitProductList(){
-  emit('getSelectProduct', props.productRows)
-}
+
 function handleProductDetail(row){
   rowData.value = row
   emit('getProductDetail', rowData.value)

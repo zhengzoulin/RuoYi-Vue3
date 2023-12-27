@@ -17,6 +17,14 @@ export function getPosition(stockPositionId) {
   })
 }
 
+// 查询库位管理详细
+export function getWarehousePosition(warehouseId) {
+  return request({
+    url: '/erp/position/warehousePositionTree?warehouseId=' + warehouseId,
+    method: 'get'
+  })
+}
+
 // 查询仓库管理1详细
 export function getWarehouse(warehouseId) {
   return request({
@@ -55,6 +63,14 @@ export function delPosition(stockPositionId) {
 export function warehouseTreeSelect() {
   return request({
     url: '/erp/position/warehouseTree',
+    method: 'get'
+  })
+}
+
+// 查询仓库下拉树结构
+export function warehouseParentTreeSelect() {
+  return request({
+    url: '/erp/position/warehouseParentTree',
     method: 'get'
   })
 }
