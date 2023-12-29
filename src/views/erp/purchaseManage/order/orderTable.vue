@@ -59,7 +59,7 @@
       <el-table-column label="订单备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:order:edit']">修改</el-button>
+          <el-button :disabled="props.single" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:order:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:order:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -116,6 +116,10 @@ const props = defineProps({
   },
   tableStyle:{
     type:Object
+  },
+  single:{
+    type:Boolean,
+    default: true
   }
 })
 

@@ -51,7 +51,7 @@
       <el-col :span="1.5">
 
         <el-dropdown class="el-dropdown-order" trigger="click"  >
-          <el-button type="primary" :disabled="auditDisabled"  style="width: 80px;">
+          <el-button type="primary"   style="width: 80px;">
             新增<el-icon class="el-icon--right"><arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
@@ -88,6 +88,7 @@
           </template>
         </el-dropdown>
       </el-col>
+
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -112,23 +113,50 @@
 
     <el-table v-loading="loading" :data="addStockList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="入库单号" align="center" prop="addStockCode" />
+      <el-table-column label="入库单号" align="center">
+      <template #default="scope">
+        <a
+            href="#"
+            style="color: rgba(40,177,232,0.83); text-decoration: underline;"
+            @click="handleAddStockDetailClick(scope.row)"
+        >
+          {{ scope.row.addStockCode }}
+        </a>
+      </template>
+      </el-table-column>
       <el-table-column label="单据名称" align="center" prop="addStockName" />
 
       <el-table-column label="入库类型" align="center" prop="addStockType" />
-      <el-table-column label="所属仓库" align="center" prop="warehousePath" />
+      <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
       <el-table-column label="入库日期" align="center" prop="addStockTime" />
+      <el-table-column label="发货方" align="center" prop="unit.unitName" />
+      <el-table-column label="操作人" align="center" prop="createBy" />
 
-      <el-table-column label="发货方" align="center" prop="unitName" />
-      <el-table-column label="操作人" align="center" prop="creator" />
+      <el-table-column align="center" label="审核状态" prop="auditId">
+        <template #default="scope">
+          <el-tooltip
+              class="box-item"
+              effect="dark"
+              :content="tooltipAuditContent"
+              placement="right"
+              :style="{ 'max-height': '200px', 'overflow-y': 'auto' }"
+          >
+            <el-tag :type="{
+            '0': 'info',       // 未审核状态
+            '1': 'success',    // 审核通过状态
+            '2': 'danger'      // 审核未通过状态
+          }[scope.row.auditId]"
+                    @mouseover="showAuditTooltip(scope.row)"> {{ addStockAuditStatus(scope.row.auditId) }} </el-tag>
+          </el-tooltip>
 
-      <el-table-column label="审核状态" align="center" prop="auditId" />
+        </template>
+      </el-table-column>
+
       <el-table-column label="创建日期" align="center" prop="createTime" />
-
       <el-table-column label="订单备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:addStock:edit']">修改</el-button>
+          <el-button  :disabled="single" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:addStock:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:addStock:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -201,7 +229,7 @@
           </el-form-item>
 
 
-          <el-form-item label="发货方" prop="unitName">
+          <el-form-item label="发货方" prop="unitId">
             <el-select v-model="form.unitId"  placeholder="采购订单获取" class="readonly-tree-select"
             >
               <el-option
@@ -209,7 +237,6 @@
                   :key="item.unitId"
                   :label="item.unitName"
                   :value="item.unitId"
-                  :disabled="item.status == 1"
                   style="width: 140px;"
               ></el-option>
             </el-select>
@@ -356,7 +383,7 @@
                       href="#"
                       class="custom-link-style"
                       @click="SelectAddStockPosition(scope.row)"
-                      v-html="String.raw`${formatBatchPosition(scope.row.batchPositionList, PositionOptions)}`"
+                      v-html="String.raw`${formatBatchPosition(scope.row)}`"
                   ></a>
                 </template>
               </el-table-column>
@@ -365,6 +392,18 @@
             </el-table>
     </el-dialog>
 
+    <!--   入库订单详情查看 -->
+    <add-stock-detail
+        :openAddOrderStockDetail="openAddOrderStockDetail"
+        :form="form"
+
+        :selectedOrder="form.selectedOrder"
+        :ProductsListLoading="ProductsListLoading"
+        :orderProductsList="form.orderProductsList"
+        :title="title"
+        :orderAuditShow="orderAuditShow"
+        :updateOrderShow="updateOrderShow"
+    />
 
 <!--    审核弹窗-->
     <AuditDialog
@@ -559,9 +598,12 @@
 <script setup name="AddStock">
 import { listAddStock, getAddStock, delAddStock, addAddStock, updateAddStock,AddStockList } from "@/api/erp/addStock";
 import {ref} from "vue";
-import {addOrderAudit, getOrder, listOrder} from "../../../../api/erp/order";
+import {addOrderAudit, getOrder, getOrderAuditRecord, listOrder} from "../../../../api/erp/order";
 import {getWarehousePosition, warehouseTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
+import {addAddStockAudit} from "../../../../api/erp/addStock";
+import AuditDialog from "../../../../components/zerp/public/auditDialog";
+import AddStockDetail from "./addStockDetail";
 import OrderTable from "../../purchaseManage/order/orderTable";
 
 const { proxy } = getCurrentInstance();
@@ -572,16 +614,21 @@ const tooltipAuditContent = ref({})
 
 const open = ref(false);
 const openAddOrderStock = ref(false);
+const openAddOrderStockDetail = ref(false);
+
 const openAudit = ref(false);
 const openSelectOrder = ref(false);
 const openSelectAddStockPosition = ref(false);
 const selectValue = ref([])
 const auditAddDTO = ref({})
 
+
 const loading = ref(true);
 const ProductsListLoading = ref(openSelectOrder);
 const showSearch = ref(true);
 const orderDetailFormShow = ref(true);
+const auditDisabled = ref(true);
+
 const ids = ref([]);
 const orderIds = ref([]);
 const unitOptions = ref([]);
@@ -592,9 +639,12 @@ const tabClickLabel = ref();
 
 const single = ref(true);
 const multiple = ref(true);
+const orderAuditShow = ref(true);
+const updateOrderShow = ref(true);
 const total = ref(0);
 const title = ref("");
 const AuditTitle = ref("");
+const selection = ref([{}]);
 const orderSelection = ref();
 
 const data = reactive({
@@ -635,6 +685,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     auditId: 1,
+    orderProgress: null,
     warehouseId: null,
     unitName: null,
   },
@@ -722,10 +773,30 @@ function resetQuery() {
 }
 
 // 多选框选中数据
-function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.addStockId);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+function handleSelectionChange(data) {
+
+  selection.value = Array.from(data);
+
+
+  ids.value = selection.value.map(item => item.addStockId);
+  single.value = selection.value.length != 1;
+  multiple.value = !selection.value.length;
+  console.log(auditDisabled.value)
+  auditDisabled.value = selection.value.length != 1 ;
+  console.log(auditDisabled.value)
+
+  if(selection.value.length == 1){
+    if(selection.value.map(item => item.auditId) == 0){
+      auditDisabled.value = false;
+      single.value = false;
+    }else{
+      auditDisabled.value = true;
+      single.value = true
+    }
+  }
+  multiple.value = !selection.value.length;
+  console.log(auditDisabled.value)
+
 }
 
 
@@ -742,6 +813,7 @@ function handleAdd() {
 /** 新增采购入库单按钮操作 */
 function handleAddOrder() {
   reset();
+  form.value.addStockType = "采购入库"
   openAddOrderStock.value = true;
   title.value = "采购入库";
 }
@@ -750,10 +822,13 @@ function handleAddOrder() {
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
+  openAddOrderStock.value = true;
+
   const _addStockId = row.addStockId || ids.value
   getAddStock(_addStockId).then(response => {
     form.value = response.data;
-    open.value = true;
+    // form.value.orderProductsList.
+    // selectPosition(form.value.warehouseId)
     title.value = "修改入库表";
   });
 }
@@ -823,25 +898,10 @@ function tabClick (row, column, cell, event) {
   // console.log('tabClick', this.tabClickIndex, row.demandNumber)
 }
 
-//审核订单
-const handleAuditCommand = (command) => {
-  auditAddDTO.value.auditType = command;
-  ids.value.forEach((id) => {
-    // 遍历 ids 数组中的每个元素，并赋值给 orderId
-    auditAddDTO.value.orderId = id;
-  });
-  openAudit.value = true;
-  if(auditAddDTO.value.auditType === 1){
-    AuditTitle.value = "审核通过"
-  }else{
-    AuditTitle.value = "审核不通过"
-  }
-}
 
 //选择采购订单带入入库单
 function selectedOrderList(){
   openSelectOrder.value = false;
-
 }
 //确定要移除这一行
 const removeOrderRow = (row) => {
@@ -890,8 +950,13 @@ function addProductBatchRow() {
   // 创建一个空对象或空数据结构
   const batchPosition = {
     selectValue: [...firstRow.selectValue], // 复制第一行的仓库信息
+    warehouseId: firstRow.warehouseId,
+    positionId: firstRow.positionId,
+    positionName: firstRow.positionName,
+    warehouseName: firstRow.warehouseName,
     batch: '' // 你可能需要根据需要初始化其他属性
   };
+
   // 将新的空对象添加到数组中
   form.value.orderProductsList.addStockProduct.batchPositionList.push(batchPosition);
   getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
@@ -956,36 +1021,17 @@ const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
 };
 
 
-function formatBatchPosition(batchPositionList, PositionOptions) {
+function formatBatchPosition(row) {
+  const batchPositionList = row.batchPositionList
   if (Array.isArray(batchPositionList) && batchPositionList.length > 0) {
     const formattedList = batchPositionList.map(item => {
       const selectedLabels = [];
 
-      if (Array.isArray(item.selectValue)) {
-        const [warehouseId, positionId] = item.selectValue;
-
-        // 在 PositionOptions 中查找对应的仓库信息
-        const foundWarehouse = PositionOptions.find(option => option.id === warehouseId);
-        if (foundWarehouse) {
-          selectedLabels.push(foundWarehouse.label); // 添加仓库名称
-
-          // 如果存在库位 ID，则在仓库的 children 中查找对应的库位信息
-          if (positionId) {
-            const foundPosition = foundWarehouse.children.find(child => child.id === positionId);
-            if (foundPosition) {
-              selectedLabels.push(foundPosition.label); // 添加库位名称
-            } else {
-              selectedLabels.push('N/A'); // 如果未找到对应库位信息，则使用默认值
-            }
-          } else {
-            selectedLabels.push('N/A'); // 如果未选择库位，则使用默认值
-          }
-        } else {
-          selectedLabels.push('N/A', 'N/A'); // 如果未找到对应仓库信息，则使用默认值
-        }
-
+      if (item != null) {
+        selectedLabels.push(item.warehouseName|| '-'); // 添加仓库名称
+        selectedLabels.push(item.positionName|| '-'); // 添加库位名称
         // 添加批次信息
-        selectedLabels.push(item.batch || 'N/A');
+        selectedLabels.push(item.batchCode || '-');
 
         // 根据找到的仓库、库位和批次信息构建显示的字符串
         return `${selectedLabels.join('-')}（${item.addNumber}）个`;
@@ -1000,7 +1046,6 @@ function formatBatchPosition(batchPositionList, PositionOptions) {
   return '选择入库：位置-批次';
 }
 
-
 // 你的函数，根据传入的 unitId 返回对应的 unitName
 function getUnitNameById(unitId) {
   // 将 unitId 转换为与 unitOptions.value 中的 unitId 类型相匹配的类型
@@ -1014,6 +1059,7 @@ function getUnitNameById(unitId) {
 function getReturnBatchPosition(){
   openSelectAddStockPosition.value=false;
 }
+
 //选择库位节点触发
 const handlePositionChange = (selectValue) => {
   console.log("position选择数据：" + selectValue);
@@ -1021,8 +1067,14 @@ const handlePositionChange = (selectValue) => {
   // 更新所有行的入库位置信息
   form.value.orderProductsList.addStockProduct.batchPositionList.forEach(row => {
     row.selectValue = selectValue; // 将入库位置设置为选择的值
-    row.warehouseId = selectValue[0];
-    row.positionId = selectValue[1];
+    row.warehouseId = row.selectValue[0];
+    row.positionId = row.selectValue[1];
+    const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
+    row.warehouseName = foundWarehouse.label
+    const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
+    row.positionName = foundPosition.label
+
+    console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
   });
 
   // 其他可能的操作或逻辑
@@ -1032,18 +1084,103 @@ const handlePositionChange = (selectValue) => {
 function subMitAddStockList(){
   console.log(form.value)
 
-  AddStockList(form.value).then(response => {
-    proxy.$modal.msgSuccess("新增成功");
-    openAddOrderStock.value = false;
-    getList();
-  });
+  if (form.value.addStockId != null) {
+    updateAddStock(form.value).then(response=>{
+      proxy.$modal.msgSuccess("修改成功");
+      openAddOrderStock.value = false;
+      getList();
+    })
+
+  }else{
+    AddStockList(form.value).then(response => {
+      proxy.$modal.msgSuccess("新增成功");
+      openAddOrderStock.value = false;
+      getList();
+    });
+  }
+
 }
 
+
+function handleAddStockDetailClick(row){
+
+  reset();
+  openAddOrderStock.value = true;
+  const _addStockId = row.addStockId
+  getAddStock(_addStockId).then(response => {
+    form.value = response.data;
+    console.log(form.value)
+    form.value.auditId = response.data.auditId
+    form.value.selectedOrder = []
+    form.value.orderProductsList = [];
+    // productListSize.value=Object.keys(response.data.demandProductsList).length
+    title.value = "订单详情";
+
+    if(response.data.auditId != 0){
+      orderAuditShow.value = true;
+      updateOrderShow.value = true;
+    }else{
+      orderAuditShow.value = false;
+      updateOrderShow.value = false;
+    }
+  });
+}
+//状态显示
+function addStockAuditStatus(auditId) {
+  if (auditId === '0') {
+    return '未审核'
+  } else if (auditId === '1') {
+    return '审核通过'
+  } else if(auditId === '2'){
+    return '审核不通过'
+  }else {
+    return '错误状态'
+  }
+}
+
+const showAuditTooltip = (row) => {
+  // 生成tooltip的内容，可以根据rowData的信息来设置tooltip内容
+  if(row.auditId == 0){
+    return;
+  }
+  getOrderAuditRecord(row.addStockId).then(response=>{
+    tooltipAuditContent.value= response.data
+
+    tooltipAuditContent.value = '审核人: '+tooltipAuditContent.value.userName +
+        '  审核时间:'+ tooltipAuditContent.value.createTime +
+        '  备注:'+tooltipAuditContent.value.auditRemark;
+
+    console.log(tooltipAuditContent.value)
+  })
+
+
+
+  console.log("***************************")
+
+};
 // 子组件交互**********************子组件交互**********************************子组件交互
+//审核订单
+const handleAuditCommand = (command) => {
+  auditAddDTO.value.auditType = command;
+  ids.value.forEach((id) => {
+    // 遍历 ids 数组中的每个元素，并赋值给 orderId
+    auditAddDTO.value.orderId = id;
+  });
+  openAudit.value = true;
+
+  if(auditAddDTO.value.auditType == 1){
+    AuditTitle.value = "审核通过"
+  }else{
+    AuditTitle.value = "审核不通过"
+  }
+
+  console.log(AuditTitle.value+"ddd:"+ openAudit.value)
+}
+
 //提交审核
 function submitOrderAudit(data){
   auditAddDTO.value = data
-  addOrderAudit(auditAddDTO.value).then(response => {
+  addAddStockAudit(auditAddDTO.value).then(response => {
     proxy.$modal.msgSuccess("审核成功");
     getList();
   })
@@ -1052,7 +1189,7 @@ function submitOrderAudit(data){
 }
 // 采购订单多选框选中数据
 function handleOrderSelectionChange(data) {
-
+  alert("订单多选框")
   orderSelection.value = Array.from(data);
   if(orderSelection.value.length > 1){
     return "只能选择一条订单入库"
@@ -1100,11 +1237,14 @@ function handleSelectOrder(){
 function getOrderList() {
   loading.value = true;
   queryOrderParams.value.auditId = 1
+  queryOrderParams.value.orderProgress = "未开始"
   listOrder(queryOrderParams.value).then(response => {
     orderList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
+
+
 }
 
 

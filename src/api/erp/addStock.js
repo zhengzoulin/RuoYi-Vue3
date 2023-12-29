@@ -25,6 +25,14 @@ export function addAddStock(data) {
     data: data
   })
 }
+// 订单审核提交
+export function addAddStockAudit(data) {
+  return request({
+    url: '/erp/addStock/addAddStockAudit',
+    method: 'post',
+    data: data
+  })
+}
 // 新增入库表
 export function AddStockList(data) {
   return request({

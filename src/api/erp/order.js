@@ -26,7 +26,7 @@ export function addOrder(data) {
   })
 }
 
-// 新增采购订单
+// 订单审核提交
 export function addOrderAudit(data) {
   return request({
     url: '/erp/order/addOrderAudit',

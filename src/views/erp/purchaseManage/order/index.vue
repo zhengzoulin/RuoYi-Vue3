@@ -150,6 +150,7 @@
     <order-table
         :loading="loading"
         :orderList="orderList"
+        :single="single"
         :tooltipAuditContent="tooltipAuditContent"
         @handleSelectionChange="handleSelectionChange"
         @handleOrderDetailClick="handleOrderDetailClick"
@@ -980,7 +981,7 @@ const handleAuditCommand = (command) => {
     auditAddDTO.value.orderId = id;
   });
   openAudit.value = true;
-  if(auditAddDTO.value.auditType === 1){
+  if(auditAddDTO.value.auditType == 1){
     AuditTitle.value = "审核通过"
   }else{
     AuditTitle.value = "审核不通过"
