@@ -1189,7 +1189,6 @@ function submitOrderAudit(data){
 }
 // 采购订单多选框选中数据
 function handleOrderSelectionChange(data) {
-  alert("订单多选框")
   orderSelection.value = Array.from(data);
   if(orderSelection.value.length > 1){
     return "只能选择一条订单入库"

@@ -187,9 +187,9 @@
 
 <script setup name="Position">
 import { listPosition, getPosition, delPosition, addPosition, updatePosition } from "@/api/erp/position";
-import {getWarehouse, warehouseTreeSelect} from "../../../api/erp/position";
+import {getWarehouse, warehouseTreeSelect} from "../../../../api/erp/position";
 import {getCurrentInstance, ref,reactive} from "vue";
-import {getToken} from "../../../utils/auth";
+import {getToken} from "../../../../utils/auth";
 
 const { proxy } = getCurrentInstance();
 

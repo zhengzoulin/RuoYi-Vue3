@@ -79,6 +79,8 @@
       <el-table-column label="仓库名称" align="center" prop="warehouseName" />
       <el-table-column label="仓库编号" prop="warehouseCode" />
       <el-table-column label="仓库地址" align="center" prop="warehouseAddress" />
+      <el-table-column label="仓库路径" align="center" prop="warehousePath" />
+
       <el-table-column label="联系人" align="center" prop="contactName" />
       <el-table-column label="联系人电话" align="center" prop="contactPhone" />
       <el-table-column align="center" label="状态" prop="status">
