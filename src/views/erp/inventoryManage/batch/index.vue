@@ -27,7 +27,7 @@
       </el-form-item>
       <el-form-item class="smaller-form-item">
         <el-button type="primary" icon="Search" @click="handleQuery"    class="smaller-button">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery"   class="smaller-button">重置</el-button>
+        <el-button icon="Refresh" @click="resetBatchQuery"   class="smaller-button">重置</el-button>
       </el-form-item>
     </el-form>
     <el-row :gutter="10" class="mb8 smaller-row">
@@ -73,26 +73,72 @@
             class="smaller-button"
         >导出</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar v-model:showSearch="showSearch" @queryTable="getBatchLevelList"></right-toolbar>
     </el-row>
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane label="商品信息维度" name="first">
-        <el-table v-loading="loading" :data="batchList" @selection-change="handleSelectionChange" class="">
-          <el-table-column type="selection" width="55" align="center" />
-          <el-table-column type="index" width="55" align="center" />
+        <el-table v-loading="loading" :data="productLevelList" style="max-height: 214px;" @selection-change="handleSelectionChange" >
 
-          <el-table-column label="批次号" align="center" prop="batchCode" />
-          <el-table-column label="批次名称" align="center" prop="batchName" />
-
-          <el-table-column label="商品名称" align="center" prop="product" />
-          <el-table-column label="商品信息" align="center" prop="productName" />
-
-          <el-table-column label="批次有效期" align="center" prop="batchvalidTime" width="180">
-            <template #default="scope">
-              <span>{{ parseTime(scope.row.batchvalidTime, '{y}-{m}-{d}') }}</span>
+          <el-table-column label="商品编号" align="center" prop="productCode">
+            <template  #default="scope" width="100">
+              <button  class="positionButton" @click="showProductBatchDetail">
+                <span>{{scope.row.productCode}}</span>
+              </button>
             </template>
           </el-table-column>
-          <el-table-column label="批次商品数量" align="center" prop="batchNumber" />
+          <el-table-column label="商品名称" align="center" prop="productName" />
+          <el-table-column label="厂家型号" align="center" prop="productName" />
+          <el-table-column label="封装规格" align="center" prop="productName" />
+
+          <el-table-column label="无批次商品数量" align="center" prop="batchCode" />
+          <el-table-column label="批次商品数量" align="center" prop="batchName" />
+          <el-table-column label="批次总额" align="center" prop="batchName" />
+        </el-table>
+
+        <pagination
+            v-show="total>0"
+            :total="total"
+            v-model:page="queryParams.pageNum"
+            v-model:limit="queryParams.pageSize"
+            @pagination="getProductLevelList"
+        />
+      </el-tab-pane>
+      <el-tab-pane label="批次信息维度" name="second" style="overflow: auto">
+
+        <el-table v-loading="loading" :data="batchLevelList" style="max-height: 500px;overflow: auto" @selection-change="handleSelectionChange" class="batchTable">
+          <el-table-column label="序号" type="index" width="55" align="center" />
+
+          <el-table-column label="批次号" align="center" prop="batchCode" />
+          <el-table-column label="批次名称" align="center" prop="batchName" width="80" />
+
+          <el-table-column label="商品名称" align="center" prop="productName" />
+          <el-table-column label="商品信息" align="center">
+            <template #default="scope">
+              <span style="display: block;">封装规格:{{ scope.row.productVO.encapStandard }}</span>
+              <span style="display: block;">厂家型号:{{ scope.row.productVO.productModel }}</span>
+
+              <span style="display: block;">最小包装数量:{{ scope.row.productVO.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="批次有效期" align="center" prop="batch.batchvalidTime" width="180">
+            <template #default="scope">
+              <span>{{ parseTime(scope.row.batch.batchvalidTime, '{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="所属仓库数量" align="center" prop="warehouseNumber">
+            <template  #default="scope" width="100">
+              <button  class="positionButton" @click="showProductBatchDetail">
+                <span>{{scope.row.warehouseNumber}}</span>
+              </button>
+            </template>
+          </el-table-column>
+          <el-table-column label="批次商品数量" align="center" prop="batchNumber">
+            <template  #default="scope" width="100">
+              <button @click="showBatchDetail(scope.row)" class="positionButton">
+                <span>{{scope.row.batchNumber}}</span>
+              </button>
+            </template>
+          </el-table-column>
           <el-table-column label="批次总额" align="center" prop="batchTotal" />
 
 
@@ -102,44 +148,80 @@
             :total="total"
             v-model:page="queryParams.pageNum"
             v-model:limit="queryParams.pageSize"
-            @pagination="getList"
+            @pagination="getBatchLevelList"
         />
       </el-tab-pane>
-      <el-tab-pane label="批次信息维度" name="second">
-        <el-table v-loading="loading" :data="batchList" @selection-change="handleSelectionChange" class="">
-
-        <el-table-column label="商品编号" align="center" prop="product" />
-        <el-table-column label="商品名称" align="center" prop="productName" />
-        <el-table-column label="厂家型号" align="center" prop="productName" />
-        <el-table-column label="封装规格" align="center" prop="productName" />
-
-        <el-table-column label="无批次商品数量" align="center" prop="batchCode" />
-        <el-table-column label="批次商品数量" align="center" prop="batchName" />
-        <el-table-column label="批次总额" align="center" prop="batchName" />
-        </el-table>
-
-        <pagination
-            v-show="total>0"
-            :total="total"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="getList"
-        />
-      </el-tab-pane>
-
     </el-tabs>
+
+
+    <el-dialog
+        title="商品批次明细" v-model="openBatchDetail"
+        append-to-body class="dialog-selectOrder"
+    >
+      <table :data="form.productVO" class="top-title" style="border: 1px solid rgb(230, 235, 245);">
+        <tr >
+          <td  class="tex" >
+            <div  class="dis">
+              商品编号：
+              <div   tabindex="0" class="tex-color">{{ form.productVO.productCode}}</div>
+            </div>
+          </td>
+          <td  class="tex">
+            <div  class="dis">
+              商品名称：
+              <div   tabindex="0" class="tex-color">{{ form.productVO.productName}}</div>
+            </div>
+          </td>
+          <td  class="tex">
+            <div  class="dis">
+              厂家型号：
+              <div   tabindex="0" class="tex-color">{{ form.productVO.productModel }} </div>
+            </div>
+          </td>
+          <td  class="tex">
+            <div  class="dis">
+              封装规格：
+              <div   tabindex="0" class="tex-color">{{ form.productVO.encapStandard }}</div></div></td>
+          <td  class="tex">
+            <div  class="dis">
+              封装单位：
+              <div  tabindex="0" class="tex-color">{{ form.productVO.minpacketUnit}}</div></div></td>
+        </tr></table>
+
+        <el-table
+            :data="form.batchProductList"
+            height="280px"
+            style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px;overflow: auto"
+            :span-method="objectSpanMethod"
+            class="el-table__header"
+        >
+          <el-table-column label="关联单据" align="center" prop="associatedCode" />
+          <el-table-column label="出入库类型" align="center" prop="warehousePath" />
+          <el-table-column label="所属位置" align="center" prop="warehousePath" />
+          <el-table-column label="变更时间" align="center" prop="createTime" />
+          <el-table-column label="变更前数量" align="center" prop="beforeChangeNumber" />
+          <el-table-column label="变更数量" align="center" prop="changeNumber" />
+          <el-table-column label="变更后数量" align="center" prop="afterChangeNumber" />
+        </el-table>
+    </el-dialog>
   </div>
 
 
 </template>
 
-<script setup name="Batch">
+<script setup>
 import { listBatch, getBatch, delBatch, addBatch, updateBatch } from "@/api/erp/batch";
-
+import { ref } from 'vue'
+import { useRoute, useRouter } from "vue-router"
+import {listBatchLevel, listProductLevel} from "../../../../api/erp/batch";
 const { proxy } = getCurrentInstance();
 
-const batchList = ref([]);
+const batchLevelList = ref([]);
+const productLevelList = ref([]);
+
 const open = ref(false);
+const openBatchDetail = ref(false);
+
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
@@ -149,7 +231,11 @@ const total = ref(0);
 const title = ref("");
 
 const data = reactive({
-  form: {},
+  form: {
+    productVO: ref({}),
+    batchProductList: ref([])
+
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -162,10 +248,9 @@ const data = reactive({
 
   }
 });
-
 const { queryParams, form, rules } = toRefs(data);
-import { ref } from 'vue'
 
+const router = useRouter();
 const activeName = ref('first')
 
 const handleClick = (tab, event) => {
@@ -173,10 +258,20 @@ const handleClick = (tab, event) => {
 }
 
 /** 查询批次列表 */
-function getList() {
+function getBatchLevelList() {
   loading.value = true;
-  listBatch(queryParams.value).then(response => {
-    batchList.value = response.rows;
+  listBatchLevel(queryParams.value).then(response => {
+    batchLevelList.value = response.rows;
+    total.value = response.total;
+    loading.value = false;
+  });
+}
+
+/** 查询批次列表 */
+function getProductLevelList() {
+  loading.value = true;
+  listProductLevel(queryParams.value).then(response => {
+    batchLevelList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -207,15 +302,26 @@ function reset() {
 }
 
 /** 搜索按钮操作 */
-function handleQuery() {
+function handleBatchQuery() {
   queryParams.value.pageNum = 1;
-  getList();
+  getBatchLevelList();
+}
+/** 搜索按钮操作 */
+function handleProductQuery() {
+  queryParams.value.pageNum = 1;
+  getBatchLevelList();
 }
 
+
 /** 重置按钮操作 */
-function resetQuery() {
+function resetBatchQuery() {
   proxy.resetForm("queryRef");
-  handleQuery();
+  handleBatchQuery();
+}
+/** 重置按钮操作 */
+function resetProductQuery() {
+  proxy.resetForm("queryRef");
+  handleProductQuery();
 }
 
 // 多选框选中数据
@@ -251,13 +357,13 @@ function submitForm() {
         updateBatch(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
-          getList();
+          getBatchLevelList();
         });
       } else {
         addBatch(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
-          getList();
+          getBatchLevelList();
         });
       }
     }
@@ -270,7 +376,7 @@ function handleDelete(row) {
   proxy.$modal.confirm('是否确认删除批次编号为"' + _batchIds + '"的数据项？').then(function() {
     return delBatch(_batchIds);
   }).then(() => {
-    getList();
+    getBatchLevelList();
     proxy.$modal.msgSuccess("删除成功");
   }).catch(() => {});
 }
@@ -282,7 +388,19 @@ function handleExport() {
   }, `batch_${new Date().getTime()}.xlsx`)
 }
 
-getList();
+function showBatchDetail(row){
+  openBatchDetail.value = true;
+  form.value.batchProductList = row.batchProductList;
+  form.value.productVO = row.productVO
+
+  console.log( form.value.batchProductList)
+}
+
+
+
+
+
+getBatchLevelList();
 </script>
 
 <style>
@@ -316,5 +434,66 @@ getList();
 .smaller-form-item {
   margin-right: 8px; /* 调整表单元素之间的间距 */
   font-size: 8px; /* 调整表单字体大小 */
+}
+.batchTable{
+
+  font-size: 12px;
+
+
+}
+
+
+.top-title{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  border: 1px solid #ebeef5;
+  padding: 4px 4px;
+  margin-bottom: 4px;
+  background-color: rgba(176,196,222, 0.2); /* 淡灰色 */
+
+}
+
+
+.dis{
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 0 6px;
+  margin: 0 16px;
+}
+.tex-color{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 1000;
+}
+.tex{
+  margin: 5px;
+}
+.el-table__header{
+  table-layout: fixed;
+  border-collapse: separate;
+}
+.positionButton{
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.positionButton span {
+  color: skyblue;
+}
+.dialog-selectOrder{
+  /*width: 85% ;*/
+  margin-top: 80px;
+  height: 500px;
+  width: 48%;
 }
 </style>

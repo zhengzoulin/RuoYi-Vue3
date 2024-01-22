@@ -23,7 +23,7 @@
 	margin-bottom: 5px;
 }
 .mb8 {
-	margin-bottom: 8px;
+	margin-bottom: 16px;
 }
 .ml5 {
 	margin-left: 5px;
@@ -74,22 +74,44 @@
 	padding: 10px 20px 0;
 }
 
-.el-table {
-	.el-table__header-wrapper, .el-table__fixed-header-wrapper {
-		th {
-			word-break: break-word;
-			background-color: #f8f8f9 !important;
-			color: #515a6e;
-			height: 40px !important;
-			font-size: 13px;
-		}
-	}
-	.el-table__body-wrapper {
-		.el-button [class*="el-icon-"] + span {
-			margin-left: 1px;
-		}
-	}
-}
+
+ .el-table {
+	 .el-table__header-wrapper,
+	 .el-table__fixed-header-wrapper {
+		 th {
+			 word-break: break-word;
+			 background-color:  rgb(236,245,255);
+			 color: #0e1011;
+			 height: 60px;
+			 font-size: 14px;
+			 text-align: center;
+			 padding: 0;
+			 border: 1px solid rgba(0, 0, 0, 0.05); /* 更浅的边框颜色 */
+		 }
+	 }
+	 .el-table__body,
+	 .el-table__body-wrapper td {
+		 /* 设置字体样式 */
+		 font-family: 'Helvetica Neue', sans-serif;
+		 font-size: 12px; /* 你希望的字体大小 */
+		 color: #333; /* 你希望的字体颜色 */
+		 /* 其他样式属性，比如行高、字重等 */
+	 }
+
+
+	 .el-table__body-wrapper {
+		 td {
+			 border: 1px solid rgba(0, 0, 0, 0.05); /* 更浅的边框颜色 */
+		 }
+
+		 .el-button [class*="el-icon-"] + span {
+			 margin-left: 1px;
+		 }
+	 }
+ }
+
+
+
 
 /** 表单布局 **/
 .form-header {

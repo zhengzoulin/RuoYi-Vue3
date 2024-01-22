@@ -507,17 +507,17 @@ import {addOrderAudit,getOrderAuditRecord} from "../../../../api/erp/order";
 import AuditDialog from "../../../../components/zerp/public/auditDialog";
 import ProductDetail from "../../productManage/product/productDetail";
 import OrderTable from "./orderTable";
+import {useRoute, useRouter} from "vue-router";
 
 const { proxy } = getCurrentInstance();
-
+const router = useRouter();
+const route = useRoute();
 const orderList = ref([]);
 const productList = ref([]);
 
 const open = ref(false);
 
-const openWarehouse = ref(false);
-const openProduct = ref(false);
-const openProductDetail = ref(false);
+
 const openOrderDetail = ref(false);
 const openAudit = ref(false);
 
@@ -537,7 +537,6 @@ const title = ref("");
 const AuditTitle = ref("");
 
 const orderDetailFormShow = ref(true);
-const productRows = ref([]);
 const selection = ref([{}]);
 
 const catalogOptions = ref(undefined);
@@ -636,9 +635,7 @@ const data = reactive({
 
 const { queryParams, form, rules ,productForm,queryProductParams} = toRefs(data);
 
-const calculateorderMoney = (item) => {
-  item.orderMoney = (item.costPrice * item.demandNumber || 0).toFixed(3);
-};
+
 
 function handleOrderDetailClick(row){
   reset();
@@ -662,38 +659,15 @@ function handleOrderDetailClick(row){
   });
 }
 
-//将
-function submitProductList(){
-  // productRows.value = [];
-  openProduct.value=false;
-  console.log(productRows.value)
-  form.value.demandProductsList = productRows.value
-}
 
 
-//确定要移除这一行
-const removeRow = (row) => {
-  const confirmResult = confirm('确定要移除这一行吗？');
-  if (confirmResult) {
-    const index = form.value.demandProductsList.findIndex(item => item.productId === row.productId);
-    if (index !== -1) {
-      form.value.demandProductsList.splice(index, 1);
-      alert('成功移除该行');
-    } else {
-      alert('未找到对应行');
-    }
-  } else {
-    alert('已取消移除');
-  }
-};
 
-//获取订单生成时间
-function getCurrentDate() {
-  const currentDate = new Date();
-  const year = currentDate.getFullYear();
-  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-  const day = String(currentDate.getDate()).padStart(2, '0');
-  form.value.createTime = `${year}-${month}-${day}`;
+
+/** 新增采购订单按钮操作，第一步选择仓库 */
+function handleAdd() {
+  reset();
+
+  router.push('/purchaseManage/order/addOrder')
 }
 
 /** 查询采购订单列表 */
@@ -706,17 +680,7 @@ function getList() {
   });
 }
 
-/** 查看详细按钮操作 */
-function handleDetail(row) {
-  getCatalogTree();
 
-  const _productId = row.productId || ids.value
-  getProduct(_productId).then(response => {
-    productForm.value = response.data;
-    openProductDetail.value = true;
-    title.value = "商品详情";
-  });
-}
 /** 查询目录下拉树结构 */
 function getCatalogTree() {
   catalogTreeSelect().then(response => {
@@ -794,11 +758,7 @@ function handleQuery() {
   queryParams.value.pageNum = 1;
   getList();
 }
-/** 商品搜索按钮操作 */
-function handleProductQuery() {
-  queryProductParams.value.pageNum = 1;
-  getProductList();
-}
+
 /** 重置按钮操作 */
 function resetQuery() {
   proxy.resetForm("queryRef");
@@ -825,89 +785,25 @@ function handleSelectionChange(data) {
   multiple.value = !selection.value.length;
 }
 
-/** 新增采购订单按钮操作，第一步选择仓库 */
-function handleAdd() {
-  reset();
-  productRows.value = [];
-  getWarehouseTree()
-  openWarehouse.value = true;
-  title.value = "选择目标仓库";
-}
-/** 新增采购订单按钮操作，第二步开始选择订单 */
-function nextStep() {
-  openWarehouse.value = false;
-  getCurrentDate();
-  getUnitList()
-  open.value = true;
-  title.value = "新增采购订单";
-}
-
-
-/** 新增选择商品按钮操作 */
-function handleAddProduct() {
-  getProductList();
-  openProduct.value = true;
-  title.value = "添加采购需求";
-}
-
-
-// tabClick row 当前行 column 当前列
-function tabClick (row, column, cell, event) {
-  switch (column.label) {
-    case '顺序':
-      tabClickIndex.value = row.index
-      tabClickLabel.value = column.label
-      break
-    default: return
-  }
-  console.log('tabClick', this.tabClickIndex, row.demandNumber)
-}
-
-// 当表格选择项发生变化时会触发该事件
-// const handleDemandSelectionChange = (val) => {
-//   if (val) {
-//     val.forEach((row) => {
-//       if (row && !productRows.value.some(item => item.productId === row.productId)) {
-//         productRows.value.push(row);
-//       }
-//     });
-//   }
-// }
-// 在退出功能触发时调用的方法
-const handleLogout = () => {
-  // 清除选中记录
-  // productRows.value = [];
-  // 其他清理操作...
-  // 进行退出操作...
-}
-
-
-
 
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
-  const _purchaseOrderId = row.purchaseOrderId || ids.value
-  console.log(_purchaseOrderId)
-  getOrder(_purchaseOrderId).then(response => {
-    form.value = response.data;
-    form.value.demandProductsList =response.data.productList;
+  const _purchaseOrderId = row.purchaseOrderId || ids.value[0]
 
-    open.value = true;
-    title.value = "修改采购订单";
+  router.push({
+    path:'/purchaseManage/order/addOrder',
+    query:{purchaseOrderId : _purchaseOrderId}
   });
 }
 
 function handleOrderUpdate(){
-
   handleUpdate(form.value.purchaseOrderId)
 }
 
-/** 提交按钮 */
+/** 采购提交按钮 */
 function submitForm() {
-
-
   proxy.$refs["orderRef"].validate(valid => {
     if (valid) {
       if (form.value.purchaseOrderId != null) {
@@ -1028,37 +924,11 @@ const showAuditTooltip = (row) => {
 
     console.log(tooltipAuditContent.value)
   })
-
-
-
-  console.log("***************************")
-
 };
 
 
 
-//父子件方法********************************************
 
-
-
-function childProductQuery(data){
-  queryProductParams.value = data
-  handleProductQuery();
-}
-
-function getChildProductDetail(data){
-  getCatalogTree();
-  const _productId = data.productId
-  getProduct(_productId).then(response => {
-    productForm.value = response.data;
-    openProductDetail.value = true;
-    title.value = "商品详情";
-  });
-}
-function getChildProductList(data){
-  openProduct.value=false;
-  form.value.demandProductsList = data
-}
 
 getList();
 getUnitList();

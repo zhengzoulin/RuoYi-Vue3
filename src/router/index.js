@@ -1,7 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
-
 /**
  * Note: 路由配置项
  *
@@ -67,9 +66,92 @@ export const constantRoutes = [
         component: () => import('@/views/index'),
         name: 'Index',
         meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
+      },
+      {
+        path: '/purchaseManage/order',
+        name: 'Order',
+        component: () => import('@/views/erp/purchaseManage/order')
+      },
+      {
+        path: '/purchaseManage/order/addOrder',
+        component: () => import('@/views/erp/purchaseManage/order/addOrder'),
+        hidden: true,
+        meta: { title: '新增采购订单', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/bom',
+        name: 'Bom',
+        component: () => import('@/views/erp/bom'),
+      },
+      {
+        path: '/bom/addBom',
+        component: () => import('@/views/erp/bom/addBom'),
+        hidden: true,
+        meta: { title: '新增bom', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/bom/bomDetail',
+        component: () => import('@/views/erp/bom/bomDetail'),
+        hidden: true
+      },
+      {
+        path: '/produce/line',
+        name: 'Line',
+        component: () => import('@/views/erp/produce/line'),
+      },
+      {
+        path: '/produce/plan',
+        name: 'Plan',
+        component: () => import('@/views/erp/produce/plan'),
+        },
+      {
+        path: '/produce/plan/addPlan',
+         component: () => import('@/views/erp/produce/plan/addPlan'),
+        hidden: true
+      },
+      {
+        path: '/produce/plan/MRPCompute',
+        component: () => import('@/views/erp/produce/plan/MRPCompute'),
+        hidden: true
+      },
+      {
+        path: '/produce/plan/planDetail',
+        component: () => import('@/views/erp/produce/plan/planDetail'),
+        hidden: true
+      },
+      {
+        path: '/outAddManage/addStock',
+        name: 'AddStock',
+        component: () => import('@/views/erp/outAddManage/addStock')
+      },
+      {
+        path: '/outAddManage/addStock/producePlanAddStock',
+        component: () => import('@/views/erp/outAddManage/addStock/producePlanAddStock'),
+        hidden: true,
+        meta: { title: '生产计划入库', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/outAddManage/addStock/purchaseAddStock',
+        component: () => import('@/views/erp/outAddManage/addStock/purchaseAddStock'),
+        hidden: true,
+        meta: { title: '采购入库', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/outAddManage/outStock',
+        name: 'OutStock',
+        component: () => import('@/views/erp/outAddManage/outStock')
+      },
+      {
+        path: '/outAddManage/outStock/producePlanAddStock',
+        component: () => import('@/views/erp/outAddManage/outStock/producePlanOutStock'),
+        hidden: true,
+        meta: { title: '生产计划出库', icon: 'dashboard', affix: true }
+      },
+
+
     ]
   },
+
   {
     path: '/user',
     component: Layout,
@@ -102,6 +184,7 @@ export const dynamicRoutes = [
       }
     ]
   },
+
   {
     path: '/system/role-auth',
     component: Layout,

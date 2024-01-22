@@ -73,6 +73,7 @@
       v-loading="loading"
       :data="warehouseList"
       row-key="warehouseId"
+      :hight="400"
       :default-expand-all="isExpandAll"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >

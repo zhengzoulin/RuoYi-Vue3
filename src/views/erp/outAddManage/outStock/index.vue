@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="入库单号" prop="addStockCode">
+      <el-form-item label="出库单号" prop="addStockCode">
         <el-input
           v-model="queryParams.addStockCode"
-          placeholder="请输入入库单号"
+          placeholder="请输入出库单号"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -56,10 +56,10 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="handleAdd">新增入库单</el-dropdown-item>
-              <el-dropdown-item @click="handleAddOrder">新增采购入库单</el-dropdown-item>
-              <el-dropdown-item @click="handlePlanAddOrder">新增生产计划入库单</el-dropdown-item>
-              <el-dropdown-item >新增调拨入库单</el-dropdown-item>
+              <el-dropdown-item @click="handleAdd">新增出库单</el-dropdown-item>
+              <el-dropdown-item @click="handleAddOrder">新增销售出库单</el-dropdown-item>
+              <el-dropdown-item @click="handlePlanOutOrder">新增生产领料出库单</el-dropdown-item>
+              <el-dropdown-item >新增调拨出库单</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -113,7 +113,7 @@
 
     <el-table v-loading="loading" :data="addStockList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="入库单号" align="center">
+      <el-table-column label="出库单号" align="center">
       <template #default="scope">
         <a
             href="#"
@@ -126,9 +126,9 @@
       </el-table-column>
       <el-table-column label="单据名称" align="center" prop="addStockName" />
 
-      <el-table-column label="入库类型" align="center" prop="addStockType" />
+      <el-table-column label="出库类型" align="center" prop="addStockType" />
       <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
-      <el-table-column label="入库日期" align="center" prop="addStockTime" />
+      <el-table-column label="出库日期" align="center" prop="addStockTime" />
       <el-table-column label="发货方" align="center" prop="unit.unitName" />
       <el-table-column label="操作人" align="center" prop="createBy" />
 
@@ -170,11 +170,11 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改入库表对话框 -->
+    <!-- 添加或修改出库表对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="addStockRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="入库单号" prop="addStockCode">
-          <el-input v-model="form.addStockCode" placeholder="请输入入库单号" />
+        <el-form-item label="出库单号" prop="addStockCode">
+          <el-input v-model="form.addStockCode" placeholder="请输入出库单号" />
         </el-form-item>
         <el-form-item label="单据名称" prop="addStockName">
           <el-input v-model="form.addStockName" placeholder="请输入单据名称" />
@@ -182,7 +182,7 @@
         <el-form-item label="所属仓库" prop="warehouseId">
           <el-input v-model="form.warehouseId" placeholder="请输入所属仓库" />
         </el-form-item>
-        <el-form-item label="入库类型" prop="addStockType">
+        <el-form-item label="出库类型" prop="addStockType">
           <el-input v-model="form.addStockType" placeholder="请输入所属仓库" />
         </el-form-item>
         <el-form-item label="发货供应商" prop="unitName">
@@ -200,7 +200,7 @@
       </template>
     </el-dialog>
 
-    <!-- （最主要的弹窗）新增（采购订单）入库对话框 -->
+    <!-- （最主要的弹窗）新增（采购订单）出库对话框 -->
     <el-dialog :title="title" v-model="openAddOrderStock"
                append-to-body class="dialog-addOrder" style="position: relative;">
       <el-row>
@@ -212,19 +212,19 @@
         </el-col>
       </el-row>
 
-      <span > 入库单基本信息
+      <span > 出库单基本信息
         <el-button link type="primary" icon="list" @click="changeOrderShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
       <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
                style="border-top: dashed 1.3px rgba(187,199,191,0.35) ;padding: 8px">
         <el-row>
-          <el-form-item label="入库单号" prop="addStockCode" class="select-container" >
+          <el-form-item label="出库单号" prop="addStockCode" class="select-container" >
             <el-input v-model="form.addStockCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
           </el-form-item>
           <el-form-item label="单据名称" prop="addStockName">
             <el-input v-model="form.addStockName" placeholder="请输入单据名称" style="width: 180px;" />
           </el-form-item>
-          <el-form-item label="入库类型" prop="addStockType" class="select-container" >
+          <el-form-item label="出库类型" prop="addStockType" class="select-container" >
             <el-input v-model="form.addStockType" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
           </el-form-item>
 
@@ -256,7 +256,7 @@
           </el-form-item>
 
 
-          <el-form-item label="入库日期" prop="addStockTime">
+          <el-form-item label="出库日期" prop="addStockTime">
             <el-date-picker clearable
                             v-model="form.addStockTime"
                             type="date"
@@ -326,7 +326,7 @@
               </el-table-column>
             </el-table>
 
-            <div style="margin-top: 10px "> <span >采购入库商品明细 </span>
+            <div style="margin-top: 10px "> <span >采购出库商品明细 </span>
               <el-button
                   type="danger"
                   plain
@@ -339,8 +339,8 @@
             </div>
 
             <br>
-            <span style="margin-top:50px"> 入库种数：       入库总额：</span>
-      <!--      待入库商品明细表格-->
+            <span style="margin-top:50px"> 出库种数：       出库总额：</span>
+      <!--      待出库商品明细表格-->
             <el-table v-loading="ProductsListLoading"
                       :data="form.orderProductsList"
                       :rules="rules"
@@ -354,7 +354,7 @@
               <el-table-column label="编号" align="center" prop="product.productCode"/>
 
               <el-table-column label="商品信息" align="center" prop="product.productName"/>
-              <el-table-column label="可入库数量" prop="demandNumber" align="center" >
+              <el-table-column label="可出库数量" prop="demandNumber" align="center" >
 
               </el-table-column>
 
@@ -369,7 +369,7 @@
 
               <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
 
-              <el-table-column label="入库数量" prop="demandNumber" align="center"  width="120px">
+              <el-table-column label="出库数量" prop="demandNumber" align="center"  width="120px">
                 <template #default="scope">
                   <span>
                     <el-input v-model="scope.row.demandNumber"  type="number" maxlength="20" placeholder="请输入需求" size="mini"  />
@@ -377,7 +377,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="入库位置相关信息" align="center" width="240px">
+              <el-table-column label="出库位置相关信息" align="center" width="240px">
                 <template #default="scope">
                   <a
                       href="#"
@@ -392,7 +392,7 @@
             </el-table>
     </el-dialog>
 
-    <!--   入库订单详情查看 -->
+    <!--   出库订单详情查看 -->
     <add-stock-detail
         :openAddOrderStockDetail="openAddOrderStockDetail"
         :form="form"
@@ -435,7 +435,7 @@
               @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="入库仓库" prop="warehouseName">
+        <el-form-item label="出库仓库" prop="warehouseName">
           <el-tree-select
               v-model="queryOrderParams.warehouseId"
               :data="warehouseOptions"
@@ -483,9 +483,9 @@
 
     </el-dialog>
 
-<!--  选择入库位置批次  //-->
+<!--  选择出库位置批次  //-->
     <el-dialog
-        title="选择入库位置" v-model="openSelectAddStockPosition"
+        title="选择出库位置" v-model="openSelectAddStockPosition"
         append-to-body class="dialog-selectOrder"
         :style="{ 'max-height': '60vh' }"
     >
@@ -515,9 +515,9 @@
 
       <div  class="el-row" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
         <span >
-         可入库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.addStockProduct.demandNumber }}</span> &nbsp;&nbsp;
+         可出库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.addStockProduct.demandNumber }}</span> &nbsp;&nbsp;
         </span>
-         已输入入库数量：<span  style="color: rgb(82, 153, 252);">66  </span>
+         已输入出库数量：<span  style="color: rgb(82, 153, 252);">66  </span>
       </div>
 
       <el-form
@@ -532,7 +532,7 @@
                   :span-method="objectSpanMethod"
         >
 
-          <el-table-column label="入库位置" align="center">
+          <el-table-column label="出库位置" align="center">
             <template #default="scope">
               <el-cascader
                   v-model="scope.row.selectValue"
@@ -553,7 +553,7 @@
 
           <el-table-column label="库存已有数量" align="center" />
 
-          <el-table-column label="入库数量" align="center" >
+          <el-table-column label="出库数量" align="center" >
             <template #default="scope">
             <span>
               <el-input v-model="scope.row.addNumber"  type="number" maxlength="26" placeholder="请输入需求" size="mini"  />
@@ -658,7 +658,7 @@ const data = reactive({
     warehouseName: ref(''),
     orderProductsList: ref([   //订单多个商品列表
       {
-        addStockProduct: ref({       //商品入库条
+        addStockProduct: ref({       //商品出库条
           batchPositionList: ref([{  //商品同一库位不同批次列表
             batchPosition: ref({
               warehouseId: ref(''),
@@ -695,7 +695,7 @@ const data = reactive({
       { required: true, message: "单据名称不能为空", trigger: "blur" }
     ],
     addStockType: [
-      { required: true, message: "入库类型不能为空", trigger: "change" }
+      { required: true, message: "出库类型不能为空", trigger: "change" }
     ],
     warehouseId: [
       { required: true, message: "所属仓库不能为空", trigger: "blur" }
@@ -717,7 +717,7 @@ const data = reactive({
 
 const { queryParams, form,queryOrderParams, rules } = toRefs(data);
 
-/** 查询入库表列表 */
+/** 查询出库表列表 */
 function getList() {
   loading.value = true;
   listAddStock(queryParams.value).then(response => {
@@ -798,27 +798,27 @@ function handleSelectionChange(data) {
 function changeOrderShow() {
   orderDetailFormShow.value = !(orderDetailFormShow.value);
 }
-/** 新增入库单按钮操作 */
+/** 新增出库单按钮操作 */
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加入库表";
+  title.value = "添加出库表";
 }
-/** 新增采购入库单按钮操作 */
+/** 新增采购出库单按钮操作 */
 function handleAddOrder() {
   reset();
-  // form.value.addStockType = "采购入库"
+  // form.value.addStockType = "采购出库"
   // openAddOrderStock.value = true;
-  // title.value = "采购入库";
-  router.push('/outAddManage/addStock/purchaseAddStock');
+  // title.value = "采购出库";
+  router.push('/outAddManage/outStock/purchaseAddStock');
 }
-/** 新增生产入库单按钮操作 */
-function handlePlanAddOrder() {
+/** 新增生产出库单按钮操作 */
+function handlePlanOutOrder() {
   reset();
-  // form.value.addStockType = "采购入库"
+  // form.value.addStockType = "采购出库"
   // openAddOrderStock.value = true;
-  // title.value = "采购入库";
-  router.push('/outAddManage/addStock/producePlanAddStock');
+  // title.value = "采购出库";
+  router.push('/outAddManage/outStock/producePlanAddStock');
 }
 
 
@@ -829,7 +829,7 @@ function handleUpdate(row) {
   const addStockId = row.addStockId || ids.value
   const addStockType = row.addStockType
 
-  if(addStockType == "采购入库"){
+  if(addStockType == "采购出库"){
     router.push({
       path:'/outAddManage/addStock/purchaseAddStock',
       query:{addStockId : addStockId}
@@ -880,7 +880,7 @@ function getUnitList() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _addStockIds = row.addStockId || ids.value;
-  proxy.$modal.confirm('是否确认删除入库表编号为"' + _addStockIds + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除出库表编号为"' + _addStockIds + '"的数据项？').then(function() {
     return delAddStock(_addStockIds);
   }).then(() => {
     getList();
@@ -908,7 +908,7 @@ function tabClick (row, column, cell, event) {
 }
 
 
-//选择采购订单带入入库单
+//选择采购订单带入出库单
 function selectedOrderList(){
   openSelectOrder.value = false;
 }
@@ -929,7 +929,7 @@ const removeOrderRow = (row) => {
 
 
 
-//选择批次库位
+//选择出库库位
 function SelectAddStockPosition(row){
   openSelectAddStockPosition.value = true;
   form.value.orderProductsList.addStockProduct = row
@@ -937,6 +937,8 @@ function SelectAddStockPosition(row){
 
   getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
 }
+
+
 
 //获得仓库的库位数据
 function selectPosition(warehouseId){
@@ -1045,7 +1047,7 @@ function formatBatchPosition(row) {
     return formattedList.join('<br>');
   }
 
-  return '选择入库：位置-批次';
+  return '选择出库：位置-批次';
 }
 
 // 你的函数，根据传入的 unitId 返回对应的 unitName
@@ -1065,9 +1067,9 @@ function getReturnBatchPosition(){
 //选择库位节点触发
 const handlePositionChange = (selectValue) => {
 
-  // 更新所有行的入库位置信息
+  // 更新所有行的出库位置信息
   form.value.orderProductsList.addStockProduct.batchPositionList.forEach(row => {
-    row.selectValue = selectValue; // 将入库位置设置为选择的值
+    row.selectValue = selectValue; // 将出库位置设置为选择的值
     row.warehouseId = row.selectValue[0];
     row.positionId = row.selectValue[1];
     const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
@@ -1080,7 +1082,7 @@ const handlePositionChange = (selectValue) => {
   // 其他可能的操作或逻辑
 };
 
-//提交入库单到后端
+//提交出库单到后端
 function subMitAddStockList(){
 
   if (form.value.addStockId != null) {
@@ -1180,7 +1182,7 @@ function submitOrderAudit(data){
 function handleOrderSelectionChange(data) {
   orderSelection.value = Array.from(data);
   if(orderSelection.value.length > 1){
-    return "只能选择一条订单入库"
+    return "只能选择一条订单出库"
   }
   orderIds.value = orderSelection.value.map(item => item.purchaseOrderId);
   multiple.value = !orderSelection.value.length;

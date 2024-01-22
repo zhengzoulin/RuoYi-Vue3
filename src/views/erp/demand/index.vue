@@ -47,12 +47,11 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="">
       <el-col :span="1.5">
         <el-button
           type="primary"
           plain
-          icon="Plus"
           @click="handleAdd"
           v-hasPermi="['erp:demand:add']"
         >新增</el-button>
@@ -61,7 +60,6 @@
         <el-button
           type="success"
           plain
-          icon="Edit"
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['erp:demand:edit']"
@@ -71,7 +69,6 @@
         <el-button
           type="danger"
           plain
-          icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['erp:demand:remove']"
@@ -86,11 +83,22 @@
           v-hasPermi="['erp:demand:export']"
         >导出</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+      <el-col :span="1.5">
+        <el-button
+            type="primary"
+            plain
+            @click="addPurchaseList"
+        >加入采购列表</el-button>
+      </el-col>
+      <el-col :span="15" style="margin-right: 50px">
+        <el-badge :value="purchaseCarLists.length" class="item" style="margin-left: 90%;">
+          <el-image @click="clickPurchaseCar" style="width: 70px; height: 60px" :src="carUrl" :fit="fit" />
+        </el-badge>
+      </el-col>
+
     </el-row>
 
-    <el-table v-loading="loading" :data="demandList" @selection-change="handleSelectionChange"
-              >
+    <el-table v-loading="loading" :data="demandList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="需求编号" align="center" prop="demandCode" />
       <el-table-column label="商品" align="center">
@@ -102,8 +110,6 @@
           <span style="display: block;">最小包装数量:{{ scope.row.product.minpacketNumber }}</span>
         </template>
       </el-table-column>
-
-
       <el-table-column label="目标仓库" align="center" prop="warehouse.warehousePath" />
       <el-table-column label="采购需求数量" align="center" prop="demandNumber" />
       <el-table-column label="需求来源" align="center" prop="demandSource" />
@@ -231,6 +237,41 @@
         :catalogOptions="catalogOptions"
     />
 
+    <el-dialog :title="title" v-model="openPurchaseCar" width="950px"  append-to-body>
+      <el-row class="mb8">
+        <div>
+          <span>商品数量： {{calculatePurchaseLength()}}</span>
+          <span style="margin-left: 20px">采购数量： {{calculatePurchaseQuantity()}}</span>
+        </div>
+      </el-row>
+      <el-table v-loading="loading" :data="purchaseCarLists" @selection-change="handleSelectionCarChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="商品编号" align="center" prop="product.productName" />
+        <el-table-column label="商品信息" align="center">
+          <template #default="scope">
+            <span style="display: block;">商品:{{ scope.row.product.productName }}</span>
+            <span style="display: block;">封装规格:{{ scope.row.product.encapStandard }}</span>
+            <span style="display: block;">厂家型号:{{ scope.row.product.productModel }}</span>
+            <span style="display: block;">最小包装数量:{{ scope.row.product.minpacketNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="采购需求数量" align="center" prop="demandNumber" />
+        <el-table-column label="采购目标仓库" align="center" prop="warehouse.warehousePath" />
+        <el-table-column label="需求来源" align="center" prop="demandSource" />
+        <el-table-column label="备注" align="center" prop="remark" />
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <template #default="scope">
+            <el-button link type="primary" icon="Delete" @click="removeRow(scope.row)" >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="margin: 10px 10px;padding-left: 85%"  >
+        <el-button type="danger" plain  @click="GoPurchaseOrder">
+          采购选择商品
+        </el-button>
+      </div>
+    </el-dialog>
+
 
   </div>
 </template>
@@ -244,12 +285,14 @@ import {getProduct} from "../../../api/erp/product";
 import {catalogTreeSelect} from "../../../api/erp/catalog";
 import {warehouseParentTreeSelect, warehouseTreeSelect} from "../../../api/erp/position";
 import ProductTable from "../../../components/zerp/table/productTable";
+ import {useRouter} from "vue-router";
 
 
 
-
+const router = useRouter();
 const { proxy } = getCurrentInstance();
 
+const carUrl = ref('src/assets/images/cart.7d6f325b.svg')
 const demandList = ref([]);
 const productList = ref([]);
 const catalogOptions = ref(undefined);
@@ -259,12 +302,17 @@ const warehouseOptions = ref(undefined);
 const open = ref(false);
 const openProduct = ref(false);
 const openProductDetail = ref(false);
+const openPurchaseCar = ref((false))
 
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
 const productIds = ref([]);
 const productRows = ref([]);
+const purchaseCarLists = ref([]);
+const commitCarLists = ref([]);
+
+
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -352,7 +400,6 @@ const getRowKeys = (row) => {
 // 记录每行的key值
 return row;
 }
-
 // 当表格选择项发生变化时会触发该事件
 const handleDemandSelectionChange = (val) => {
 if (val) {
@@ -625,7 +672,67 @@ function handleExport() {
     ...queryParams.value
   }, `demand_${new Date().getTime()}.xlsx`)
 }
+/** 多选框选择条数  */
+const tempCarList = ref([])
+function handleSelectionChange(selection) {
+  ids.value = selection.map(item => item.demandId);
+  single.value = selection.length != 1;
+  multiple.value = !selection.length;
+  tempCarList.value = selection
+  console.log(purchaseCarLists.value)
+};
+/** 多选框选择条数  */
+function handleSelectionCarChange(selection) {
+  commitCarLists.value = selection
+  console.log(commitCarLists.value)
+}
 
+function addPurchaseList(){
+  purchaseCarLists.value = tempCarList.value
+}
+function clickPurchaseCar(){
+  title.value = "采购列表"
+  openPurchaseCar.value = true
+}
+function calculatePurchaseQuantity(){
+  let priceTotal = 0;
+  purchaseCarLists.value.forEach(row =>{
+    priceTotal += row.demandNumber * row.product.costPrice;
+  })
+  return priceTotal
+}
+function calculatePurchaseLength(){
+  let size = 0;
+  purchaseCarLists.value.forEach(row =>{
+    size ++;
+  })
+  return size;
+}
+
+function GoPurchaseOrder(){
+
+  let warehouseId = commitCarLists.value[0].warehouseId;
+  let flag = true
+  for (const row of commitCarLists.value) {
+    console.log(row.warehouseId);
+    console.log(warehouseId);
+
+    if (row.warehouseId !== warehouseId) {
+      flag = false;
+      break;  // 使用 break 来中断整个循环
+    }
+  }
+  if(flag == false){
+    proxy.$modal.alertWarning("请选择所属仓库相同的采购需求进行下推!");
+    return
+  }
+  openPurchaseCar.value = false;
+
+  router.push({
+    path:'/purchaseManage/order/addOrder',
+    query:{rows: JSON.stringify(commitCarLists.value)}
+  });
+}
 //************************************************************
 function childProductQuery(data){
   queryProductParams.value = data
@@ -647,7 +754,6 @@ function getChildProductList(data){
 
   openProduct.value=false;
   form.value.demandProductsList = data
-
 }
 
 

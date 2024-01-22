@@ -47,30 +47,6 @@
         <el-button link type="primary" icon="list" @click="changeOrderShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
 
-<!--    <div>-->
-<!--      <el-table :data="props.form" border style="width: 100%">-->
-<!--        <el-table-column label="入库单基本信息" :span="3">-->
-<!--          <el-table-column label="入库单号" prop="addStockCode"></el-table-column>-->
-<!--          <el-table-column label="单据名称" prop="addStockName"></el-table-column>-->
-<!--          <el-table-column label="入库类型" prop="addStockType"></el-table-column>-->
-<!--        </el-table-column>-->
-<!--        <el-table-column label="入库日期" prop="addStockTime"></el-table-column>-->
-<!--      </el-table>-->
-
-<!--      <el-table :data="props.form" border style="width: 100%">-->
-<!--        <el-table-column label="入库单基本信息" :span="3">-->
-<!--          <el-table-column label="发货方" prop="unitName"></el-table-column>-->
-<!--          <el-table-column label="所属仓库" prop="warehouseName"></el-table-column>-->
-<!--          <el-table-column label="入库总金额" prop="addStockAmount"></el-table-column>-->
-<!--        </el-table-column>-->
-<!--      </el-table>-->
-
-<!--      <el-table :data="props.form" border style="width: 100%">-->
-<!--        <el-table-column label="入库单基本信息" :span="3">-->
-<!--          <el-table-column label="订单备注" prop="remark"></el-table-column>-->
-<!--        </el-table-column>-->
-<!--      </el-table>-->
-<!--    </div>-->
 
     <br>
     <div style="margin-top: 10px "> <span >采购订单信息 </span>

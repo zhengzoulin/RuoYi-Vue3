@@ -332,6 +332,7 @@
 <script setup name="User">
 import { getToken } from "@/utils/auth";
 import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser, addUser, deptTreeSelect } from "@/api/system/user";
+import {useRouter} from "vue-router";
 
 const router = useRouter();
 const { proxy } = getCurrentInstance();

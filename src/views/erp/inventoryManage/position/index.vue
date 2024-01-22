@@ -76,8 +76,8 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 <!--    当前展示的为【默认父仓 - 成品仓】的库位数据-->
-    <el-row >
-      <el-col :span="8">当前展示的为: [  <span class="current-house">{{currentHouse.warehousePath}}</span>  ] 的库位数据</el-col>
+    <el-row style="margin-bottom: 10px">
+      <el-col :span="8" style="font-size: 20px">当前展示的为: [  <span class="current-house">{{currentHouse.warehousePath}}</span>  ] 的库位数据</el-col>
 
     </el-row>
 
@@ -91,7 +91,8 @@
         <template #default="scope">
           <el-tag :type="scope.row.status == '0' ?'success':'warning'"> {{ formatStatus(scope.row.status) }} </el-tag>
         </template>
-      </el-table-column>      <el-table-column label="备注" align="center" prop="remark" />
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:position:edit']">修改</el-button>

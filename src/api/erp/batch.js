@@ -9,6 +9,23 @@ export function listBatch(query) {
   })
 }
 
+// 查询批次列表
+export function listBatchLevel(query) {
+  return request({
+    url: '/erp/batch/listBatch',
+    method: 'get',
+    params: query
+  })
+}
+// 查询批次列表
+export function listProductLevel(query) {
+  return request({
+    url: '/erp/batch/listProduct',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询批次详细
 export function getBatch(batchId) {
   return request({

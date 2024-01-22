@@ -1,9 +1,7 @@
-// global transition css
-
 /* fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.28s;
+  transition: opacity 0.3s ease; /* 调整过渡时间和动画曲线 */
 }
 
 .fade-enter,
@@ -15,33 +13,33 @@
 .fade-transform--move,
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all .5s;
+  transition: all 0.5s ease; /* 调整过渡时间和动画曲线 */
 }
 
 .fade-transform-enter {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-20px); /* 减小初始位移量 */
 }
 
 .fade-transform-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(20px); /* 减小离开时的位移量 */
 }
 
 /* breadcrumb transition */
 .breadcrumb-enter-active,
 .breadcrumb-leave-active {
-  transition: all .5s;
+  transition: all 0.5s ease; /* 调整过渡时间和动画曲线 */
 }
 
 .breadcrumb-enter,
 .breadcrumb-leave-active {
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(10px); /* 减小初始位移量 */
 }
 
 .breadcrumb-move {
-  transition: all .5s;
+  transition: all 0.5s ease; /* 调整过渡时间和动画曲线 */
 }
 
 .breadcrumb-leave-active {

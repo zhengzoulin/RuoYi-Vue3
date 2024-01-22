@@ -17,13 +17,23 @@ export function getPosition(stockPositionId) {
   })
 }
 
-// 查询库位管理详细
-export function getWarehousePosition(warehouseId) {
+// 查询仓库下的库位list
+export function getWarehousePosition(data) {
   return request({
-    url: '/erp/position/warehousePositionTree?warehouseId=' + warehouseId,
-    method: 'get'
+    url: '/erp/position/warehousePositionTree',
+    method: 'post',
+    data: data
   })
 }
+// 根据商品和库位查询下的商品+批次list
+export function getProductBatchNumberList(data) {
+  return request({
+    url: '/erp/position/getProductBatchNumberList',
+    method: 'post',
+    data: data
+  })
+}
+
 
 // 查询仓库管理1详细
 export function getWarehouse(warehouseId) {

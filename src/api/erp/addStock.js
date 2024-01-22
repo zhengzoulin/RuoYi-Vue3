@@ -50,6 +50,22 @@ export function updateAddStock(data) {
     data: data
   })
 }
+// 新增生产入库表
+export function ProduceAddStockList(data) {
+  return request({
+    url: '/erp/addStock/produceAddStockList',
+    method: 'post',
+    data: data
+  })
+}
+// 修改生产入库表
+export function updateProduceAddStock(data) {
+  return request({
+    url: '/erp/addStock/updateProduceAddStock',
+    method: 'post',
+    data: data
+  })
+}
 
 // 删除入库表
 export function delAddStock(addStockId) {
