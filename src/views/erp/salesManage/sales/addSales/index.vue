@@ -2,7 +2,7 @@
 
   <div class="app-container">
     <el-row class="header">
-      <router-link to="/purchaseManage/order">
+      <router-link to="/salesManage/sales">
         <el-button type="primary"     icon="Back"
                    plain style=" color: #fff;background-color: #909399;
                                   border-color: #909399; font-size: 12px;padding-left: 18px">
@@ -23,21 +23,21 @@
     </el-row>
     <div >
       <el-row>
-             <span > 采购订单基本信息
+             <span > 销售订单基本信息
         <el-button link type="primary" icon="list" @click="orderDetailFormShow = !orderDetailFormShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
       </el-row>
       <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
                style="border-top: dashed 1.3px rgba(187,199,191,0.35) ;padding: 8px">
         <el-row>
-          <el-form-item label="订单编号" prop="purchaseOrderCode" class="select-container" >
-            <el-input v-model="form.purchaseOrderCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
+          <el-form-item label="订单编号" prop="salesOrderCode" class="select-container" >
+            <el-input v-model="form.salesOrderCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
           </el-form-item>
           <el-form-item label="下单日期" prop="createTime" class="select-container">
             <el-input v-model="form.createTime" placeholder="" class="readonly-tree-select"  style="width: 180px;"/>
           </el-form-item>
 
-          <el-form-item label="目标仓库" prop="warehouseName" class="select-container">
+          <el-form-item label="出货仓库" prop="warehouseName" class="select-container">
             <el-tree-select
                 v-model="form.warehouseId"
                 :data="warehouseOptions"
@@ -48,7 +48,7 @@
                 style="width: 160px;"
             />
           </el-form-item>
-          <el-form-item label="供应商" prop="unitName">
+          <el-form-item label="客户" prop="unitName">
             <el-select v-model="form.unitId"  placeholder="请选择">
               <el-option
                   v-for="item in unitOptions"
@@ -62,17 +62,17 @@
           </el-form-item>
         </el-row>
         <el-row>
-          <el-form-item label="交货日期" prop="purchaseOrderTime">
+          <el-form-item label="交货日期" prop="salesOrderTime">
             <el-date-picker clearable
-                            v-model="form.purchaseOrderTime"
+                            v-model="form.salesOrderTime"
                             type="date"
                             value-format="YYYY-MM-DD"
                             placeholder="请选择订单交货日期"
                             style="width: 180px;">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="单据名称" prop="purchaseOrderName">
-            <el-input v-model="form.purchaseOrderName" placeholder="请输入单据名称" style="width: 180px;" />
+          <el-form-item label="单据名称" prop="salesOrderName">
+            <el-input v-model="form.salesOrderName" placeholder="请输入单据名称" style="width: 180px;" />
           </el-form-item>
 
 
@@ -82,7 +82,7 @@
         </el-row>
       </el-form>
 
-      <el-row>
+      <el-row style="margin-top: 10px">
         <span > 采购订单商品信息 </span>
       </el-row>
 
@@ -98,29 +98,18 @@
         </el-col>
         <el-col :span="1.2">
           <el-button
-              type="success"
+              type="primary"
               plain
-              icon="Edit"
               :disabled="single"
               @click="handleUpdate"
               v-hasPermi="['erp:order:edit']"
-          >导入采购需求</el-button>
+          >导入历史订单</el-button>
         </el-col>
+
         <el-col :span="1.2">
           <el-button
-              type="danger"
+              type="primary"
               plain
-              icon="Delete"
-              :disabled="multiple"
-              @click="handleDelete"
-              v-hasPermi="['erp:order:remove']"
-          >导入BOM</el-button>
-        </el-col>
-        <el-col :span="1.2">
-          <el-button
-              type="warning"
-              plain
-              icon="Download"
               @click="handleExport"
               v-hasPermi="['erp:order:export']"
           >Excel导入</el-button>
@@ -129,7 +118,6 @@
           <el-button
               type="danger"
               plain
-              icon="Delete"
               :disabled="multiple"
               @click="handleDelete"
               v-hasPermi="['erp:order:remove']"
@@ -141,58 +129,82 @@
         <!--        <right-toolbar >dsf</right-toolbar>-->
       </el-row>
 
-      <span >采购种数：{{form.demandProductsList.length}}</span>
-      <span style="margin-left: 20px">采购总额：{{getPurchaseAllAmount()}}</span>
+      <span >出售种数：{{form.saleProductsList.length}}</span>
+      <span style="margin-left: 20px">订单总额：{{getPurchaseAllAmount()}}</span>
 
 
       <el-table v-loading="loading"
-                :data="form.demandProductsList"
+                :data="form.saleProductsList"
                 height="450"
-                @cell-click="tabClick">
+                :row-style="{ height: '140px'}"
+                @cell-click="tabClick"
+                style="font-size: 14px">
 
-        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column type="selection" width="55"  align="center" />
+        <el-table-column type="index" width="30" align="center"/>
 
-        <el-table-column label="商品编号" align="center" prop="productCode">
+
+
+        <el-table-column label="商品编号" width="110" align="center" prop="productCode" >
           <template #default="scope">
-          <span>
+          <span class="readonly-column-select">
               {{ scope.row.productCode}}
           </span>
           </template>
         </el-table-column>
 
-        <el-table-column label="商品信息" align="center" prop="productName" >
+
+        <el-table-column label="商品信息" width="110" align="center"  >
+          <template #default="scope" >
+            <span style="display: block;font-weight: bold;" class="readonly-column-select">{{ scope.row.productName }}</span>
+            <span style="display: block;">目录:{{ scope.row.catalog.catalogName }}</span>
+            <span style="display: block;">规格:{{ scope.row.encapStandard }}</span>
+            <span style="display: block;">型号:{{ scope.row.productModel }}</span>
+            <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品在库库存" width="110" align="center" prop="balanceNumber" >
+          <template #default="scope">
+          <span class="readonly-column-select" >
+              {{ scope.row.balanceNumber}}
+          </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="占用库存" align="center" prop="occupiedNumber" >
+          <template #default="scope">
+          <span >
+              {{ scope.row.occupiedNumber}}
+          </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="可用库存"  align="center" prop="availableNumber" >
           <template #default="scope">
           <span>
-              {{ scope.row.productName}}
+              {{ scope.row.availableNumber}}
           </span>
           </template>
         </el-table-column>
 
-        <el-table-column label="商品图片" prop="productImage" align="center" >
-          <template  #default="scope" width="90">
-            <ImagePreview style="width:60px;height:60px;" :src="scope.row.productImage" />
-          </template>
-        </el-table-column>
 
-        <el-table-column label="需求数量" prop="demandNumber" >
+        <el-table-column label="出售数量" prop="saleNumber" >
           <template #default="scope">
             <span>
-              <el-input v-model="scope.row.demandNumber"  type="number" maxlength="26" placeholder="请输入需求" size="mini"  />
+              <el-input v-model="scope.row.saleNumber"  type="number" maxlength="26" placeholder="请输入需求" size="mini"  />
             </span>
           </template>
         </el-table-column>
 
-        <el-table-column label="采购价" align="center" prop="costPrice" >
+        <el-table-column label="单价" align="center" prop="salePrice" >
           <template #default="scope">
             <span>
-              <el-input v-model="scope.row.costPrice"  type="number" maxlength="26" placeholder="请输入" size="mini"  />
+              <el-input v-model="scope.row.salePrice"  type="number" maxlength="26" placeholder="请输入" size="mini"  />
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="金额" prop="orderMoney" class="select-container">
+        <el-table-column label="金额" prop="amountPrice"  >
           <template #default="scope">
             <span>
-              <span class="readonly-tree-select">{{ scope.row.orderMoney ? scope.row.orderMoney : '0.00' }}</span>
+              <span >{{ scope.row.amountPrice ? scope.row.amountPrice : '0.00' }}</span>
             </span>
           </template>
         </el-table-column>
@@ -217,7 +229,7 @@
 
 
     <el-dialog :title="title" v-model="openWarehouse" width="500px" append-to-body>
-      <el-form-item label="选择目标仓库" prop="warehouseName">
+      <el-form-item label="选择出货仓库" prop="warehouseName">
         <el-tree-select
             v-model="form.warehouseId"
             :data="warehouseOptions"
@@ -259,6 +271,7 @@ import {addOrder, getOrder, updateOrder} from "../../../../../api/erp/order";
 import {catalogTreeSelect} from "../../../../../api/erp/catalog";
 import {getBom} from "../../../../../api/erp/bom";
 import ProductTable from "../../../../../components/zerp/table/productTable";
+import {addSales, getInventoryBySales, getSales, updateSales} from "../../../../../api/erp/sales";
 
 const router = useRouter();
 const route = useRoute();
@@ -281,34 +294,29 @@ const unitOptions = ref([]);
 const catalogOptions = ref(undefined);
 
 const data = reactive({
-  form: {
+  form: ref({
     createTime: "",
-    demandProductsList: ref([]),
-  },
+    saleProductsList: ref([]),
+
+  }),
 
   productForm:{},
 
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    purchaseOrderCode: null,
-    purchaseOrderName: null,
-    productId: null,
-    unitId: null,
+    salesOrderCode: null,
+    salesOrderName: null,
+    salesProducts: null,
+    unit: null,
     warehouseId: null,
-    warehouseName: null,
-    warehouse:{
-      warehouseName: null,
-
-    },
-    userName:null,
-    auditStatus:null,
-    purchaseOrderTime: null,
-    paymentStatus:null,
+    warehouse: null,
+    salesOrderTime: null,
     auditId: null,
-    paymentId: null,
     orderProgress: null,
-    purchaseAllAmount: null,
+    salesTotalAmount: null,
+    currentReceiptAmount: null,
+    receiptStatus: null,
     status: null,
   },
   queryProductParams: {
@@ -340,7 +348,7 @@ const data = reactive({
     auditId: [
       { required: true, message: "订单审核状态id不能为空", trigger: "blur" }
     ],
-    demandNumber: [
+    saleNumber: [
       { required: true, message: "需求数量不能为空", trigger: "blur" }
     ],
     paymentId: [
@@ -349,7 +357,7 @@ const data = reactive({
     orderProgress: [
       { required: true, message: "订单进度不能为空", trigger: "blur" }
     ],
-    purchaseAllAmount: [
+    salesTotalAmount: [
       { required: true, message: "采购订单总金额不能为空", trigger: "blur" }
     ],
     status: [
@@ -361,10 +369,10 @@ const data = reactive({
 const { queryParams, form, rules ,productForm,queryProductParams} = toRefs(data);
 
 const displayTitleText = computed(() => {
-  if (purchaseOrderId.value == null) {
-    return '新增采购订单';
+  if (salesOrderId.value == null) {
+    return '新增销售订单';
   } else {
-    return '修改采购订单';
+    return '修改销售订单';
   }
 });
 
@@ -412,21 +420,24 @@ function getProductList() {
 }
 /** 采购提交按钮 */
 function submitForm() {
+
+
+  console.log(form.value)
   proxy.$refs["orderRef"].validate(valid => {
     if (valid) {
-      if (form.value.purchaseOrderId != null) {
-        updateOrder(form.value).then(response => {
+      if (form.value.salesOrderId != null) {
+        updateSales(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
         });
       } else {
-        addOrder(form.value).then(response => {
+        addSales(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
         });
       }
     }
   });
 
-  router.push('/purchaseManage/order')
+  router.push('/salesManage/sales')
 }
 // tabClick row 当前行 column 当前列
 function tabClick (row, column, cell, event) {
@@ -437,7 +448,7 @@ function tabClick (row, column, cell, event) {
       break
     default: return
   }
-  console.log('tabClick', this.tabClickIndex, row.demandNumber)
+  console.log('tabClick', this.tabClickIndex, row.saleNumber)
 }
 
 /** 查看详细按钮操作 */
@@ -455,9 +466,9 @@ function handleDetail(row) {
 const removeRow = (row) => {
   const confirmResult = confirm('确定要移除这一行吗？');
   if (confirmResult) {
-    const index = form.value.demandProductsList.findIndex(item => item.productId === row.productId);
+    const index = form.value.saleProductsList.findIndex(item => item.productId === row.productId);
     if (index !== -1) {
-      form.value.demandProductsList.splice(index, 1);
+      form.value.saleProductsList.splice(index, 1);
       alert('成功移除该行');
     } else {
       alert('未找到对应行');
@@ -470,9 +481,24 @@ const removeRow = (row) => {
 function submitProductList(){
   // productRows.value = [];
   openProduct.value=false;
-  console.log(productRows.value)
-  form.value.demandProductsList = productRows.value
-}
+  console.log("哈哈哈哈")
+
+
+  productRows.value.forEach(row=>{
+    // form.value.saleProductsList.push(row)
+    if (row && !form.value.saleProductsList.some(item => item.productId === row.productId)) {
+      alert(row.productName)
+      form.value.saleProductsList.push(row);
+    }
+  })
+
+
+  getInventoryBySales(form.value).then(response=>{
+    form.value.saleProductsList = response.data;
+    console.log(form.value.saleProductsList)
+  })
+
+ }
 /** 商品搜索按钮操作 */
 function handleProductQuery() {
   queryProductParams.value.pageNum = 1;
@@ -497,18 +523,15 @@ function nextStep() {
 //采购总额
 function getPurchaseAllAmount(){
   let price = 0
-  form.value.demandProductsList.forEach(row=>{
-    if(demandRows.value==null){
-      row.orderMoney = (row.costPrice * row.demandNumber || 0).toFixed(3);
-    }else{
-      row.orderMoney = (row.product.costPrice * row.demandNumber || 0).toFixed(3);
-      row.costPrice = row.product.costPrice;
-    }
-    price += parseFloat(row.orderMoney) || 0;
-    form.value.purchaseAllAmount = price;
+  form.value.saleProductsList.forEach(row=>{
+
+    row.amountPrice = (row.salePrice * row.saleNumber || 0).toFixed(3);
+    
+    price += parseFloat(row.amountPrice) || 0;
+    form.value.salesTotalAmount = price;
   })
-  if(price < 0 || price==null){
-    price=0
+  if(price < 0 || price == null){
+    price = 0
   }
 
   return price;
@@ -541,64 +564,44 @@ function getChildProductDetail(data){
 }
 function getChildProductList(data){
   openProduct.value=false;
-  form.value.demandProductsList = data
+  form.value.saleProductsList = data
 }
 
 //******************************************************
 function getOrderDetail(){
-  getOrder(purchaseOrderId.value).then(response => {
+  getOrder(salesOrderId.value).then(response => {
     form.value = response.data;
-    form.value.demandProductsList =response.data.demandProductsList;
-    console.log(form.value.demandProductsList)
-   });
+    form.value.saleProductsList =response.data.productList;
+    console.log(form.value.saleProductsList)
+    title.value = "修改bom物料";
+  });
 }
 // 接收参数
 const isShowP = ref()
-const purchaseOrderId = ref(route.query.purchaseOrderId ? route.query.purchaseOrderId : null);
-const demandRows = ref(route.query.rows ? route.query.rows : null);
-const produceData = ref(route.query.produce ? route.query.produce : null);
+const salesOrderId = ref(route.query.salesOrderId ? route.query.salesOrderId : null);
 
 
 function addOrUpdate() {
   getCurrentDate();
-  console.log(purchaseOrderId.value);
-  console.log(demandRows.value);
-  console.log(produceData.value)
+  console.log(salesOrderId.value);
 
-  if (purchaseOrderId.value === null && demandRows.value === null && produceData.value===null) {
+  if (salesOrderId.value === null ) {
     alert("新增")
 
     openWarehouse.value = true;
     isShowP.value = null; // 或者适当的默认值
 
-  } else if (purchaseOrderId.value !== null ) {
+  } else if (salesOrderId.value !== null ) {
     alert("修改")
 
-    isShowP.value = purchaseOrderId.value;
+    isShowP.value = salesOrderId.value;
     openWarehouse.value = false;
     loading.value = false;
-    getOrderDetail();
-
-  } else if (demandRows.value !== null) {
-    alert("需求下推")
-    isShowP.value = demandRows.value;
-    demandRows.value = JSON.parse(demandRows.value);
-    form.value.demandProductsList = Array.from(demandRows.value);
-    loading.value = false;
-    form.value.warehouseId = form.value.demandProductsList[0].warehouseId;
-  }else if(produceData.value !== null){
-    openWarehouse.value = false;
-
-    alert("缺料")
-    displayTitleText.value = "新增缺料采购订单"
-
-    produceData.value = JSON.parse(produceData.value);
-    form.value = produceData.value;
-    form.value.demandProductsList = produceData.value.purchaseProductList
-    loading.value = false
-    getCurrentDate()
-    console.log(form.value)
-
+     getSales(salesOrderId.value).then(response => {
+      form.value = response.data;
+       form.value.saleProductsList = response.data.saleProductsList;
+       form.value.unitId = response.data.unit
+      });
 
   }
 }
@@ -609,7 +612,7 @@ getWarehouseTree()
 getUnitList();
 </script>
 
-<style>
+<style scoped>
 
 .header {
   justify-content: space-between;
@@ -629,12 +632,24 @@ getUnitList();
 .readonly-tree-select::after {
   content: '';
   position: absolute;
-  top: 1px;
-  bottom: 1px;
-  right: 1px;
-  left: 1px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
   z-index: 1;
   background-color: rgba(176,196,222, 0.2); /* 淡灰色 */
+}
+
+/* 给蒙版添加样式 */
+.readonly-column-select::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  background-color: rgba(219,238,242,0.3); /* 淡灰色 */
 }
 
 .dialog-addOrder{
@@ -666,5 +681,9 @@ getUnitList();
   margin-right: 10px;
   display: flex;
 }
+.el-table{
+
+}
+
 </style>
 

@@ -196,11 +196,15 @@
             class="el-table__header"
         >
           <el-table-column label="关联单据" align="center" prop="associatedCode" />
-          <el-table-column label="出入库类型" align="center" prop="warehousePath" />
+          <el-table-column label="出入库类型" align="center" prop="addOutType" />
           <el-table-column label="所属位置" align="center" prop="warehousePath" />
           <el-table-column label="变更时间" align="center" prop="createTime" />
           <el-table-column label="变更前数量" align="center" prop="beforeChangeNumber" />
-          <el-table-column label="变更数量" align="center" prop="changeNumber" />
+          <el-table-column label="变更数量" align="center" prop="changeNumber">
+            <template #default="scope">
+              <span style="color:red;font-size: 13px"> {{ scope.row.changeNumber }}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="变更后数量" align="center" prop="afterChangeNumber" />
         </el-table>
     </el-dialog>

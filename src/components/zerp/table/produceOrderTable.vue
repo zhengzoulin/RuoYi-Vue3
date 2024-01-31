@@ -46,7 +46,7 @@
             '0': 'info',       // 待生产
             '1': 'danger',    // 待入库
              '2': 'success'      // 已入库
-          }[scope.row.status]"> {{ addStocktatus(scope.row.status) }} </el-tag>
+          }[scope.row.status]"> {{ addStockStatus(scope.row.status) }} </el-tag>
       </template>
     </el-table-column>
     <el-table-column label="已生产数量" align="center" prop="produceNumber" />
@@ -168,7 +168,7 @@ function PlanStatus(planId) {
     return '错误状态'
   }
 }
-function addStocktatus(status) {
+function addStockStatus(status) {
   if (status === '0') {
     return '待生产'
   } else if (status === '1') {

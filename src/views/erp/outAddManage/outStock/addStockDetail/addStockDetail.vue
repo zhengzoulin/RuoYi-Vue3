@@ -11,7 +11,7 @@
             icon="Edit"
             :disabled="props.updateOrderShow"
             v-hasPermi="['erp:order:add']"
-        >修改</el-button>
+        >修改111</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button

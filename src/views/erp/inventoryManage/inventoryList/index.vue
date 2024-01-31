@@ -172,10 +172,10 @@
     <el-dialog
         title="库位明细" v-model="openProductPosition"
         append-to-body class="dialog-selectOrder"
-        :style="{ 'max-height': '60vh' }"
+        :style="{ 'max-height': '50vh' }"
     >
 
-      <table :data="form.productVO" class="top-title" style="border: 1px solid rgb(230, 235, 245);">
+      <table :data="form.productVO" class="top-title" hight="350px" style="border: 1px solid rgb(230, 235, 245);">
         <tr >
           <td  class="tex" >
             <div  class="dis">

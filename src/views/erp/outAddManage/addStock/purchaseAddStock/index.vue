@@ -149,7 +149,7 @@
   </div>
 
   <br>
-  <span style="margin-top:50px"> 入库种数：       入库总额：</span>
+  <span style="margin-top:50px"> 入库种数：{{form.orderProductsList.length}}      入库总额：{{}}</span>
   <!--      待入库商品明细表格-->
   <el-table v-loading="ProductsListLoading"
             :data="form.orderProductsList"
@@ -161,15 +161,15 @@
 
     <el-table-column type="selection" width="55" align="center" />
     <el-table-column type="index" width="55" align="center" label="序号" />
-    <el-table-column label="编号" align="center" prop="product.productCode"/>
+    <el-table-column label="编号" align="center" prop="productCode"/>
 
-    <el-table-column label="商品信息" align="center" prop="product.productName"/>
+    <el-table-column label="商品信息" align="center" prop="productName"/>
     <el-table-column label="可入库数量" prop="demandNumber" align="center" >
 
     </el-table-column>
 
     <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
-    <el-table-column label="成本价" align="center" prop="costPrice" width="80px">
+    <el-table-column label="成本价" align="center" prop="costPrice" width="100px">
       <template #default="scope">
                   <span>
                     <el-input v-model="scope.row.costPrice"  type="number" maxlength="20" placeholder="请输入"  size="mini"  />
@@ -279,32 +279,32 @@
       :style="{ 'max-height': '60vh' }"
   >
 
-    <table :data="form.orderProductsList.addStockProduct.product" class="tab-top-centent" style="border: 1px solid rgb(230, 235, 245);">
+    <table :data="tempProduct" class="tab-top-centent" style="border: 1px solid rgb(230, 235, 245);">
       <tr ><td  class="tex">
         <div  class="dis">
           商品编号：
-          <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productCode}}</div></div></td>
+          <div   tabindex="0">{{ tempProduct.productCode}}</div></div></td>
         <td  class="tex">
           <div  class="dis">
             商品名称：
-            <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productName}}</div></div></td>
+            <div   tabindex="0">{{ tempProduct.productName}}</div></div></td>
         <td  class="tex">
           <div  class="dis">
             厂家型号：
-            <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productModel }} </div></div></td>
+            <div   tabindex="0">{{ tempProduct.productModel }} </div></div></td>
         <td  class="tex">
           <div  class="dis">
             封装规格：
-            <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.encapStandard }}</div></div></td>
+            <div   tabindex="0">{{ tempProduct.encapStandard }}</div></div></td>
         <td  class="tex">
           <div  class="dis">
             封装单位：
-            <div  tabindex="0">{{ form.orderProductsList.addStockProduct.product.minpacketUnit}}</div></div></td>
+            <div  tabindex="0">{{ tempProduct.minpacketUnit}}</div></div></td>
       </tr></table>
 
     <div  class="el-row" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
         <span >
-         可入库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.addStockProduct.demandNumber }}</span> &nbsp;&nbsp;
+         可入库数量：<span  style="color: rgb(82, 153, 252);">{{ tempProduct.demandNumber }}</span> &nbsp;&nbsp;
         </span>
       已输入入库数量：<span  style="color: rgb(82, 153, 252);">{{currentInputNum()}}</span>
     </div>
@@ -446,6 +446,8 @@ const orderIds = ref([]);
 const unitOptions = ref([]);
 const warehouseOptions = ref(undefined);
 const orderList = ref([]);
+const tempProduct = ref({})
+
 const tooltipAuditContent = ref({})
 const PositionOptions = ref([])
 const productBatchNumbers = ref([
@@ -477,6 +479,8 @@ const data = reactive({
         addStockProduct: ref({       //商品入库条
           batchPositionList: ref([{  //商品同一库位不同批次列表
             batchPosition: ref({
+              productCode: ref(''),
+              productName: ref(''),
               warehouseId: ref(''),
               positionId: ref('')
             })  //商品不同批次
@@ -564,7 +568,7 @@ const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
   if (columnIndex === 0) {
     const _row = spanArr.value[rowIndex];
     const _col = _row > 0 ? 1 : 0;
-    console.log(`rowspan:${_row} colspan:${_col}`);
+    // console.log(`rowspan:${_row} colspan:${_col}`);
     return {
       rowspan: _row,
       colspan: _col
@@ -581,9 +585,8 @@ const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
 //提交入库单到后端
 function subMitAddStockList(){
 
-  console.log("id是：")
-  console.log(form.value.addStockId)
-  console.log(form.value)
+  // console.log("id是：")
+   console.log(form.value)
   if (form.value.addStockId == null) {
       AddStockList(form.value).then(response => {
         proxy.$modal.msgSuccess("新增成功");
@@ -683,9 +686,6 @@ const currentInputNum = () => {
     // 使用parseInt确保row.addNumber是数字类型
     currentCount += parseInt(row.addNumber, 10) || 0;
   });
-  // if(currentCount > form.value.orderProductsList.addStockProduct.demandNumber){
-  //   proxy.$modal.msgWarning("输入入库数量大于可入库数量，请重新输入！");
-  // }
   return currentCount;
 };
 
@@ -712,31 +712,42 @@ function showAddBatch(){
   openAddBatch.value = true;
 }
 function submitAddBatch(data){
-    console.log(form.value)
+    // console.log(form.value)
   addBatch(form.value).then(response =>{
     openAddBatch.value = false;
     proxy.$modal.msgSuccess("新增成功");
-    getProductBatchNumbers(form.value.orderProductsList.addStockProduct.product.productCode,selectValueTemp.value[1])
+    getProductBatchNumbers(form.value.orderProductsList.addStockProduct.productCode,selectValueTemp.value[1])
 
   })
 }
 //获得仓库的库位数据
 function selectPosition(){
   const data={}
-  data.productCode = form.value.orderProductsList.addStockProduct.product.productCode;
+  data.productCode = tempProduct.value.productCode;
   data.warehouseId = form.value.warehouseId;
   getWarehousePosition(data).then(response => {
     PositionOptions.value = response.data;
   });
 
-  console.log(PositionOptions.value)
-}
+ }
 //选择批次库位
 function SelectAddStockPosition(row){
+
   openSelectAddStockPosition.value = true;
+
+console.log("批次商品赋值")
+  console.log(form.value.orderProductsList)
   form.value.orderProductsList.addStockProduct = row
+  console.log(form.value.orderProductsList)
+
+  tempProduct.value = row
+  tempProduct.value.demandNumber = row.demandNumber
+
   selectPosition()
-  form.value.orderProductsList.addStockProduct.batchPositionList = [{}]
+  form.value.orderProductsList.addStockProduct.batchPositionList = [{
+      productCode : tempProduct.value.productCode,
+      productName : tempProduct.value.productName
+  }]
   getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
 }
 // 采购订单多选框选中数据
@@ -745,6 +756,8 @@ function handleOrderSelectionChange(data) {
   if(orderSelection.value.length > 1){
     return "只能选择一条订单入库"
   }
+  console.log("选中订单")
+  console.log(orderSelection.value)
   orderIds.value = orderSelection.value.map(item => item.purchaseOrderId);
   multiple.value = !orderSelection.value.length;
   form.value.selectedOrder = orderSelection.value   //暂存选中订单
@@ -761,16 +774,17 @@ function handleOrderSelectionChange(data) {
   }
 
   //可能以后需要多选订单，这里遍历list只拿到一个订单包含的商品，放入下面的商品暂存表格
-  form.value.orderProductsLists = orderSelection.value.map(item => item.productList)
+  // form.value.orderProductsList = orderSelection.value.demandProductsList
+  form.value.orderProductsLists = orderSelection.value.map(item => item.demandProductsList)
 // 遍历 orderProductsLists 数组
   for (const productList of form.value.orderProductsLists) {
     // form.value.orderProductsList.push(productList);
     // 这里可以对每个 productList 进行处理
     form.value.orderProductsList = productList;
-    console.log(productList)
+    // console.log(productList)
   }
 
-  console.log("入库商品：：" )
+  console.log("多选框入库商品：：" )
   console.log( form.value)
 }
 function formatBatchPosition(row) {
@@ -801,20 +815,10 @@ function formatBatchPosition(row) {
 const selectValueTemp = ref([])
 const handlePositionChange = (selectValue) => {
   selectValueTemp.value = selectValue
-  console.log("position选择数据：" + selectValue);
-  // 更新所有行的入库位置信息
-  form.value.orderProductsList.addStockProduct.batchPositionList.forEach(row => {
-    row.selectValue = selectValue; // 将入库位置设置为选择的值
-    row.warehouseId = row.selectValue[0];
-    row.positionId = row.selectValue[1];
-    const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
-    row.warehouseName = foundWarehouse.label
-    const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
-    row.positionName = foundPosition.label
-    console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
-  });
+  // console.log("position选择数据：" + selectValue);
+
   // 其他可能的操作或逻辑
-  getProductBatchNumbers(form.value.orderProductsList.addStockProduct.product.productCode,selectValue[1])
+  getProductBatchNumbers(form.value.orderProductsList.addStockProduct.productCode,selectValue[1])
 };
 /** 根据商品和库位   获得商品批次数量list */
 function getProductBatchNumbers(productCode,stockPositionId){
@@ -859,20 +863,21 @@ const showAuditTooltip = (row) => {
         '  审核时间:'+ tooltipAuditContent.value.createTime +
         '  备注:'+tooltipAuditContent.value.auditRemark;
 
-    console.log(tooltipAuditContent.value)
+    // console.log(tooltipAuditContent.value)
   })
-  console.log("***************************")
 
 };
 // 当需要添加新行时触发的函数或事件处理程序
 function addProductBatchRow() {
   console.log("准备新增")
-  console.log(form.value.orderProductsList.addStockProduct.batchPositionList)
+  // console.log(form.value.orderProductsList.addStockProduct.batchPositionList)
   const firstRow = form.value.orderProductsList.addStockProduct.batchPositionList[0];
 
   // 创建一个空对象或空数据结构
   const batchPosition = {
     selectValue: [...firstRow.selectValue], // 复制第一行的仓库信息
+    productCode: firstRow.productCode,
+    productName: firstRow.productName,
     warehouseId: firstRow.warehouseId,
     positionId: firstRow.positionId,
     positionName: firstRow.positionName,
@@ -885,6 +890,18 @@ function addProductBatchRow() {
   getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
 }
 function getReturnBatchPosition(){
+
+  // 更新所有行的入库位置信息
+  form.value.orderProductsList.addStockProduct.batchPositionList.forEach(row => {
+    row.warehouseId = row.selectValue[0];
+    row.positionId = row.selectValue[1];
+    const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
+    row.warehouseName = foundWarehouse.label
+    const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
+    row.positionName = foundPosition.label.replace(/\(库存: \d+\)/, '');
+    console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
+  });
+
   openSelectAddStockPosition.value=false;
 }
 
@@ -893,12 +910,10 @@ function getReturnBatchPosition(){
 const addStockId = ref(route.query.addStockId);
 function addOrUpdate(){
   if(addStockId.value == null){
-    console.log("3")
 
   }else{
     getAddStock(addStockId.value).then(response => {
     form.value = response.data;
-    console.log(form.value)
 
    });
   }

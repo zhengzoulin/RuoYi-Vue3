@@ -1,17 +1,17 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="出库单号" prop="addStockCode">
+      <el-form-item label="出库单号" prop="outStockCode">
         <el-input
-          v-model="queryParams.addStockCode"
+          v-model="queryParams.outStockCode"
           placeholder="请输入出库单号"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="单据名称" prop="addStockName">
+      <el-form-item label="单据名称" prop="outStockName">
         <el-input
-          v-model="queryParams.addStockName"
+          v-model="queryParams.outStockName"
           placeholder="请输入单据名称"
           clearable
           @keyup.enter="handleQuery"
@@ -57,7 +57,7 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="handleAdd">新增出库单</el-dropdown-item>
-              <el-dropdown-item @click="handleAddOrder">新增销售出库单</el-dropdown-item>
+              <el-dropdown-item @click="handSalesOutOrder">新增销售出库单</el-dropdown-item>
               <el-dropdown-item @click="handlePlanOutOrder">新增生产领料出库单</el-dropdown-item>
               <el-dropdown-item >新增调拨出库单</el-dropdown-item>
             </el-dropdown-menu>
@@ -71,7 +71,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['erp:addStock:edit']"
+          v-hasPermi="['erp:outStock:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -96,7 +96,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['erp:addStock:remove']"
+          v-hasPermi="['erp:outStock:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -105,30 +105,30 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['erp:addStock:export']"
+          v-hasPermi="['erp:outStock:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="addStockList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="outStockList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="出库单号" align="center">
       <template #default="scope">
         <a
             href="#"
             style="color: rgba(40,177,232,0.83); text-decoration: underline;"
-            @click="handleAddStockDetailClick(scope.row)"
+            @click="handleoutStockDetailClick(scope.row)"
         >
-          {{ scope.row.addStockCode }}
+          {{ scope.row.outStockCode }}
         </a>
       </template>
       </el-table-column>
-      <el-table-column label="单据名称" align="center" prop="addStockName" />
+      <el-table-column label="单据名称" align="center" prop="outStockName" />
 
-      <el-table-column label="出库类型" align="center" prop="addStockType" />
+      <el-table-column label="出库类型" align="center" prop="outStockType" />
       <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
-      <el-table-column label="出库日期" align="center" prop="addStockTime" />
+      <el-table-column label="出库日期" align="center" prop="outStockTime" />
       <el-table-column label="发货方" align="center" prop="unit.unitName" />
       <el-table-column label="操作人" align="center" prop="createBy" />
 
@@ -146,7 +146,7 @@
             '1': 'success',    // 审核通过状态
             '2': 'danger'      // 审核未通过状态
           }[scope.row.auditId]"
-                    @mouseover="showAuditTooltip(scope.row)"> {{ addStockAuditStatus(scope.row.auditId) }} </el-tag>
+                    @mouseover="showAuditTooltip(scope.row)"> {{ outStockAuditStatus(scope.row.auditId) }} </el-tag>
           </el-tooltip>
 
         </template>
@@ -156,8 +156,8 @@
       <el-table-column label="订单备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button  :disabled="single" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:addStock:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:addStock:remove']">删除</el-button>
+          <el-button  :disabled="single" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:outStock:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:outStock:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -172,18 +172,18 @@
 
     <!-- 添加或修改出库表对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="addStockRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="出库单号" prop="addStockCode">
-          <el-input v-model="form.addStockCode" placeholder="请输入出库单号" />
+      <el-form ref="outStockRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="出库单号" prop="outStockCode">
+          <el-input v-model="form.outStockCode" placeholder="请输入出库单号" />
         </el-form-item>
-        <el-form-item label="单据名称" prop="addStockName">
-          <el-input v-model="form.addStockName" placeholder="请输入单据名称" />
+        <el-form-item label="单据名称" prop="outStockName">
+          <el-input v-model="form.outStockName" placeholder="请输入单据名称" />
         </el-form-item>
         <el-form-item label="所属仓库" prop="warehouseId">
           <el-input v-model="form.warehouseId" placeholder="请输入所属仓库" />
         </el-form-item>
-        <el-form-item label="出库类型" prop="addStockType">
-          <el-input v-model="form.addStockType" placeholder="请输入所属仓库" />
+        <el-form-item label="出库类型" prop="outStockType">
+          <el-input v-model="form.outStockType" placeholder="请输入所属仓库" />
         </el-form-item>
         <el-form-item label="发货供应商" prop="unitName">
           <el-input v-model="form.unitName" placeholder="请输入发货供应商" />
@@ -205,10 +205,10 @@
                append-to-body class="dialog-addOrder" style="position: relative;">
       <el-row>
         <el-col :span="24" style="position: absolute; top: 0; right: 105px; width: auto;">
-          <el-button type="primary" plain size="small" icon="primary" @click="subMitAddStockAndAuditPass">保存并审核通过</el-button>
+          <el-button type="primary" plain size="small" icon="primary" @click="subMitoutStockAndAuditPass">保存并审核通过</el-button>
         </el-col>
         <el-col :span="24"    style="position: absolute; top: 0; right: 20px; width: auto;">
-          <el-button type="primary" plain size="small" icon="primary" @click="subMitAddStockList">保存</el-button>
+          <el-button type="primary" plain size="small" icon="primary" @click="subMitOutStockList">保存</el-button>
         </el-col>
       </el-row>
 
@@ -218,14 +218,14 @@
       <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
                style="border-top: dashed 1.3px rgba(187,199,191,0.35) ;padding: 8px">
         <el-row>
-          <el-form-item label="出库单号" prop="addStockCode" class="select-container" >
-            <el-input v-model="form.addStockCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
+          <el-form-item label="出库单号" prop="outStockCode" class="select-container" >
+            <el-input v-model="form.outStockCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
           </el-form-item>
-          <el-form-item label="单据名称" prop="addStockName">
-            <el-input v-model="form.addStockName" placeholder="请输入单据名称" style="width: 180px;" />
+          <el-form-item label="单据名称" prop="outStockName">
+            <el-input v-model="form.outStockName" placeholder="请输入单据名称" style="width: 180px;" />
           </el-form-item>
-          <el-form-item label="出库类型" prop="addStockType" class="select-container" >
-            <el-input v-model="form.addStockType" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
+          <el-form-item label="出库类型" prop="outStockType" class="select-container" >
+            <el-input v-model="form.outStockType" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
           </el-form-item>
 
 
@@ -256,9 +256,9 @@
           </el-form-item>
 
 
-          <el-form-item label="出库日期" prop="addStockTime">
+          <el-form-item label="出库日期" prop="outStockTime">
             <el-date-picker clearable
-                            v-model="form.addStockTime"
+                            v-model="form.outStockTime"
                             type="date"
                             value-format="YYYY-MM-DD"
                             placeholder="请选择订单交货日期"
@@ -382,7 +382,7 @@
                   <a
                       href="#"
                       class="custom-link-style"
-                      @click="SelectAddStockPosition(scope.row)"
+                      @click="SelectoutStockPosition(scope.row)"
                       v-html="String.raw`${formatBatchPosition(scope.row)}`"
                   ></a>
                 </template>
@@ -485,37 +485,37 @@
 
 <!--  选择出库位置批次  //-->
     <el-dialog
-        title="选择出库位置" v-model="openSelectAddStockPosition"
+        title="选择出库位置" v-model="openSelectoutStockPosition"
         append-to-body class="dialog-selectOrder"
         :style="{ 'max-height': '60vh' }"
     >
 
-      <table :data="form.orderProductsList.addStockProduct.product" class="tab-top-centent" style="border: 1px solid rgb(230, 235, 245);">
+      <table :data="form.orderProductsList.outStockProduct.product" class="tab-top-centent" style="border: 1px solid rgb(230, 235, 245);">
         <tr ><td  class="tex">
           <div  class="dis">
           商品编号：
-          <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productCode}}</div></div></td>
+          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productCode}}</div></div></td>
           <td  class="tex">
           <div  class="dis">
           商品名称：
-          <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productName}}</div></div></td>
+          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productName}}</div></div></td>
           <td  class="tex">
           <div  class="dis">
           厂家型号：
-          <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.productModel }} </div></div></td>
+          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productModel }} </div></div></td>
           <td  class="tex">
           <div  class="dis">
           封装规格：
-          <div   tabindex="0">{{ form.orderProductsList.addStockProduct.product.encapStandard }}</div></div></td>
+          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.encapStandard }}</div></div></td>
           <td  class="tex">
           <div  class="dis">
           封装单位：
-          <div  tabindex="0">{{ form.orderProductsList.addStockProduct.product.minpacketUnit}}</div></div></td>
+          <div  tabindex="0">{{ form.orderProductsList.outStockProduct.product.minpacketUnit}}</div></div></td>
         </tr></table>
 
       <div  class="el-row" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
         <span >
-         可出库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.addStockProduct.demandNumber }}</span> &nbsp;&nbsp;
+         可出库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.outStockProduct.demandNumber }}</span> &nbsp;&nbsp;
         </span>
          已输入出库数量：<span  style="color: rgb(82, 153, 252);">66  </span>
       </div>
@@ -525,7 +525,7 @@
       >
 
         <el-table
-                  :data="form.orderProductsList.addStockProduct.batchPositionList"
+                  :data="form.orderProductsList.outStockProduct.batchPositionList"
                   height="250px"
                   @cell-click="tabClick"
                   style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
@@ -593,23 +593,22 @@
   </div>
 </template>
 
-<script setup name="AddStock">
-import { listAddStock, getAddStock, delAddStock, addAddStock, updateAddStock,AddStockList } from "@/api/erp/addStock";
+<script setup name="OutStock">
 import {ref} from "vue";
 import {addOrderAudit, getOrder, getOrderAuditRecord, listOrder} from "../../../../api/erp/order";
 import {getWarehousePosition, warehouseTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
-import {addAddStockAudit} from "../../../../api/erp/addStock";
 import AuditDialog from "../../../../components/zerp/public/auditDialog";
-import AddStockDetail from "./addStockDetail/addStockDetail";
+import addStockDetail from "./addStockDetail/addStockDetail";
 import OrderTable from "../../purchaseManage/order/orderTable";
 import {useRoute, useRouter} from "vue-router";
+import {addOutStock, addOutStockAudit, delOutStock, getOutStock, listOutStock, updateOutStock,OutStockList} from "../../../../api/erp/outStock";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
 
-const addStockList = ref([]);
+const outStockList = ref([]);
 const orderList = ref([]);
 const tooltipAuditContent = ref({})
 
@@ -619,7 +618,7 @@ const openAddOrderStockDetail = ref(false);
 
 const openAudit = ref(false);
 const openSelectOrder = ref(false);
-const openSelectAddStockPosition = ref(false);
+const openSelectoutStockPosition = ref(false);
 const auditAddDTO = ref({})
 
 
@@ -658,7 +657,7 @@ const data = reactive({
     warehouseName: ref(''),
     orderProductsList: ref([   //订单多个商品列表
       {
-        addStockProduct: ref({       //商品出库条
+        outStockProduct: ref({       //商品出库条
           batchPositionList: ref([{  //商品同一库位不同批次列表
             batchPosition: ref({
               warehouseId: ref(''),
@@ -672,9 +671,9 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    addStockCode: null,
-    addStockName: null,
-    addStockType: null,
+    outStockCode: null,
+    outStockName: null,
+    outStockType: null,
     warehouseId: null,
     warehousePath: null,
     unitName: ref(''),
@@ -691,10 +690,10 @@ const data = reactive({
   },
   rules: {
 
-    addStockName: [
+    outStockName: [
       { required: true, message: "单据名称不能为空", trigger: "blur" }
     ],
-    addStockType: [
+    outStockType: [
       { required: true, message: "出库类型不能为空", trigger: "change" }
     ],
     warehouseId: [
@@ -720,8 +719,8 @@ const { queryParams, form,queryOrderParams, rules } = toRefs(data);
 /** 查询出库表列表 */
 function getList() {
   loading.value = true;
-  listAddStock(queryParams.value).then(response => {
-    addStockList.value = response.rows;
+  listOutStock(queryParams.value).then(response => {
+    outStockList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -736,10 +735,10 @@ function cancel() {
 // 表单重置
 function reset() {
   form.value = {
-    addStockId: null,
-    addStockCode: null,
-    addStockName: null,
-    addStockType: null,
+    outStockId: null,
+    outStockCode: null,
+    outStockName: null,
+    outStockType: null,
     warehouseId: null,
     warehousePath: null,
     unitName: null,
@@ -748,12 +747,12 @@ function reset() {
     delFlag: null,
     createBy: null,
     createTime: null,
-    addStockTime:null,
+    outStockTime:null,
     updateBy: null,
     updateTime: null,
     remark: null
   };
-  proxy.resetForm("addStockRef");
+  proxy.resetForm("outStockRef");
 }
 
 /** 搜索按钮操作 */
@@ -776,7 +775,7 @@ function resetQuery() {
 function handleSelectionChange(data) {
 
   selection.value = Array.from(data);
-  ids.value = selection.value.map(item => item.addStockId);
+  ids.value = selection.value.map(item => item.outStockId);
   single.value = selection.value.length != 1;
   multiple.value = !selection.value.length;
   auditDisabled.value = selection.value.length != 1 ;
@@ -807,18 +806,23 @@ function handleAdd() {
 /** 新增采购出库单按钮操作 */
 function handleAddOrder() {
   reset();
-  // form.value.addStockType = "采购出库"
+  // form.value.outStockType = "采购出库"
   // openAddOrderStock.value = true;
   // title.value = "采购出库";
-  router.push('/outAddManage/outStock/purchaseAddStock');
+  router.push('/outAddManage/outStock/purchaseoutStock');
 }
 /** 新增生产出库单按钮操作 */
 function handlePlanOutOrder() {
   reset();
-  // form.value.addStockType = "采购出库"
+  // form.value.outStockType = "采购出库"
   // openAddOrderStock.value = true;
   // title.value = "采购出库";
-  router.push('/outAddManage/outStock/producePlanAddStock');
+  router.push('/outAddManage/outStock/producePlanOutStock');
+}
+/** 新增销售出库单按钮操作 */
+function handSalesOutOrder(){
+  router.push('/outAddManage/outStock/salesOutStock');
+
 }
 
 
@@ -826,18 +830,18 @@ function handlePlanOutOrder() {
 function handleUpdate(row) {
   reset();
   // openAddOrderStock.value = true;
-  const addStockId = row.addStockId || ids.value
-  const addStockType = row.addStockType
+  const outStockId = row.outStockId || ids.value
+  const outStockType = row.outStockType
 
-  if(addStockType == "采购出库"){
+  if(outStockType == "销售出库"){
     router.push({
-      path:'/outAddManage/addStock/purchaseAddStock',
-      query:{addStockId : addStockId}
+      path:'/outAddManage/outStock/purchaseOutStock',
+      query:{outStockId : outStockId}
     });
   }else{
     router.push({
-      path:'/outAddManage/addStock/producePlanAddStock',
-      query:{addStockId : addStockId}
+      path:'/outAddManage/outStock/producePlanOutStock',
+      query:{outStockId : outStockId}
     });
   }
 
@@ -845,16 +849,16 @@ function handleUpdate(row) {
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["addStockRef"].validate(valid => {
+  proxy.$refs["outStockRef"].validate(valid => {
     if (valid) {
-      if (form.value.addStockId != null) {
-        updateAddStock(form.value).then(response => {
+      if (form.value.outStockId != null) {
+        updateOutStock(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addAddStock(form.value).then(response => {
+        addOutStock(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -879,9 +883,9 @@ function getUnitList() {
 
 /** 删除按钮操作 */
 function handleDelete(row) {
-  const _addStockIds = row.addStockId || ids.value;
-  proxy.$modal.confirm('是否确认删除出库表编号为"' + _addStockIds + '"的数据项？').then(function() {
-    return delAddStock(_addStockIds);
+  const _outStockIds = row.outStockId || ids.value;
+  proxy.$modal.confirm('是否确认删除出库表编号为"' + _outStockIds + '"的数据项？').then(function() {
+    return delOutStock(_outStockIds);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -890,9 +894,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('erp/addStock/export', {
+  proxy.download('erp/outStock/export', {
     ...queryParams.value
-  }, `addStock_${new Date().getTime()}.xlsx`)
+  }, `outStock_${new Date().getTime()}.xlsx`)
 }
 
 
@@ -930,12 +934,12 @@ const removeOrderRow = (row) => {
 
 
 //选择出库库位
-function SelectAddStockPosition(row){
-  openSelectAddStockPosition.value = true;
-  form.value.orderProductsList.addStockProduct = row
-  form.value.orderProductsList.addStockProduct.batchPositionList = [{}]
+function SelectoutStockPosition(row){
+  openSelectoutStockPosition.value = true;
+  form.value.orderProductsList.outStockProduct = row
+  form.value.orderProductsList.outStockProduct.batchPositionList = [{}]
 
-  getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
+  getSpanArr(form.value.orderProductsList.outStockProduct.batchPositionList);
 }
 
 
@@ -950,7 +954,7 @@ function selectPosition(warehouseId){
 
 // 当需要添加新行时触发的函数或事件处理程序
 function addProductBatchRow() {
-  const firstRow = form.value.orderProductsList.addStockProduct.batchPositionList[0];
+  const firstRow = form.value.orderProductsList.outStockProduct.batchPositionList[0];
 
   // 创建一个空对象或空数据结构
   const batchPosition = {
@@ -963,24 +967,24 @@ function addProductBatchRow() {
   };
 
   // 将新的空对象添加到数组中
-  form.value.orderProductsList.addStockProduct.batchPositionList.push(batchPosition);
-  getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
+  form.value.orderProductsList.outStockProduct.batchPositionList.push(batchPosition);
+  getSpanArr(form.value.orderProductsList.outStockProduct.batchPositionList);
 }
 
 
 function removeProductBatchRow(row) {
   const confirmResult = confirm('确定要移除这一行吗？');
   if (confirmResult) {
-    const index = form.value.orderProductsList.addStockProduct.batchPositionList.findIndex(item => item === row);
+    const index = form.value.orderProductsList.outStockProduct.batchPositionList.findIndex(item => item === row);
     if (index !== -1) {
-      form.value.orderProductsList.addStockProduct.batchPositionList.splice(index, 1);
+      form.value.orderProductsList.outStockProduct.batchPositionList.splice(index, 1);
     } else {
       alert('未找到对应行');
     }
   } else {
     alert('已取消移除');
   }
-  getSpanArr(form.value.orderProductsList.addStockProduct.batchPositionList);
+  getSpanArr(form.value.orderProductsList.outStockProduct.batchPositionList);
 }
 
 
@@ -1061,14 +1065,14 @@ function getUnitNameById(unitId) {
 
 
 function getReturnBatchPosition(){
-  openSelectAddStockPosition.value=false;
+  openSelectoutStockPosition.value=false;
 }
 
 //选择库位节点触发
 const handlePositionChange = (selectValue) => {
 
   // 更新所有行的出库位置信息
-  form.value.orderProductsList.addStockProduct.batchPositionList.forEach(row => {
+  form.value.orderProductsList.outStockProduct.batchPositionList.forEach(row => {
     row.selectValue = selectValue; // 将出库位置设置为选择的值
     row.warehouseId = row.selectValue[0];
     row.positionId = row.selectValue[1];
@@ -1083,17 +1087,17 @@ const handlePositionChange = (selectValue) => {
 };
 
 //提交出库单到后端
-function subMitAddStockList(){
+function subMitOutStockList(){
 
-  if (form.value.addStockId != null) {
-    updateAddStock(form.value).then(response=>{
+  if (form.value.outStockId != null) {
+    updateOutStock(form.value).then(response=>{
       proxy.$modal.msgSuccess("修改成功");
       openAddOrderStock.value = false;
       getList();
     })
 
   }else{
-    AddStockList(form.value).then(response => {
+    OutStockList(form.value).then(response => {
       proxy.$modal.msgSuccess("新增成功");
       openAddOrderStock.value = false;
       getList();
@@ -1103,12 +1107,12 @@ function subMitAddStockList(){
 }
 
 
-function handleAddStockDetailClick(row){
+function handleoutStockDetailClick(row){
 
   reset();
   openAddOrderStock.value = true;
-  const _addStockId = row.addStockId
-  getAddStock(_addStockId).then(response => {
+  const _outStockId = row.outStockId
+  getOutStock(_outStockId).then(response => {
     form.value = response.data;
     form.value.auditId = response.data.auditId
     form.value.selectedOrder = []
@@ -1126,7 +1130,7 @@ function handleAddStockDetailClick(row){
   });
 }
 //状态显示
-function addStockAuditStatus(auditId) {
+function outStockAuditStatus(auditId) {
   if (auditId === '0') {
     return '未审核'
   } else if (auditId === '1') {
@@ -1143,7 +1147,7 @@ const showAuditTooltip = (row) => {
   if(row.auditId == 0){
     return;
   }
-  getOrderAuditRecord(row.addStockId).then(response=>{
+  getOrderAuditRecord(row.outStockId).then(response=>{
     tooltipAuditContent.value= response.data
 
     tooltipAuditContent.value = '审核人: '+tooltipAuditContent.value.userName +
@@ -1171,7 +1175,7 @@ const handleAuditCommand = (command) => {
 //提交审核
 function submitOrderAudit(data){
   auditAddDTO.value = data
-  addAddStockAudit(auditAddDTO.value).then(response => {
+  addOutStockAudit(auditAddDTO.value).then(response => {
     proxy.$modal.msgSuccess("审核成功");
     getList();
   })
@@ -1242,7 +1246,7 @@ onBeforeMount(() => {
   watch(
       () => route.fullPath,
       async () => {
-        if (route.name === 'AddStock') {
+        if (route.name === 'outStock') {
           // 使用 nextTick 确保在 DOM 更新后执行刷新数据的逻辑
           await nextTick();
           getList();

@@ -52,6 +52,7 @@
           <ImagePreview style="width:70px;height:60px;" :src="scope.row.productImage" />
         </template>
       </el-table-column>
+      <el-table-column label="类别" align="center" prop="catalog.catalogName" />
       <el-table-column label="品牌" align="center" prop="brand.brandName" />
       <el-table-column label="描述" align="center" prop="productIntro" />
       <el-table-column label="厂家型号" align="center" prop="productModel" />

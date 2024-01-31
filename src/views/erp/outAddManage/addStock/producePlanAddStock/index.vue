@@ -72,7 +72,7 @@
 
 
     <br>
-    <div style="margin-top: 10px "> <span >生产订单信息 </span>
+    <div style="margin-top: 10px "> <span >生产订单成品信息 </span>
       <el-button
           type="primary"
           plain
@@ -119,7 +119,7 @@
         </template>
       </el-table-column>
       <el-table-column label="计划入库数量" align="center" prop="groupNumber" width="100px"/>
-      <el-table-column label="可入库数量" align="center" prop="" width="100px"/>
+      <el-table-column label="可入库数量" align="center" prop="produceNumber" width="100px"/>
       <el-table-column label="合格数量" align="center">
         <template #default="scope">
                   <span>
@@ -155,20 +155,20 @@
 
     </el-table>
 
-    <div style="margin-top: 10px "> <span >采购入库商品明细 </span>
-      <el-button
-          type="danger"
-          plain
-          icon="Plus"
-          size="small"
-          style="margin-left: 10px;"
-          @click="handleAddProduct"
-          v-hasPermi="['erp:order:add']"
-      >移出明细</el-button>
-    </div>
+<!--    <div style="margin-top: 10px "> <span >采购入库商品明细 </span>-->
+<!--      <el-button-->
+<!--          type="danger"-->
+<!--          plain-->
+<!--          icon="Plus"-->
+<!--          size="small"-->
+<!--          style="margin-left: 10px;"-->
+<!--          @click="handleAddProduct"-->
+<!--          v-hasPermi="['erp:order:add']"-->
+<!--      >移出明细</el-button>-->
+<!--    </div>-->
 
     <br>
-    <span style="margin-top:50px"> 入库种数：       入库总额：</span>
+    <span style="margin-top:50px"> 剩余物料种数：{{orderPlanProductsList.length}}   </span>
     <!--      待二次入库商品明细表格-->
     <el-table
         :data="orderPlanProductsList"
@@ -340,7 +340,7 @@
         <span >
          可入库数量：<span  style="color: rgb(82, 153, 252);">{{ tempProduct.groupNumber }}</span> &nbsp;&nbsp;
         </span>
-        已输入入库数量：<span  style="color: rgb(82, 153, 252);">计算  </span>
+        已输入入库数量：<span  style="color: rgb(82, 153, 252);">{{currentInputNum()}}</span>
       </div>
 
       <el-form
@@ -360,21 +360,35 @@
                   v-model="scope.row.selectValue"
                   :options="PositionOptions"
                   :props="{ value: 'id', label: 'label', children: 'children' }"
-                  @change="handlePositionChange(scope.row.selectValue)"
+                  @change="handlePositionChange(scope.row)"
               />
             </template>
           </el-table-column>
 
-          <el-table-column label="批次" align="center">
+          <el-table-column label="批次" align="center" width="245">
             <template #default="scope">
-            <span>
-              <el-input v-model="scope.row.batchCode"  type="text" maxlength="26" placeholder="请输入批次" size="mini"  />
-            </span>
+              <el-select v-model="scope.row.batchCode" placeholder="采购订单获取" >
+                <el-option
+                    v-for="item in scope.row.batchList"
+                    :key="item.batchCode"
+                    :label="item.batchName"
+                    :value="item.batchCode"
+                    style="width: 250px;"
+                    class="custom-option"
+                    @click="BatchCanbeSelected(scope.row)"
+                ></el-option>
+              </el-select>
+
             </template>
           </el-table-column>
 
-          <el-table-column label="库存已有数量" align="center" />
-
+          <el-table-column label="库存数量" align="center">
+            <template #default="scope">
+            <span>
+              {{ scope.row.currentBatchNumber ? scope.row.currentBatchNumber:0}}
+            </span>
+            </template>
+          </el-table-column>
           <el-table-column label="入库数量" align="center" >
             <template #default="scope">
             <span>
@@ -412,6 +426,10 @@
 
 
     </el-dialog>
+    <add-batch-dialog
+        :openAddBatch="openAddBatch"
+        @submitAddBatch="submitAddBatch"
+    />
   </div>
 
 
@@ -430,10 +448,13 @@ import {
 } from "../../../../../api/erp/addStock";
 import {useRoute, useRouter} from "vue-router";
 import {listUnit} from "../../../../../api/erp/customer";
-import {getWarehousePosition, warehouseTreeSelect} from "../../../../../api/erp/position";
+import {getProductBatchNumberList, getWarehousePosition, warehouseTreeSelect} from "../../../../../api/erp/position";
 import {getOrderAuditRecord, listOrder} from "../../../../../api/erp/order";
 import {listPlan} from "../../../../../api/erp/plan";
 import produceOrderTable from "../../../../../components/zerp/table/produceOrderTable"
+import AddBatchDialog from "../../../../../components/zerp/public/addBatchDialog";
+
+import {addBatch} from "../../../../../api/erp/batch";
 
 
 const { proxy } = getCurrentInstance();
@@ -443,6 +464,8 @@ const  orderDetailFormShow = ref(true)
 const openAddOrderStock = ref(false);
 const openSelectAddStockPosition = ref(false);
 const openSelectOrder = ref(false);
+const openAddBatch = ref(false);
+
 const multiple = ref(true);
 const loading = ref(true);
 const selectPlanOrderShow = ref(false);
@@ -466,6 +489,16 @@ const total = ref(0);
 const  selectedOrder = ref([]);
 const orderPlanProductsList = ref([]);
 const tempProduct = ref({})
+const productBatchNumbers = ref([
+  {
+    batchCode:101,
+    batchName:'hhh101'
+  },
+  {
+    batchCode:102,
+    batchName:'hhh102'
+  }
+])
 const data = reactive({
   form: {
 
@@ -565,7 +598,8 @@ function getWarehouseTree() {
 function getPlanOrderList() {
   loading.value = true;
   queryParams.value.auditId="1"
-  queryParams.value.planStatus = "2"
+  queryParams.value.planStatus = "3"
+  queryParams.value.status = "1"
   listPlan(queryParams.value).then(response => {
     planList.value = response.rows;
     total.value = response.total;
@@ -605,21 +639,87 @@ function returnAddStock(){
 //提交入库单到后端
 function subMitAddStockList(){
   // form.value orderPlanProductsList
-  form.value.orderSelection = orderSelection.value;
-  form.value.orderPlanProductsList = orderPlanProductsList.value
+  form.value.orderSelection = orderSelection.value;   //计划单号信息
+  form.value.orderPlanProductsList = orderPlanProductsList.value   //剩余材料list
+
+  console.log(form.value)
   if (form.value.addStockId == null) {
       AddStockList(form.value).then(response => {
-        proxy.$modal.msgSuccess("新增成功");
-         getList();
-      });
+        proxy.$modal.msgSuccess("提交成功");
+       });
 
   }else {
     updateAddStock(form.value).then(response => {
       proxy.$modal.msgSuccess("修改成功");
-       getList();
-    })
+     })
   }
   router.push("/outAddManage/addStock");
+}
+//current批次库存
+const getCurrentStockQuantity = (row) => {
+  productBatchNumbers.value= row.batchList ? row.batchList : []
+  const batchInfo = productBatchNumbers.value.find(item => item.batchCode === row.batchCode);
+  return batchInfo ? extractStockQuantity(batchInfo.batchName) : '0';
+};
+
+const extractStockQuantity = (batchName) => {
+  const stockMatch = batchName.match(/\(库存:(\d+)\)/);
+  return stockMatch ? stockMatch[1] : '0';
+}
+//判断批次是否已选
+function BatchCanbeSelected(row){
+
+  let count = 0
+  let currentName = row.selectValue[1]+row.batchCode
+  // row.currentBatchNumber = extractStockQuantity(row.batchCode)
+
+  row.currentBatchNumber= getCurrentStockQuantity(row)
+  form.value.orderPlanProductsList.addStockProduct.batchPositionList.forEach(item=>{
+
+    let nowName = item.selectValue[1]+item.batchCode
+    if(currentName === nowName){
+      count ++;
+      if(count > 1){
+        proxy.$modal.msgWarning("重复选择，请选择其他批次！");
+        item.batchCode = ''
+      }
+    }
+  })
+  console.log("批次")
+  console.log(form.value)
+}
+//计算当前已选数量和判断是否超过
+const currentInputNum = () => {
+  let currentCount = 0;
+  form.value.orderPlanProductsList.addStockProduct.batchPositionList.forEach((row) => {
+    // 使用parseInt确保row.addNumber是数字类型
+    currentCount += parseInt(row.addNumber, 10) || 0;
+  });
+  return currentCount;
+};
+//新增批次
+function showAddBatch(){
+  openAddBatch.value = false;
+  openAddBatch.value = true;
+}
+function submitAddBatch(data){
+  // console.log(form.value)
+  addBatch(form.value).then(response =>{
+    openAddBatch.value = false;
+    proxy.$modal.msgSuccess("新增成功");
+    getProductBatchNumbers(form.value.orderPlanProductsList.addStockProduct.product.productCode,selectValueTemp.value[1])
+
+  })
+}
+/** 根据商品和库位   获得商品批次数量list */
+function getProductBatchNumbers(productCode,stockPositionId){
+  const data={}
+  data.productCode = productCode;
+  data.stockPositionId = stockPositionId;
+
+  getProductBatchNumberList(data).then(response=>{
+    productBatchNumbers.value = response.data
+  })
 }
 // 定义变量
 const spanArr = ref([]);
@@ -670,17 +770,22 @@ function handleSelectOrder(){
 function SelectAddStockPosition(row){
   //给商品列赋值
   openSelectAddStockPosition.value = true;
-  console.log("row")
-  console.log(row)
-
-  alert()
 
   form.value.orderPlanProductsList.addStockProduct = row
+  console.log("row")
+  console.log(row)
+  console.log(form.value)
+
+
   if(row.planId == null){
     tempProduct.value = row
+    tempProduct.value.groupNumber = row.groupNumber;
   }else{
     tempProduct.value = row.productForm
+    tempProduct.value.groupNumber = row.groupNumber;
+
   }
+  selectPosition( )
 
   form.value.orderPlanProductsList.addStockProduct.batchPositionList = [{}]
   getSpanArr(form.value.orderPlanProductsList.addStockProduct.batchPositionList);
@@ -693,28 +798,26 @@ function handleOrderSelectionChange(data) {
     return "只能选择一条订单入库"
   }
   // orderIds.value = orderSelection.value.map(item => item.planId);
-
   multiple.value = !orderSelection.value.length;
 
-  console.log(orderSelection.value)
    orderSelection.value.forEach(item=>{
-     console.log(item)
      selectedOrder.value = item
      form.value.warehouse = item.warehouse
      form.value.warehouseId = item.warehouseId
      orderPlanProductsList.value = item.productList
    });
-  console.log("待入库商品list：："+ form.value.orderPlanProductsList)
 
-   selectPosition(form.value.warehouseId)
 }
 //获得仓库的库位数据
-function selectPosition(warehouseId){
-  alert("ss")
-  getWarehousePosition(warehouseId).then(response => {
+function selectPosition(){
+  const data={}
+  data.productCode = tempProduct.value.productCode;
+  data.warehouseId = form.value.warehouseId;
+  getWarehousePosition(data).then(response => {
     PositionOptions.value = response.data;
-   });
-}
+  });
+
+ }
 function formatBatchPosition(row) {
   const batchPositionList = row.batchPositionList
   if (Array.isArray(batchPositionList) && batchPositionList.length > 0) {
@@ -739,23 +842,35 @@ function formatBatchPosition(row) {
 
   return '选择入库：位置-批次';
 }
-//选择库位节点触发
-const handlePositionChange = (selectValue) => {
 
-  // 更新所有行的入库位置信息
-  form.value.orderPlanProductsList.addStockProduct.batchPositionList.forEach(row => {
-    row.selectValue = selectValue; // 将入库位置设置为选择的值
-    row.warehouseId = row.selectValue[0];
-    row.positionId = row.selectValue[1];
-    const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
-    row.warehouseName = foundWarehouse.label
-    const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
-    row.positionName = foundPosition.label
+//查询一行库位批次
+const handlePositionChange = (row) => {
+  // 在PositionOptions中找到所选位置
+  // 根据ID在PositionOptions中找到位置的方法
+  let selectValue = row.selectValue
+  let wid=selectValue[0];
+  PositionOptions.value.forEach(row1=>{
+    if(row1.id == wid){
 
-    // console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
-  });
+      const children = ref([])
+      children.value = row1.children
 
-  // 其他可能的操作或逻辑
+      //入库不需要筛选批次
+      children.value.forEach(item=>{
+        if(item.id == selectValue[1]){
+          row.batchList = []
+          for(let i=0;i<item.batchList.length;i++){
+              row.batchList.push(item.batchList[i])
+
+            // if(item.batchList[i].batchNums>0){
+            //   row.batchList.push(item.batchList[i])
+            // }
+          }
+        }
+      })
+    }
+  })
+  // 更新行的batchList属性
 };
 function removeProductBatchRow(row) {
   const confirmResult = confirm('确定要移除这一行吗？');
@@ -787,8 +902,7 @@ const showAuditTooltip = (row) => {
 };
 // 当需要添加新行时触发的函数或事件处理程序
 function addProductBatchRow() {
-  console.log("准备新增")
-  // console.log(form.value.orderPlanProductsList.addStockProduct.batchPositionList)
+   // console.log(form.value.orderPlanProductsList.addStockProduct.batchPositionList)
   const firstRow = form.value.orderPlanProductsList.addStockProduct.batchPositionList[0];
 
   // 创建一个空对象或空数据结构
@@ -798,6 +912,7 @@ function addProductBatchRow() {
     positionId: firstRow.positionId,
     positionName: firstRow.positionName,
     warehouseName: firstRow.warehouseName,
+    batchList:firstRow.batchList,
     batch: '' // 你可能需要根据需要初始化其他属性
   };
 
@@ -808,6 +923,18 @@ function addProductBatchRow() {
 
 
 function getReturnBatchPosition(){
+  // 更新所有行的入库位置信息
+  form.value.orderPlanProductsList.addStockProduct.batchPositionList.forEach(row => {
+    row.warehouseId = row.selectValue[0];
+    row.positionId = row.selectValue[1];
+    const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
+    row.warehouseName = foundWarehouse.label
+    const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
+    row.positionName = foundPosition.label.replace(/\(库存: \d+\)/, '');
+    console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
+  });
+
+
   openSelectAddStockPosition.value=false;
 }
 

@@ -80,7 +80,7 @@
           size="small"
           style="margin-left: 10px;"
           @click="handleSelectOrder"
-      >选择生产计划</el-button>
+      >选择销售订单</el-button>
     </div>
 
     <el-table
@@ -190,72 +190,89 @@
     </el-table>
 
 
-    <el-dialog title="选择生产订单" v-model="openSelectOrder"
+    <el-dialog title="选择销售订单" v-model="openSelectOrder"
                append-to-body class="dialog-selectOrder">
       <div style="">
-        <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
-          <el-form-item   prop="planCode" v-show="showQuery">
-            <el-input
-                v-model="queryParams.planCode"
-                placeholder="请输入关键字"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="计划单号" prop="planCode" v-show="!showQuery">
-            <el-input
-                v-model="queryParams.planCode"
-                placeholder="请输入计划单号"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="计划单据名称" prop="planName" v-show="!showQuery">
-            <el-input
-                v-model="queryParams.planName"
-                placeholder="请输入计划单据名称"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="关联单据号" prop="associatedCode" v-show="!showQuery">
-            <el-input
-                v-model="queryParams.associatedCode"
-                placeholder="请输入关联单据号"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="商品编号" prop="productCode" v-show="!showQuery">
-            <el-input
-                v-model="queryParams.productCode"
-                placeholder="请输入商品编号"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="生产线id" prop="lineId" v-show="!showQuery">
-            <el-input
-                v-model="queryParams.lineId"
-                placeholder="请输入生产线id"
-                clearable
-                @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
-          </el-form-item>
-        </el-form>
-        <produceOrderTable
-            :planList = "planList"
-            :queryParams="queryParams"
+        <el-row>
+          <el-form :model="querySalesParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
+            <el-form-item  prop="bomKey" v-show="showQuery">
+              <el-input
+                  v-model="querySalesParams.bomKey"
+                  placeholder="请输入关键字"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="订单编号" prop="salesOrderCode" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.salesOrderCode"
+                  placeholder="请输入订单编号"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="单据名称" prop="salesOrderName" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.salesOrderName"
+                  placeholder="请输入单据名称"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="客户信息" prop="unit" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.unit"
+                  placeholder="请输入客户信息"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="所属仓库" prop="warehouseId" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.warehouseId"
+                  placeholder="请输入所属仓库"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="订单交货日期" prop="salesOrderTime" v-show="!showQuery">
+              <el-date-picker clearable
+                              v-model="querySalesParams.salesOrderTime"
+                              type="date"
+                              value-format="YYYY-MM-DD"
+                              placeholder="请选择订单交货日期">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="订单审核状态" prop="auditId" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.auditId"
+                  placeholder="请输入订单审核状态"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="订单进度(0待出库，1已出库)" prop="orderProgress" v-show="!showQuery">
+              <el-input
+                  v-model="querySalesParams.orderProgress"
+                  placeholder="请输入订单进度(0待出库，1已出库)"
+                  clearable
+                  @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+              <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+              <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
+            </el-form-item>
+          </el-form>
+
+        </el-row>
+        <sales-order-table
+            :salesList = "salesList"
             :total="total"
-            :single="single"
-            :selectPlanOrderShow="selectPlanOrderShow"
-            :tooltipAuditContent="tooltipAuditContent"
-            @handleUpdate="handleUpdate"
+            :loading="loading"
+            :queryParams="queryParams"
             @handleSelectionChange="handleOrderSelectionChange"
         />
         <div style="padding-top: 10px; margin-bottom: 10px; display: flex; justify-content: flex-end;">
@@ -407,7 +424,9 @@ import {listUnit} from "../../../../../api/erp/customer";
 import {getProductBatchNumberList, getWarehousePosition, warehouseTreeSelect} from "../../../../../api/erp/position";
 import {getOrderAuditRecord, listOrder} from "../../../../../api/erp/order";
 import {listPlan} from "../../../../../api/erp/plan";
-import produceOrderTable from "../../../../../components/zerp/table/produceOrderTable"
+import SalesOrderTable from "../../../../../components/zerp/table/salesOrderTable";
+
+import {listSales} from "../../../../../api/erp/sales";
 
 
 const { proxy } = getCurrentInstance();
@@ -420,7 +439,8 @@ const openSelectOrder = ref(false);
 const multiple = ref(true);
 const loading = ref(true);
 const selectPlanOrderShow = ref(false);
-
+const showSearch = ref(true);
+const showQuery = ref(true);
 
 
 const tabClickIndex = ref();
@@ -432,7 +452,7 @@ const warehouseOptions = ref(undefined);
 const orderList = ref([]);
 const tooltipAuditContent = ref({})
 const PositionOptions = ref([])
-const planList = ref([]);
+const salesList = ref([]);
 const orderSelection = ref();
 const total = ref(0);
 
@@ -480,7 +500,7 @@ const data = reactive({
     auditId: null,
     status: null,
   },
-  queryOrderParams: {
+  querySalesParams: {
     pageNum: 1,
     pageSize: 10,
     auditId: 1,
@@ -513,7 +533,7 @@ const data = reactive({
     ],
   }
 });
-const { queryParams, form,queryOrderParams, rules } = toRefs(data);
+const { queryParams, form,querySalesParams, rules } = toRefs(data);
 
 
 const validateMaxNumber = (rule, value, callback) => {
@@ -526,9 +546,9 @@ const validateMaxNumber = (rule, value, callback) => {
 };
 const displayTitleText = computed(() => {
   if (outStockId.value == null) {
-    return '新增生产计划出库单';
+    return '新增销售出库单';
   } else {
-    return '修改生产计划出库单';
+    return '修改销售出库单';
   }
 });
 /** 查询往来单位列表 */
@@ -544,12 +564,13 @@ function getWarehouseTree() {
   });
 };
 /** 查询生产管理列表 */
-function getPlanOrderList() {
+function getSalesOrderList() {
   loading.value = true;
-  queryParams.value.auditId="1"
-  queryParams.value.planStatus = "0"
-  listPlan(queryParams.value).then(response => {
-    planList.value = response.rows;
+  querySalesParams.value.auditId="1"
+  querySalesParams.value.orderProgress="1"
+
+  listSales(querySalesParams.value).then(response => {
+    salesList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -605,6 +626,17 @@ function subMitOutStockList(){
   }
   router.push("/outAddManage/outStock");
 }
+/** 搜索按钮操作 */
+function handleQuery() {
+  querySalesParams.value.pageNum = 1;
+  getSalesOrderList();
+}
+
+/** 重置按钮操作 */
+function resetQuery() {
+  proxy.resetForm("queryRef");
+  handleQuery();
+}
 
  /** 修改按钮操作 */
 function handleUpdate(row) {
@@ -624,7 +656,7 @@ function selectedOrderList(){
 
 function handleSelectOrder(){
   openSelectOrder.value = true;
-  getPlanOrderList()
+  getSalesOrderList()
 }
 /** 查询采购订单列表 */
 
@@ -686,6 +718,8 @@ function SelectOutStockPosition(row){
 function handleOrderSelectionChange(data) {
     orderSelection.value = Array.from(data);
 
+    console.log(orderSelection.value)
+
   if(orderSelection.value.length > 1){
     return "只能选择一条订单出库"
   }
@@ -693,7 +727,7 @@ function handleOrderSelectionChange(data) {
 
   multiple.value = !orderSelection.value.length;
 
-  console.log("选中生产补料订单")
+  console.log("选中销售订单")
    orderSelection.value.forEach(item=>{
      selectedOrder.value = item
      form.value.warehouse = item.warehouse

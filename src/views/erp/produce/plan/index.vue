@@ -70,7 +70,7 @@
         <el-button
           type="success"
           plain
-           :disabled="single"
+           :disabled="updateItem"
           @click="handleUpdate"
           v-hasPermi="['erp:plan:edit']"
         >修改</el-button>
@@ -111,7 +111,7 @@
             type="danger"
             plain
             icon="Odometer"
-            :disabled="production"
+            :disabled="beganProduction"
             @click="beganProduceClick"
             v-hasPermi="['erp:plan:edit']"
         >开始生产</el-button>
@@ -121,7 +121,7 @@
             type="primary"
             plain
             icon="Odometer"
-            :disabled="production"
+            :disabled="MRPCalculate"
             @click="beganMRP"
         >MRP计算</el-button>
       </el-col>
@@ -132,7 +132,7 @@
         :planList = "planList"
         :queryParams="queryParams"
         :total="total"
-        :single="single"
+        :single="updateItem"
         :tooltipAuditContent="tooltipAuditContent"
         @handleUpdate="handleUpdate"
         @handleSelectionChange="handleSelectionChange"
@@ -233,12 +233,13 @@ const tooltipAuditContent = ref({})
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
-const single = ref(true);
-const production = ref(true)
+const updateItem = ref(true);
+const MRPCalculate = ref(true)
+const beganProduction = ref(true)
 const auditDisabled = ref(true);
 const showQuery = ref(false);
 
-const multiple = ref(false);
+const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
 const AuditTitle = ref("");
@@ -342,23 +343,39 @@ function handleSelectionChange(selection) {
   multiple.value = !selection.length;
    if(selection.length ==  1){
     const auditId = selection.map(item => item.auditId)
-     if(auditId == 0){
+     if(auditId == 0){  //未审核
       auditDisabled.value = false;
-      single.value = false;
+       updateItem.value = false;
+       multiple.value = false;
 
-    }else if(auditId == 1 && selection.map(item => item.planStatus)==0){
-      production.value = false
-    }else{
-       auditDisabled.value = true;
-       single.value = true
-       production.value = true
-    }
+     }else if(auditId == 1 && selection.map(item => item.planStatus)== 0){  //审核通过且未领料 false显示 true不可点
+        MRPCalculate.value = false
+        multiple.value = false;
+     }else if(auditId == 1 && selection.map(item => item.planStatus)== 1){  //审核通过且已领料
+         beganProduction.value = false;
+         multiple.value = true;
+
+       }
+       else if(auditId == 1 && selection.map(item => item.planStatus)== 2){  //审核通过且正在生产
+         beganProduction.value = false;
+         multiple.value = true;
+
+       } else if(auditId == 1 && selection.map(item => item.planStatus)== 3){  //审核通过且生产完成
+         multiple.value = false;
+       } else{
+         auditDisabled.value = true;
+         updateItem.value = true
+         MRPCalculate.value = true
+        beganProduction.value = true;
+     }
   }else{
      auditDisabled.value = true;
-     single.value = true
-     production.value = true
+     updateItem.value = true
+     MRPCalculate.value = true
+     beganProduction.value = true;
+
    }
-  console.log(auditDisabled.value+" "+single.value+" "+production.value)
+  console.log(auditDisabled.value+" "+updateItem.value+" "+MRPCalculate.value)
 
 }
 
@@ -422,7 +439,7 @@ function handleExport() {
 /** 开始生产 */
 function beganProduceClick(){
   const _planId = ids.value
-  console.log(  selectRowPlan.value)
+  console.log( selectRowPlan.value)
   if(selectRowPlan.value.planStatus === "0"){
     console.log(selectRowPlan.value)
     proxy.$modal.msgWarning("当前生产订单未领料");
@@ -430,12 +447,11 @@ function beganProduceClick(){
   loading.value = true;
 
 //进行生产前物料统计
-//   console.log(  selectRowPlan.value)
 
-  // beganProduce(_planId).then(response=>{
-  //   proxy.$modal.msgSuccess("生产启动成功");
-  //   getList();
-  // })
+  beganProduce(_planId).then(response=>{
+    proxy.$modal.msgSuccess(selectRowPlan.value.planCode+"生产计划启动成功");
+    getList();
+  })
   loading.value = false
 }
 /** MRP计算 */

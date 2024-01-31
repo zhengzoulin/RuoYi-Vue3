@@ -477,13 +477,6 @@ function getPlanTotalCost(){
   return bomTotalCost.value;
 }
 
-function getPlanDetail(){
-  getPlan(planId.value).then(response => {
-    form.value = response.data;
-    title.value = "修改bom物料";
-  });
-}
-
 const displayTitleText = computed(() => {
   if (planId.value == null) {
     return '新增生产计划';
@@ -492,10 +485,24 @@ const displayTitleText = computed(() => {
   }
 });
 
+function getPlanDetail(){
+  getPlan(planId.value).then(response => {
+    form.value = response.data;
+    console.log("get")
+    console.log(form.value)
 
-function getLineOptions(){
-  const _warehouseId = form.value.warehouseId
-  getLinesByWarehouse(_warehouseId).then(response =>{
+    console.log(form.value.warehouseId)
+    title.value = "修改bom物料";
+    getLineOptions(form.value.warehouseId)
+
+  });
+}
+
+
+function getLineOptions(warehouseId){
+
+
+  getLinesByWarehouse(warehouseId).then(response =>{
     // 处理数据，将长整数转换为字符串，使用 bignumber.js
     const processedData = response.data.map(item => ({
       id: new BigNumber(item.id).toString(),
@@ -505,7 +512,6 @@ function getLineOptions(){
     // 将处理后的数据赋值给 lineOptions
     lineOptions.value = processedData;
 
-    console.log(lineOptions.value)
 
   })
 }
@@ -578,7 +584,7 @@ function submitBomSelect(data){
     console.log(form.value.productList)
   })
   console.log(form.value.warehouseId)
-  getLineOptions()
+  getLineOptions(form.value.warehouseId)
 
   console.log(data.productList)
   openPlanAdd.value = false
@@ -595,6 +601,8 @@ function addOrUpdate(){
   }else{
     openPlanAdd.value = false
     getPlanDetail()
+
+
   }
 }
 
@@ -608,11 +616,6 @@ getBomList()
  </script>
 
 <style >
-/* Your CSS styles for layout and components */
-
-.app-container{
-
-}
 
 
 .header {

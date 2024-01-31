@@ -70,7 +70,8 @@ export const constantRoutes = [
       {
         path: '/purchaseManage/order',
         name: 'Order',
-        component: () => import('@/views/erp/purchaseManage/order')
+        component: () => import('@/views/erp/purchaseManage/order'),
+        meta: { title: '采购管理', icon: 'dashboard', affix: true }
       },
       {
         path: '/purchaseManage/order/addOrder',
@@ -115,6 +116,11 @@ export const constantRoutes = [
         hidden: true
       },
       {
+        path: '/produce/plan/MRPCompute/lackOrPlan',
+        component: () => import('@/views/erp/produce/plan/MRPCompute/lackOrPlan'),
+        hidden: true
+      },
+      {
         path: '/produce/plan/planDetail',
         component: () => import('@/views/erp/produce/plan/planDetail'),
         hidden: true
@@ -142,10 +148,23 @@ export const constantRoutes = [
         component: () => import('@/views/erp/outAddManage/outStock')
       },
       {
-        path: '/outAddManage/outStock/producePlanAddStock',
+        path: '/outAddManage/outStock/producePlanOutStock',
         component: () => import('@/views/erp/outAddManage/outStock/producePlanOutStock'),
         hidden: true,
         meta: { title: '生产计划出库', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/outAddManage/outStock/salesOutStock',
+        component: () => import('@/views/erp/outAddManage/outStock/salesOutStock'),
+        hidden: true,
+        meta: { title: '销售出库', icon: 'dashboard', affix: true }
+      },
+
+      {
+        path: '/salesManage/sales/addSales',
+        component: () => import('@/views/erp/salesManage/sales/addSales'),
+        hidden: true,
+        meta: { title: '新增销售订单', icon: 'dashboard', affix: true }
       },
 
 

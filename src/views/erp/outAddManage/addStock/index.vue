@@ -772,7 +772,7 @@ function resetQuery() {
   handleQuery();
 }
 
-// 多选框选中数据
+// index多选框选中数据
 function handleSelectionChange(data) {
 
   selection.value = Array.from(data);
@@ -790,8 +790,7 @@ function handleSelectionChange(data) {
       single.value = true
     }
   }
-  multiple.value = !selection.value.length;
-}
+ }
 
 
 /** 搜索按钮操作 */
@@ -826,15 +825,28 @@ function handlePlanAddOrder() {
 function handleUpdate(row) {
   reset();
   // openAddOrderStock.value = true;
-  const addStockId = row.addStockId || ids.value
-  const addStockType = row.addStockType
 
-  if(addStockType == "采购入库"){
+
+  let dataRow = {}
+  selection.value.forEach(row =>{
+    dataRow = row;
+  })
+
+  const addStockId = row.addStockId || ids.value
+  const addStockType = row.addStockType || dataRow.addStockType
+
+
+  if(addStockType === "采购入库"){
     router.push({
       path:'/outAddManage/addStock/purchaseAddStock',
       query:{addStockId : addStockId}
     });
-  }else{
+  }else if(addStockType === "二恶"){
+    router.push({
+      path:'/outAddManage/addStock/producePlanAddStock',
+      query:{addStockId : addStockId}
+    });
+  } else{
     router.push({
       path:'/outAddManage/addStock/producePlanAddStock',
       query:{addStockId : addStockId}
