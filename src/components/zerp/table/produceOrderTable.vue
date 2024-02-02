@@ -93,11 +93,17 @@
 
 <script setup>
 
+import {useRoute, useRouter} from "vue-router";
+
 const tooltipAuditContent = ref({})
 
 // 接收父组件传递过来的值
 import {defineEmits, defineProps} from "vue";
 import {getAuditRecord} from "../../../api/erp/bom";
+
+const router = useRouter();
+const route = useRoute();
+
 
 const props = defineProps({
   planList:{

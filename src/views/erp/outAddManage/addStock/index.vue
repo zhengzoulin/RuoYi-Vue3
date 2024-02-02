@@ -345,7 +345,6 @@
                       :data="form.orderProductsList"
                       :rules="rules"
                       height="350"
-                      class="productAddDetailTable"
                       style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
                       @cell-click="tabClick">
 
@@ -776,7 +775,7 @@ function resetQuery() {
 function handleSelectionChange(data) {
 
   selection.value = Array.from(data);
-  ids.value = selection.value.map(item => item.addStockId);
+  ids.value = selection.value.map(item => item.outStockId);
   single.value = selection.value.length != 1;
   multiple.value = !selection.value.length;
   auditDisabled.value = selection.value.length != 1 ;
@@ -790,6 +789,7 @@ function handleSelectionChange(data) {
       single.value = true
     }
   }
+  multiple.value = !selection.value.length;
  }
 
 
@@ -1283,11 +1283,7 @@ getList();
   margin-left: 200px;
   /*max-width: calc(100% - 300px);*/
 }
-.productAddDetailTable{
-  background : #eef1f6;
-  color: #606266
-  /*:header-cell-style = "{background:'#eef1f6',color:'#606266'}"*/
-}
+
 
 .tab-top-centent{
   width: 100%;

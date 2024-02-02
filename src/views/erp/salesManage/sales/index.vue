@@ -309,44 +309,6 @@ function reset() {
   proxy.resetForm("salesRef");
 }
 
-
-// //状态显示
-// function salesAuditStatus(auditId) {
-//   if (auditId === '0') {
-//     return '未审核'
-//   } else if (auditId === '1') {
-//     return '审核通过'
-//   } else if(auditId === '2'){
-//     return '审核不通过'
-//   }else {
-//     return '错误状态'
-//   }
-// }
-// function OrderProgress(status) {
-//   if (status === '0') {
-//     return '待处理'
-//   } else if (status === '1') {
-//     return '待出库'
-//   } else if(status === '2'){
-//     return '已出库'
-//   }else {
-//     return '已结束'
-//   }
-// }
-// const showAuditTooltip = (row) => {
-//   // 生成tooltip的内容，可以根据rowData的信息来设置tooltip内容
-//   if(row.auditId == 0){
-//     tooltipAuditContent.value = {}
-//     return;
-//   }
-//   getOrderAuditRecord(row.salesOrderId).then(response=>{
-//     tooltipAuditContent.value= response.data
-//
-//     tooltipAuditContent.value = '审核人: '+tooltipAuditContent.value.userName +
-//         '  审核时间:'+ tooltipAuditContent.value.createTime +
-//         '  备注:'+tooltipAuditContent.value.auditRemark;
-//   })
-// };
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;

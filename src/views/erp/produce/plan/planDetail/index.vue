@@ -33,73 +33,49 @@
           </div>
           <div class="section-content" v-show="orderBOMDetailFormShow">
             <!-- Form items for basic info -->
-            <el-row class="el-row">
+            <el-descriptions border="true" column="3" size="large" class="my-descriptions" v-show="orderBOMDetailFormShow">
+              <el-descriptions-item label="计划编号"  label-align="center">
+                {{form.planCode }}
+              </el-descriptions-item>
 
-              <el-col :span="6">
-                <el-form-item label="计划编号">
-                  <el-input v-model="form.planCode" placeholder="保存后自动生成" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="单据名称">
-                  <el-input v-model="form.planName" placeholder="请输入单据名称" clearable />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="生产线" >
-                  <el-select v-model="form.lineId" class="m-2" placeholder="请选择生产线">
-                    <el-option
-                        v-for="item in lineOptions"
-                        :key="item.id"
-                        :label="item.label"
-                        :value="item.id"
-                        :props="{ value: 'id', label: 'label'}"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="目标仓库" >
-                  <el-tree-select
-                      v-model="form.warehouseId"
-                      :data="warehouseOptions"
-                      :props="{ value: 'id', label: 'label', children: 'children' }"
-                      value-key="id"
-                      placeholder="请选择仓库"
-                      class="readonly-tree-select"
+              <el-descriptions-item label="单据名称"  label-align="center">
+                {{form.planName }}
+                <el-button link type="primary"  icon="Edit"  @click=" " class="followButton"></el-button>
+              </el-descriptions-item>
 
-                  />
-                </el-form-item>
-              </el-col>
-            <el-col :span="6">
-              <el-form-item label="计划日期"   prop="planTime">
+              <el-descriptions-item label="生产线"  label-align="center">
+               {{form.line.lineName}}
+              </el-descriptions-item>
+
+              <el-descriptions-item label="目标仓库"  label-align="center">
+                {{form.warehouse.warehousePath}}
+              </el-descriptions-item>
+
+              <el-descriptions-item label="计划日期" prop="planTime"  label-align="center">
                 <el-date-picker clearable
                                 v-model="form.planTime"
                                 type="date"
                                 value-format="YYYY-MM-DD"
                                 placeholder="请选择订单交货日期"
-                                style="height: 45px">
+                                style="height: 46px">
                 </el-date-picker>
-              </el-form-item>
-            </el-col>
-              <el-col :span="6">
-                <el-form-item label="交货日期"   prop="warehouseId">
-                  <el-date-picker clearable
-                                  v-model="form.purchaseOrderTime"
-                                  type="date"
-                                  value-format="YYYY-MM-DD"
-                                  placeholder="请选择订单交货日期"
-                                  style="height: 46px">
-                  </el-date-picker>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="订单备注">
-                  <el-input v-model="form.remark" placeholder="请输入BOM表备注" style="height: 60px" clearable />
-                </el-form-item>
-              </el-col>
+              </el-descriptions-item>
 
-            </el-row>
+              <el-descriptions-item label="交货日期" prop="warehouseId"  label-align="center">
+                <el-date-picker clearable
+                                v-model="form.planTime"
+                                type="date"
+                                value-format="YYYY-MM-DD"
+                                placeholder="请选择订单交货日期"
+                                style="height: 46px">
+                </el-date-picker>
+              </el-descriptions-item>
+
+              <el-descriptions-item label="订单备注"  label-align="center">
+               {{form.remark}}
+              </el-descriptions-item>
+            </el-descriptions>
+
           </div>
         </div>
 
@@ -107,77 +83,27 @@
         <div class="section" v-show="orderBOMDetailFormShow">
           <div class="section-header">
             成品信息
-            <el-button link type="primary"  @click=" " class="followButton"> 重置</el-button>
           </div>
+
           <div class="section-content">
             <!-- Form items for product info -->
-            <el-form :model="form.productForm" :inline="true" :rules="rules" class="BomForm">
-            <el-row>
-              <el-col :span="6">
-                <el-form-item label="成品商品名称" >
-                  <el-input v-model="form.productForm.productName" placeholder="请输入成品商品名称" prop="productName" clearable >
-                    <template v-slot:append>
-                      <el-button plain style="width: 80px; padding: 0;" @click="handleSelectProduct">
-                        <span style="color: #409eff!important; font-size: 12px;">选择商品</span>
-                      </el-button>
-                    </template>
-                  </el-input>
-                </el-form-item>
-              </el-col>
+            <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" >
+              <el-descriptions-item label="成品商品名称"  label-align="center">{{form.productForm.productName}}</el-descriptions-item>
+              <el-descriptions-item label="封装规格"  label-align="center">
+                <span>{{form.productForm.encapStandard}}</span>
+               </el-descriptions-item>
+              <el-descriptions-item label="厂家型号"  label-align="center">{{form.productForm.productModel}}</el-descriptions-item>
+              <el-descriptions-item label="成品商品编号"  label-align="center">{{form.productForm.productCode}}</el-descriptions-item>
+              <el-descriptions-item label="包装单位"  label-align="center">{{form.productForm.minpacketUnit}}</el-descriptions-item>
+              <el-descriptions-item label="包装数量"  label-align="center">{{form.productForm.minpacketNumber}}</el-descriptions-item>
+              <el-descriptions-item label="品牌"  label-align="center">{{form.productForm.brand.brandName}}</el-descriptions-item>
+              <el-descriptions-item label="重量"  label-align="center">{{form.productForm.productWeight}}</el-descriptions-item>
+              <el-descriptions-item label="目录"  label-align="center">{{form.createBy}}</el-descriptions-item>
+              <el-descriptions-item label="备注"  label-align="center">{{form.productForm.remark}}</el-descriptions-item>
+              <el-descriptions-item label="套数"  label-align="center">{{form.groupNumber}}</el-descriptions-item>
 
-              <el-col :span="6">
-                <el-form-item label="封装规格" class="select-container">
-                  <el-input v-model="form.productForm.encapStandard" placeholder="请输入封装规格" clearable class="readonly-tree-select" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="厂家型号" class="select-container">
-                  <el-input v-model="form.productForm.productModel" placeholder="请输入厂家型号" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="成品商品编号" class="select-container">
-                  <el-input v-model="form.productForm.productCode" placeholder="请输入成品商品编号" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="6">
-                <el-form-item label="包装单位" class="select-container">
-                  <el-input v-model="form.productForm.minpacketUnit" placeholder="请输入重量" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="包装数量" class="select-container">
-                  <el-input v-model="form.productForm.minpacketNumber" placeholder="请输入备注" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="品牌" class="select-container">
-                  <el-input v-model="form.productForm.warehouse" placeholder="请输入备注" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="重量" >
-                  <el-input v-model="form.productForm.productWeight" placeholder="请输入重量" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row>
+            </el-descriptions>
 
-              <el-col :span="6">
-                <el-form-item label="备注" class="select-container">
-                  <el-input v-model="form.productForm.remark" placeholder="请输入备注" clearable class="readonly-tree-select"/>
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="套数" class="select-container" prop="groupNumber">
-                  <el-input v-model="form.groupNumber" placeholder="请输入套数" clearable />
-                </el-form-item>
-              </el-col>
-            </el-row>
-
-            </el-form>
           </div>
         </div>
 
@@ -187,13 +113,7 @@
             Bom用料信息
            </div>
           <div class="section-content">
-            <!-- Buttons for importing and downloading -->
-<!--            <el-row>-->
-<!--              <el-button size="mini">导入BOM表</el-button>-->
-<!--              <el-button>下载BOM模板</el-button>-->
-<!--            </el-row>-->
 
-            <!-- Display BOM total count and cost -->
             <el-row>
               <span style="margin-right: 20px">BOM总数：{{ form.productList.length }}</span>
               <span>BOM总成本：￥{{ getBomTotalCost() }}</span>
@@ -206,12 +126,17 @@
                   :cell-class-name="addSeparate"
                   :header-cell-style="tableHeaderColor"
               >
-
                   <el-table-column type="selection" width="55" align="center" />
-                   <el-table-column label="编号" align="center" prop="productCode" />
-                  <el-table-column label="商品信息" align="center" prop="productName" >
+                   <el-table-column label="编号" align="center" prop="productCode" >
+                     <template #default="scope">
+                      <span class="readonly-column-select">
+                          {{ scope.row.productCode}}
+                      </span>
+                     </template>
+                </el-table-column>
+                  <el-table-column label="商品信息" align="center"  width="140" prop="productName" class="readonly-column-select">
                     <template #default="scope">
-                      <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
+                      <span style="display: block;font-family: '微软雅黑'" class="readonly-column-select">商品:{{ scope.row.productName }}</span>
                       <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
                       <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
                       <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
@@ -219,10 +144,12 @@
                   </el-table-column>
                   <el-table-column label="单套用量" prop="usageAmount" align="center" width="124px" >
                     <template #default="scope">
-                      <el-input v-model="scope.row.usageAmount" type="number" size="small"  :min="1" />
+                       <span >
+                        {{scope.row.usageAmount}}
+                      </span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="总数" align="center" prop="encapStandard" >
+                  <el-table-column label="用料总数" align="center" prop="encapStandard" >
                     <template #default="scope">
                       <span style="color: rgba(40,177,232,0.83); ">
                         {{scope.row.usageAmount * form.groupNumber}}
@@ -231,8 +158,11 @@
                   </el-table-column>
                   <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
                     <template #default="scope">
-                      <el-input-number v-model="scope.row.costPrice" size="small"  :min="1" />
+                       <span >
+                        {{scope.row.costPrice}}
+                      </span>
                     </template>
+
                   </el-table-column>
                   <el-table-column label="金额" align="center" prop="remark" >
                     <template #default="scope">
@@ -243,8 +173,8 @@
                   </el-table-column>
                   <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
                     <template #default="scope">
-                      <span>
-                        <el-input v-model="scope.row.estimatedLoss"  type="number" maxlength="26" placeholder="请输入" size="mini"  />
+                       <span >
+                        {{scope.row.estimatedLoss}}
                       </span>
                     </template>
                   </el-table-column>
@@ -253,12 +183,11 @@
                 <el-table-column label="库存数量" align="center" prop="balanceNumber" />
                 <el-table-column label="占用数量" align="center">
                   <template #default="scope">
-                    <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.balanceNumber - scope.row.availableNumber}}</a>
+                    <a  style="color: rgb(241,54,36); text-decoration: underline;">{{scope.row.balanceNumber - scope.row.availableNumber}}</a>
                   </template>
                 </el-table-column>
                 <el-table-column label="可用数量" align="center" prop="availableNumber" />
               </el-table>
-
 
           </div>
         </div>
@@ -324,12 +253,22 @@ const queryBom = ref({});
 const bomList = ref([]);
 const data = reactive({
   form: ref({
+    line:{
+      lineName:""
+    },
+    warehouse:{
+      warehousePath:''
+    },
     createTime: "",
     bomCostPrice: 0,
     groupNumber :0,
     warehouseId: 0,
     lineId:"",
-    productForm:ref({}),
+    productForm:ref({
+      brand:{
+        brandName:''
+      }
+    }),
     productList: ref([{
         product:{},
         costPrice: 2,
@@ -664,31 +603,22 @@ getBomList()
 }
 
 
-/* 添加蒙版效果 */
-.readonly-tree-select {
-  pointer-events: none;
-}
-/* 给蒙版添加样式 */
-/* 给蒙版添加样式 */
-.readonly-tree-select::after {
+ /* 给蒙版添加样式 */
+.readonly-column-select::after {
   content: '';
   position: absolute;
-  top: 6px; /* 调整蒙版顶部偏移 */
-  bottom: 6px; /* 调整蒙版底部偏移 */
-  left: 6px;
-  right: 6px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
   z-index: 1;
-  background-color: rgba(204, 219, 238, 0.43); /* 淡灰色 */
-  box-sizing: border-box; /* 让蒙版尺寸包括 border 和 padding */
-  padding: 1px; /* 调整蒙版内边距，使其与输入框内容更贴近 */
-  border-radius: 4px; /* 添加圆角 */
+  background-color: rgba(133, 203, 217, 0.3); /* 淡灰色 */
+  /*background-color: rgba(219,238,242,0.3); !* 淡灰色 *!*/
 }
 
-.el-table .custom-header th {
-  background-color: #e6f7ff !important;
-}
 
-.separator-border {
-  border-right: 1px solid #eeeff2!important;
-}
+
+
+
+
 </style>

@@ -929,6 +929,9 @@ getWarehouseTree()
 
 <style>
 
+.el-table{
+
+}
 .dialog-selectOrder{
   /*width: 85% ;*/
   /*!*height: 90%;*!*/
@@ -943,11 +946,7 @@ getWarehouseTree()
   margin-left: 200px;
   /*max-width: calc(100% - 300px);*/
 }
-.productAddDetailTable{
-  background : #eef1f6;
-  color: #606266
-  /*:header-cell-style = "{background:'#eef1f6',color:'#606266'}"*/
-}
+
 
 .tab-top-centent{
   width: 100%;

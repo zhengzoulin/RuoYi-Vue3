@@ -639,24 +639,29 @@ const { queryParams, form, rules ,productForm,queryProductParams} = toRefs(data)
 
 function handleOrderDetailClick(row){
   reset();
-  openOrderDetail.value = true;
+  // openOrderDetail.value = true;
   const _purchaseOrderId = row.purchaseOrderId
-  getOrder(_purchaseOrderId).then(response => {
-    form.value = response.data;
-    form.value.auditId = response.data.auditId
-    form.value.demandProductsList =form.value.productList;
-    productListSize.value=Object.keys(response.data.demandProductsList).length
-    title.value = "订单详情";
 
-    if(response.data.auditId != 0){
-      orderAuditShow.value = true;
-      updateOrderShow.value = true;
-    }else{
-      orderAuditShow.value = false;
-      updateOrderShow.value = false;
-
-    }
+  router.push({
+    path:'/purchaseManage/order/purchaseOrderShow',
+    query:{purchaseOrderId : _purchaseOrderId}
   });
+  // getOrder(_purchaseOrderId).then(response => {
+  //   form.value = response.data;
+  //   form.value.auditId = response.data.auditId
+  //   form.value.demandProductsList =form.value.productList;
+  //   productListSize.value=Object.keys(response.data.demandProductsList).length
+  //   title.value = "订单详情";
+  //
+  //   if(response.data.auditId != 0){
+  //     orderAuditShow.value = true;
+  //     updateOrderShow.value = true;
+  //   }else{
+  //     orderAuditShow.value = false;
+  //     updateOrderShow.value = false;
+  //
+  //   }
+  // });
 }
 
 

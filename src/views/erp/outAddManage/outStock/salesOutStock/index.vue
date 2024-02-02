@@ -72,7 +72,7 @@
 
 
     <br>
-    <div style="margin-top: 10px "> <span >生产订单信息 </span>
+    <div style="margin-top: 10px "> <span >销售订单信息 </span>
       <el-button
           type="primary"
           plain
@@ -84,14 +84,14 @@
     </div>
 
     <el-table
-        :data="orderSelection"
+        :data="salesOrderSelection"
         height="220px"
         style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
     >
 
       <el-table-column type="selection" width="55" align="center" />
 
-      <el-table-column label="计划单号" align="center" width="120px" >
+      <el-table-column label="销售单号" align="center" width="120px" >
         <template #default="scope">
           <!-- 使用 <a> 标签来包装数据，并添加样式 -->
           <a
@@ -99,35 +99,21 @@
               style="color: rgba(40,177,232,0.83); text-decoration: underline;"
               @click="handleOrderDetailClick(scope.row)"
           >
-            {{ scope.row.planCode }}
+            {{ scope.row.salesOrderCode }}
           </a>
         </template>
       </el-table-column>
 
-      <el-table-column label="单据名称" align="center" prop="planName" width="100px"  />
-
-      <el-table-column label="计划日期" prop="planTime" width="120px" align="center"/>
-      <el-table-column label="交货日期" prop="planTime" width="120px" align="center"/>
-
-      <el-table-column label="生产备注" prop="remark" width="120px" align="center"/>
-
-      <el-table-column label="成品编号" align="center" prop="productForm.productName" width="100px"  />
-      <el-table-column label="商品信息" align="center" width="220px">
-        <template #default="scope">
-          <span style="display: block;"> {{ scope.row.productForm.productName }}</span>
-          <span style="display: block;">封装规格:{{ scope.row.productForm.encapStandard }}</span>
-          <span style="display: block;">厂家型号:{{ scope.row.productForm.productModel }}</span>
-          <span style="display: block;">最小包装数量:{{ scope.row.productForm.minpacketNumber }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="生产数量" align="center" prop="groupNumber" />
-
-
-
+      <el-table-column label="单据名称" align="center" prop="salesOrderName"  />
+      <el-table-column label="创建日期" prop="createTime" align="center"/>
+      <el-table-column label="交货日期" prop="salesOrderTime" align="center"/>
+      <el-table-column label="客户" align="center" prop="unit.unitName"  />
+      <el-table-column label="出货仓库" align="center" prop="warehouse.warehousePath"  />
+      <el-table-column label="订单备注" prop="remark"  align="center"/>
 
     </el-table>
 
-    <div style="margin-top: 10px "> <span >领料出库商品明细 </span>
+    <div style="margin-top: 10px "> <span >销售出库商品明细 </span>
       <el-button
           type="danger"
           plain
@@ -140,12 +126,11 @@
     </div>
 
     <br>
-    <span style="margin-top:50px"> 出库种数：{{orderPlanProductsList.length}}   </span>
+    <span style="margin-top:50px"> 出库种数：{{form.orderPlanProductsList.length}}   </span>
     <!--      待领料出库商品明细表格-->
     <el-table
-        :data="orderPlanProductsList"
+        :data="form.orderPlanProductsList"
         height="350"
-        class="productAddDetailTable"
         style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
 
     >
@@ -162,9 +147,14 @@
           <span style="display: block;">最小包装数量:{{ scope.row.minpacketNumber }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="需求总数" prop="usageAmount" align="center" class="select-container" width="110px"/>
+      <el-table-column label="销售数量" prop="salesNumber" align="center" class="select-container" width="110px"/>
 
-      <el-table-column label="备损量" prop="estimatedLoss" align="center" class="select-container" width="110px"/>
+      <el-table-column label="在库数量" prop="balanceNumber" align="center" class="select-container" width="110px"/>
+      <el-table-column label="占用数量" prop="availableNumber" align="center" width="110px">
+        <template #default="scope">
+          {{scope.row.balanceNumber - scope.row.availableNumber}}
+        </template>
+      </el-table-column>
       <el-table-column label="可出库数量" prop="availableNumber" align="center" width="110px"/>
 
       <el-table-column label="出库数量"   align="center"  >
@@ -385,15 +375,11 @@
             </template>
           </el-table-column>
         </el-table>
-
-
-
         <div  class="el-row is-justify-end el-row--flex">
           <button  type="button" class="el-button lc-success el-button--text el-button--mini"
                    style="font-size: 18px;" @click="addProductBatchRow">
             <span>+新增行</span>
           </button></div>
-
         <div style="text-align: right;">
           <button type="button" class="el-button el-button--default el-button--mini" @click=" openSelectOutStockPosition=false">
             <span>取消</span>
@@ -426,7 +412,7 @@ import {getOrderAuditRecord, listOrder} from "../../../../../api/erp/order";
 import {listPlan} from "../../../../../api/erp/plan";
 import SalesOrderTable from "../../../../../components/zerp/table/salesOrderTable";
 
-import {listSales} from "../../../../../api/erp/sales";
+import {getSales, listSales} from "../../../../../api/erp/sales";
 
 
 const { proxy } = getCurrentInstance();
@@ -453,18 +439,18 @@ const orderList = ref([]);
 const tooltipAuditContent = ref({})
 const PositionOptions = ref([])
 const salesList = ref([]);
-const orderSelection = ref();
+const salesOrderSelection = ref();
 const total = ref(0);
 
 
 const  selectedOrder = ref([]);
-const orderPlanProductsList = ref([]);
+// const orderPlanProductsList = ref([]);
 const tempProduct = ref({})
 const productBatchNumbers = ref([])
 const data = reactive({
   form: ref( {
 
-    outStockType: "生产计划出库",
+    outStockType: "销售出库",
     outStockCode:null,
     outStockName:null,
     unit: {
@@ -608,21 +594,19 @@ function returnOutStock(){
 //提交出库单到后端
 function subMitOutStockList(){
   // form.value orderPlanProductsList
-  form.value.orderSelection = orderSelection.value;
-  form.value.orderPlanProductsList = orderPlanProductsList.value
+  form.value.salesOrderSelection = salesOrderSelection.value;
+  // form.value.orderPlanProductsList = orderPlanProductsList.value
 
   console.log(form.value)
   if (form.value.outStockId == null) {
       OutStockList(form.value).then(response => {
         proxy.$modal.msgSuccess("新增成功");
-         getList();
-      });
+       });
 
   }else {
     updateOutStock(form.value).then(response => {
       proxy.$modal.msgSuccess("修改成功");
-       getList();
-    })
+     })
   }
   router.push("/outAddManage/outStock");
 }
@@ -694,6 +678,7 @@ function BatchCanbeSelected(row){
           }
     }
   })
+
 }
 //点击选择批次库位
 function SelectOutStockPosition(row){
@@ -702,7 +687,7 @@ function SelectOutStockPosition(row){
 
 
   form.value.orderPlanProductsList.outStockProduct = row
-  console.log(row)
+  // console.log(row)
   if(row.planId == null){
     tempProduct.value = row
     tempProduct.value.availableNumber = row.availableNumber
@@ -711,40 +696,43 @@ function SelectOutStockPosition(row){
   }
   selectPosition()
 
-  form.value.orderPlanProductsList.outStockProduct.batchPositionList = [{}]
+  form.value.orderPlanProductsList.outStockProduct.batchPositionList = [{
+    productCode : tempProduct.value.productCode,
+    productName : tempProduct.value.productName
+  }]
 }
 
 // 采购订单多选框选中数据（单选）
 function handleOrderSelectionChange(data) {
-    orderSelection.value = Array.from(data);
 
-    console.log(orderSelection.value)
+  // alert("sw")
+    salesOrderSelection.value = Array.from(data);
 
-  if(orderSelection.value.length > 1){
+    console.log(salesOrderSelection.value)
+
+  if(salesOrderSelection.value.length > 1){
     return "只能选择一条订单出库"
   }
-  // orderIds.value = orderSelection.value.map(item => item.planId);
+  // orderIds.value = salesOrderSelection.value.map(item => item.planId);
 
-  multiple.value = !orderSelection.value.length;
+  multiple.value = !salesOrderSelection.value.length;
 
-  console.log("选中销售订单")
-   orderSelection.value.forEach(item=>{
-     selectedOrder.value = item
-     form.value.warehouse = item.warehouse
-     form.value.warehouseId = item.warehouseId
-     orderPlanProductsList.value = item.productList
+  // console.log("选中销售订单")
+   salesOrderSelection.value.forEach(item=>{
+      getSales(item.salesOrderId).then(response =>{
+
+       form.value.warehouse = response.data.warehouse;
+       form.value.warehouseId = response.data.warehouseId;
+       form.value.orderPlanProductsList = response.data.saleProductsList;
+       console.log(form.value.orderPlanProductsList )
+     })
    });
-
-  console.log(orderPlanProductsList.value)
-
-  // selectPosition(form.value.warehouseId)
 }
 
 function formatBatchPosition(row) {
   const batchPositionList = row.batchPositionList
   if (Array.isArray(batchPositionList) && batchPositionList.length > 0) {
     const formattedList = batchPositionList.map(item => {
-      console.log(item)
       const selectedLabels = [];
 
       if (item != null) {
@@ -863,7 +851,6 @@ function addProductBatchRow() {
     positionId: '',
     positionName: '',
     warehouseName: '',
-    batch: '' // 你可能需要根据需要初始化其他属性
   };
 
   // 将新的空对象添加到数组中
@@ -880,13 +867,13 @@ function getReturnBatchPosition(){
     row.positionId = row.selectValue[1];
 
     const foundWarehouse =  PositionOptions.value.find(option => option.id === row.warehouseId);
-    console.log(foundWarehouse)
+    // console.log(foundWarehouse)
      row.warehouseName = foundWarehouse.label
     const foundPosition = foundWarehouse.children.find(child => child.id === row.positionId);
-    console.log(foundPosition)
+    // console.log(foundPosition)
      row.positionName = foundPosition.label.replace(/\(库存: \d+\)/, '');
 
-    console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
+    // console.log("仓库库位："+row.warehouseName+"-"+row.positionName)
   });
 
 
@@ -901,11 +888,11 @@ function addOrUpdate(){
   if(outStockId.value == null){
     alert("新增")
   }else{
-    alert("修改")
+    alert("修改xiaos")
     getOutStock(outStockId.value).then(response => {
       form.value = response.data;
-      orderSelection.value = form.value.orderSelection;
-      orderPlanProductsList.value = form.value.orderPlanProductsList;
+      salesOrderSelection.value = form.value.salesOrderSelection;
+      // form.value.orderPlanProductsList = form.value.orderPlanProductsList;
     });
   }
 }
@@ -934,11 +921,7 @@ getWarehouseTree()
   margin-left: 200px;
   /*max-width: calc(100% - 300px);*/
 }
-.productAddDetailTable{
-  background : #eef1f6;
-  color: #606266
-  /*:header-cell-style = "{background:'#eef1f6',color:'#606266'}"*/
-}
+
 
 .tab-top-centent{
   width: 100%;

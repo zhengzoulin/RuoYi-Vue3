@@ -9,7 +9,7 @@
         <template #default="scope">
           <span
               style="color: rgba(40,177,232,0.72); ;  font-size: 12px;font-weight: bold;"
-              @click="handleBomDetailClick(scope.row)"
+              @click="handleSalesDetailClick(scope.row)"
           >
             {{ scope.row.salesOrderCode }}
           </span>
@@ -79,11 +79,14 @@
 
 import {getOrderAuditRecord} from "../../../api/erp/order";
 
+const router = useRouter();
+const route = useRoute();
 const tooltipAuditContent = ref({})
 
 // 接收父组件传递过来的值
 import {defineEmits, defineProps} from "vue";
 import {getAuditRecord} from "../../../api/erp/bom";
+import {useRoute, useRouter} from "vue-router";
 
 const props = defineProps({
   salesList:{
@@ -165,11 +168,13 @@ function OrderProgress(status) {
     return '已结束'
   }
 }
-function handlePlanDetailClick(row){
+
+
+function handleSalesDetailClick(row){
 
   router.push({
-    path:'/produce/plan/planDetail',
-    query:{planId : row.planId}
+    path:'/salesManage/sales/salesDetail',
+    query:{salesOrderId: row.salesOrderId}
   });
 }
 </script>

@@ -68,16 +68,16 @@ export const constantRoutes = [
         meta: { title: '首页', icon: 'dashboard', affix: true }
       },
       {
-        path: '/purchaseManage/order',
-        name: 'Order',
-        component: () => import('@/views/erp/purchaseManage/order'),
-        meta: { title: '采购管理', icon: 'dashboard', affix: true }
-      },
-      {
         path: '/purchaseManage/order/addOrder',
         component: () => import('@/views/erp/purchaseManage/order/addOrder'),
         hidden: true,
         meta: { title: '新增采购订单', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/purchaseManage/order/purchaseOrderShow',
+        component: () => import('@/views/erp/purchaseManage/order/purchaseOrderShow'),
+        hidden: true,
+        meta: { title: '采购订单详情', icon: 'dashboard', affix: true }
       },
       {
         path: '/bom',
@@ -165,6 +165,12 @@ export const constantRoutes = [
         component: () => import('@/views/erp/salesManage/sales/addSales'),
         hidden: true,
         meta: { title: '新增销售订单', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/salesManage/sales/salesDetail',
+        component: () => import('@/views/erp/salesManage/sales/salesDetail'),
+        hidden: true,
+        meta: { title: '销售订单详情', icon: 'dashboard', affix: true }
       },
 
 

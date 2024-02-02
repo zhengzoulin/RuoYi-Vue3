@@ -118,7 +118,7 @@
         <a
             href="#"
             style="color: rgba(40,177,232,0.83); text-decoration: underline;"
-            @click="handleoutStockDetailClick(scope.row)"
+            @click="handleOutStockDetailClick(scope.row)"
         >
           {{ scope.row.outStockCode }}
         </a>
@@ -345,7 +345,6 @@
                       :data="form.orderProductsList"
                       :rules="rules"
                       height="350"
-                      class="productAddDetailTable"
                       style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
                       @cell-click="tabClick">
 
@@ -830,12 +829,17 @@ function handSalesOutOrder(){
 function handleUpdate(row) {
   reset();
   // openAddOrderStock.value = true;
-  const outStockId = row.outStockId || ids.value
-  const outStockType = row.outStockType
 
-  if(outStockType == "销售出库"){
+  let dataRow = {}
+  selection.value.forEach(row =>{
+    dataRow = row;
+  })
+
+  const outStockId = row.outStockId || ids.value
+  const outStockType = row.addStockType || dataRow.outStockType
+  if(outStockType === "销售出库"){
     router.push({
-      path:'/outAddManage/outStock/purchaseOutStock',
+      path:'/outAddManage/outStock/salesOutStock',
       query:{outStockId : outStockId}
     });
   }else{
@@ -1107,7 +1111,7 @@ function subMitOutStockList(){
 }
 
 
-function handleoutStockDetailClick(row){
+function handleOutStockDetailClick(row){
 
   reset();
   openAddOrderStock.value = true;
@@ -1145,6 +1149,8 @@ function outStockAuditStatus(auditId) {
 const showAuditTooltip = (row) => {
   // 生成tooltip的内容，可以根据rowData的信息来设置tooltip内容
   if(row.auditId == 0){
+    tooltipAuditContent.value= {}
+
     return;
   }
   getOrderAuditRecord(row.outStockId).then(response=>{
@@ -1277,11 +1283,7 @@ getList();
   margin-left: 200px;
   /*max-width: calc(100% - 300px);*/
 }
-.productAddDetailTable{
-  background : #eef1f6;
-  color: #606266
-  /*:header-cell-style = "{background:'#eef1f6',color:'#606266'}"*/
-}
+
 
 .tab-top-centent{
   width: 100%;
