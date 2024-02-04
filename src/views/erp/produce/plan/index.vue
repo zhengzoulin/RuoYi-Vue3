@@ -49,6 +49,19 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="日期" v-if="!showQuery">
+        <el-date-picker
+            v-model="queryParams.timeRange"
+            type="daterange"
+            unlink-panels
+            range-separator="To"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            format="YYYY/MM/DD"
+            value-format="YYYY-MM-DD"
+            ref="queryRef"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -554,7 +567,8 @@ th {
 
 
 .custom-form .el-form-item {
-  margin-bottom: 12px; /* 调整表单项之间的间距 */
+  margin-bottom: 14px; /* 调整表单项之间的间距 */
+  padding-right: 10px;
 }
 
 .custom-form .el-form-item .el-input {
@@ -565,11 +579,10 @@ th {
   font-size: 12px; /* 调整按钮中的字体大小 */
   padding-top: 6px; /* 调整按钮的内边距 */
   padding-bottom: 6px; /* 调整按钮的内边距 */
-  margin-right: 8px; /* 调整按钮之间的间距 */
-}
+ }
 .custom-form .el-form-item .el-form-item__label {
   max-width: 100px; /* 设置 label 的最大宽度 */
-  overflow: hidden;
+  /*overflow: hidden;*/
   text-overflow: ellipsis; /* 超出部分显示省略号 */
   white-space: nowrap; /* 不换行 */
 }

@@ -42,13 +42,18 @@
               @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="订单交货日期" prop="salesOrderTime" v-show="!showQuery">
-          <el-date-picker clearable
-                          v-model="queryParams.salesOrderTime"
-                          type="date"
-                          value-format="YYYY-MM-DD"
-                          placeholder="请选择订单交货日期">
-          </el-date-picker>
+        <el-form-item label="交货日期" v-if="!showQuery">
+          <el-date-picker
+              v-model="queryParams.timeRange"
+              type="daterange"
+              unlink-panels
+              range-separator="To"
+              start-placeholder="Start date"
+              end-placeholder="End date"
+              format="YYYY/MM/DD"
+              value-format="YYYY-MM-DD"
+              ref="queryRef"
+          />
         </el-form-item>
         <el-form-item label="订单审核状态" prop="auditId" v-show="!showQuery">
           <el-input
@@ -149,8 +154,6 @@
         @handleSelectionChange="handleSelectionChange"
         @handleUpdate="handleUpdate"
         @handleDelete="handleDelete"
-
-
     />
 
     <!-- 添加或修改销售订单管理对话框 -->
@@ -468,6 +471,7 @@ getWarehouseTree()
 getUnitList();
 getList();
 </script>
+
 <style>
 .custom-form .el-form-item {
   margin-bottom: 12px; /* 调整表单项之间的间距 */
@@ -481,10 +485,9 @@ getList();
   font-size: 12px; /* 调整按钮中的字体大小 */
   padding-top: 6px; /* 调整按钮的内边距 */
   padding-bottom: 6px; /* 调整按钮的内边距 */
-  margin-right: 8px; /* 调整按钮之间的间距 */
-}
+ }
 .custom-form .el-form-item .el-form-item__label {
-  max-width: 100px; /* 设置 label 的最大宽度 */
+  max-width: 80px; /* 设置 label 的最大宽度 */
   overflow: hidden;
   text-overflow: ellipsis; /* 超出部分显示省略号 */
   white-space: nowrap; /* 不换行 */

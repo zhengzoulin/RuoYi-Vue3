@@ -41,6 +41,19 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="日期" v-if="!showQuery">
+        <el-date-picker
+            v-model="queryParams.timeRange"
+            type="daterange"
+            unlink-panels
+            range-separator="To"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            format="YYYY/MM/DD"
+            value-format="YYYY-MM-DD"
+            ref="queryRef"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>

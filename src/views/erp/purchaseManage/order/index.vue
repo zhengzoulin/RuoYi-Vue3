@@ -1,9 +1,17 @@
 <template>
   <div class="app-container">
 
-
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="订单编号" prop="purchaseOrderCode">
+    <el-row>
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch"  class="custom-form">
+      <el-form-item  prop="keyWord" v-if="showQuery">
+        <el-input
+            v-model="queryParams.keyWord"
+            placeholder="请输入关键字"
+            clearable
+            @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="订单编号" prop="purchaseOrderCode" v-if="!showQuery">
         <el-input
           v-model="queryParams.purchaseOrderCode"
           placeholder="请输入订单编号"
@@ -11,80 +19,101 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="单据名称" prop="purchaseOrderName">
+      <el-form-item label="单据名称" prop="purchaseOrderName" v-if="!showQuery">
         <el-input
           v-model="queryParams.purchaseOrderName"
           placeholder="请输入单据名称"
           clearable
           @keyup.enter="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="制单人" prop="user">
-        <el-input
-            v-model="queryParams.userName"
-            placeholder="请输入制单人"
-            clearable
-            @keyup.enter="handleQuery"
-        />
+      </el-form-item >
+      <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
+        <el-select v-model="queryParams.createBy"  placeholder="请选择">
+          <el-option
+              v-for="item in userOptions"
+              :key="item.userId"
+              :label="item.userName"
+              :value="item.userId"
+              :disabled="item.status == 1"
+              style="width: 140px;"
+          ></el-option>
+        </el-select>
       </el-form-item>
 
-      <el-form-item label="审核状态" prop="auditStatus">
-        <el-input
-          v-model="queryParams.auditStatus"
-          placeholder="审核状态"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+      <el-form-item label="审核状态" prop="auditId" v-if="!showQuery">
+        <el-select
+            v-model="queryParams.auditId"
+            placeholder="请选择审核状态"
+            clearable
+        >
+          <el-option label="未审核" value="0"></el-option>
+          <el-option label="审核通过" value="1"></el-option>
+          <el-option label="审核未通过" value="2"></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item label="订单进度" prop="orderProgress">
-        <el-input
+      <el-form-item label="订单进度" prop="orderProgress" v-if="!showQuery">
+        <el-select
             v-model="queryParams.orderProgress"
-            placeholder="请输入订单进度"
+            placeholder="请选择订单进度"
             clearable
-            @keyup.enter="handleQuery"
-        />
+        >
+          <el-option label="未开始" value="未开始"></el-option>
+          <el-option label="待入库" value="待入库"></el-option>
+          <el-option label="已入库" value="已入库"></el-option>
+        </el-select>
       </el-form-item>
 
-      <el-form-item label="选择目标仓库" prop="warehouseName">
+      <el-form-item label="目标仓库" prop="warehouseName" v-if="!showQuery">
         <el-tree-select
             v-model="queryParams.warehouseId"
             :data="warehouseOptions"
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
-            @change="handleChange"
         />
       </el-form-item>
-      <el-form-item label="订单交货日期" prop="purchaseOrderTime">
-        <el-date-picker clearable
-          v-model="queryParams.purchaseOrderTime"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择订单交货日期">
-        </el-date-picker>
+      <el-form-item label="日期" v-if="!showQuery">
+        <el-date-picker
+            v-model="queryParams.purchaseTimeRange"
+            type="daterange"
+            unlink-panels
+            range-separator="To"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            format="YYYY/MM/DD"
+            value-format="YYYY-MM-DD"
+            ref="queryRef"
+         />
       </el-form-item>
-      <el-form-item label="订单支付状态" prop="paymentStatus">
-        <el-input
-          v-model="queryParams.paymentStatus"
-          placeholder="请输入订单支付状态id"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+<!--      <el-form-item label="支付状态" prop="paymentStatus" v-if="!showQuery">-->
+<!--        <el-input-->
+<!--          v-model="queryParams.paymentStatus"-->
+<!--          placeholder="请输入订单支付状态id"-->
+<!--          clearable-->
+<!--          @keyup.enter="handleQuery"-->
+<!--        />-->
+<!--      </el-form-item>-->
+      <el-form-item label="供应商" prop="unitName" v-if="!showQuery">
+        <el-select v-model="queryParams.unitId"  placeholder="请选择">
+          <el-option
+              v-for="item in unitOptions"
+              :key="item.unitId"
+              :label="item.unitName"
+              :value="item.unitId"
+              :disabled="item.status == 1"
+              style="width: 140px;"
+          ></el-option>
+        </el-select>
       </el-form-item>
 
-      <el-form-item label="采购订单总金额" prop="purchaseAllAmount">
-        <el-input
-          v-model="queryParams.purchaseAllAmount"
-          placeholder="请输入采购订单总金额"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
+
       </el-form-item>
     </el-form>
+    </el-row>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
@@ -508,6 +537,7 @@ import AuditDialog from "../../../../components/zerp/public/auditDialog";
 import ProductDetail from "../../productManage/product/productDetail";
 import OrderTable from "./orderTable";
 import {useRoute, useRouter} from "vue-router";
+import {listUser} from "../../../../api/system/user";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -524,9 +554,12 @@ const openAudit = ref(false);
 
 const warehouseOptions = ref([]);
 const unitOptions = ref([]);
+const userOptions =  ref([])
 
 const loading = ref(true);
 const showSearch = ref(true);
+const showQuery = ref(true);
+
 const ids = ref([]);
 const single = ref(true);
 const multiple = ref(true);
@@ -545,7 +578,35 @@ const auditValue = ref("审核")
 const auditDisabled = ref(true);
 const auditAddDTO = ref({})
 const tooltipAuditContent = ref({})
-
+const shortcuts = [
+  {
+    text: 'Last week',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last month',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last 3 months',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+      return [start, end]
+    },
+  },
+]
 
 const data = reactive({
   form: {
@@ -576,6 +637,7 @@ const data = reactive({
       warehouseName: null,
 
     },
+    purchaseTimeRange:[],
     userName:null,
     auditStatus:null,
     purchaseOrderTime: null,
@@ -760,14 +822,18 @@ function formatStatus(status) {
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1;
-  getList();
+     queryParams.value.pageNum = 1;
+    getList();
 }
 
 /** 重置按钮操作 */
 function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
+}
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  proxy.resetForm("queryRef");
 }
 
 // 多选框选中数据
@@ -860,6 +926,12 @@ function getUnitList() {
     unitOptions.value = response.rows;
   });
 }
+/** 查询user列表 */
+function getUserList() {
+  listUser().then(response => {
+    userOptions.value = response.rows;
+  });
+}
 
 //状态显示
 function orderPayStatus(paymentId) {
@@ -937,6 +1009,7 @@ const showAuditTooltip = (row) => {
 
 getList();
 getUnitList();
+getUserList();
 getWarehouseTree();
 </script>
 
@@ -993,5 +1066,31 @@ getWarehouseTree();
 .el-dropdown-order{
   margin-right: 10px;
   display: flex;
+}
+
+
+/*搜素框*/
+.custom-form .el-form-item {
+  margin-bottom: 14px; /* 调整表单项之间的间距 */
+  padding-right: 10px;
+}
+
+.custom-form .el-form-item .el-input {
+  font-size: 12px; /* 调整输入框中的字体大小 */
+}
+
+.custom-form .el-button {
+  font-size: 12px; /* 调整按钮中的字体大小 */
+  padding-top: 6px; /* 调整按钮的内边距 */
+  padding-bottom: 6px; /* 调整按钮的内边距 */
+ }
+.custom-form .el-form-item .el-form-item__label {
+  max-width: 100px; /* 设置 label 的最大宽度 */
+  /*overflow: hidden;*/
+  text-overflow: ellipsis; /* 超出部分显示省略号 */
+  white-space: nowrap; /* 不换行 */
+}
+.custom-form .el-button:last-child {
+  margin-right: 0; /* 最后一个按钮不需要右边距 */
 }
 </style>

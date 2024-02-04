@@ -1,7 +1,16 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="需求编号" prop="demandCode">
+    <el-row>
+      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
+        <el-form-item  prop="bomKey" v-show="showQuery">
+          <el-input
+              v-model="queryParams.bomKey"
+              placeholder="请输入关键字"
+              clearable
+              @keyup.enter="handleQuery"
+          />
+        </el-form-item>
+      <el-form-item label="需求编号" prop="demandCode"  v-show="!showQuery">
         <el-input
           v-model="queryParams.demandCode"
           placeholder="请输入需求编号"
@@ -9,45 +18,79 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="商品id" prop="productId">
+
+        <el-form-item label="需求来源" prop="demandSource" v-show="!showQuery">
+          <el-select
+              v-model="queryParams.demandSource"
+              placeholder="请选择需求来源"
+              clearable
+           >
+            <el-option label="手动添加" value="手动"></el-option>
+            <el-option label="生产补料" value="生产补料"></el-option>
+            <el-option label="销售补料" value="销售补料"></el-option>
+          </el-select>
+        </el-form-item>
+      <el-form-item label="需求状态" prop="demandStatus"  v-show="!showQuery">
+        <el-select
+            v-model="queryParams.demandStatus"
+            placeholder="请选择需求状态"
+            clearable
+        >
+          <el-option label="待处理" value="待处理"></el-option>
+          <el-option label="已处理" value="已处理"></el-option>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="商品编号" prop="productId"  v-show="!showQuery">
         <el-input
-          v-model="queryParams.productId"
-          placeholder="请输入商品id"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.productId"
+            placeholder="请输入商品id"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="所属仓库" prop="warehouseId">
+      <el-form-item label="商品名称" prop="productId"  v-show="!showQuery">
         <el-input
-          v-model="queryParams.warehouseId"
-          placeholder="请输入所属仓库"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.productId"
+            placeholder="请输入商品id"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="采购需求数量" prop="demandNumber">
-        <el-input
-          v-model="queryParams.demandNumber"
-          placeholder="请输入采购需求数量"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="需求来源" prop="demandSource">
-        <el-input
-          v-model="queryParams.demandSource"
-          placeholder="请输入需求来源"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
+      <el-form-item label="所属仓库" prop="warehouseId"  v-show="!showQuery">
+           <el-tree-select
+              v-model="queryParams.warehouseId"
+              :data="warehouseOptions"
+              :props="{ value: 'id', label: 'label', children: 'children' }"
+              value-key="id"
+              placeholder="请选择仓库"
+          />
+       </el-form-item>
+        <el-form-item label="日期" v-if="!showQuery">
+          <el-date-picker
+              v-model="queryParams.timeRange"
+              type="daterange"
+              unlink-panels
+              range-separator="To"
+              start-placeholder="Start date"
+              end-placeholder="End date"
+              format="YYYY/MM/DD"
+              value-format="YYYY-MM-DD"
+              ref="queryRef"
+          />
+        </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
+
       </el-form-item>
     </el-form>
+    </el-row>
 
-    <el-row :gutter="10" class="">
+
+    <el-row :gutter="10" class="operRow">
       <el-col :span="1.5">
         <el-button
           type="primary"
@@ -113,8 +156,16 @@
       <el-table-column label="目标仓库" align="center" prop="warehouse.warehousePath" />
       <el-table-column label="采购需求数量" align="center" prop="demandNumber" />
       <el-table-column label="需求来源" align="center" prop="demandSource" />
-      <el-table-column label="需求状态" align="center" prop="demandStatus" />
-      <el-table-column label="状态" align="center" prop="status" />
+      <el-table-column label="需求状态" align="center" prop="demandStatus" >
+        <template #default="scope">
+          <el-tag :type="{
+            '待处理': 'danger',       // 待处理
+            '已处理': 'success',    // 已处理
+          }[scope.row.demandStatus]"> {{ OrderProgress(scope.row.demandStatus) }} </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="创建日期" align="center" prop="createTime" />
+
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -240,7 +291,7 @@
     <el-dialog :title="title" v-model="openPurchaseCar" width="950px"  append-to-body>
       <el-row class="mb8">
         <div>
-          <span>商品数量： {{calculatePurchaseLength()}}</span>
+          <span>已选商品数量： {{calculatePurchaseLength()}}</span>
           <span style="margin-left: 20px">采购数量： {{calculatePurchaseQuantity()}}</span>
         </div>
       </el-row>
@@ -266,7 +317,7 @@
         </el-table-column>
       </el-table>
       <div style="margin: 10px 10px;padding-left: 85%"  >
-        <el-button type="danger" plain  @click="GoPurchaseOrder">
+        <el-button type="danger" plain  @click="GoPurchaseOrder" :disabled="goPurchaseButton">
           采购选择商品
         </el-button>
       </div>
@@ -306,6 +357,9 @@ const openPurchaseCar = ref((false))
 
 const loading = ref(true);
 const showSearch = ref(true);
+const showQuery = ref(true);
+const goPurchaseButton = ref(true)
+
 const ids = ref([]);
 const productIds = ref([]);
 const productRows = ref([]);
@@ -578,7 +632,10 @@ function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
 }
-
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  proxy.resetForm("queryRef");
+}
 /** 重置商品按钮操作 */
 function resetProductQuery() {
   proxy.resetForm("queryProductRef");
@@ -684,9 +741,22 @@ function handleSelectionChange(selection) {
 /** 多选框选择条数  */
 function handleSelectionCarChange(selection) {
   commitCarLists.value = selection
+  if(commitCarLists.value.length>0){
+    goPurchaseButton.value = false;
+  }else{
+    goPurchaseButton.value = true;
+  }
   console.log(commitCarLists.value)
 }
-
+function OrderProgress(status) {
+  if (status === '待处理') {
+    return '待处理'
+  } else if (status === '已处理') {
+    return '已处理'
+  } else {
+    return '已结束'
+  }
+}
 function addPurchaseList(){
   purchaseCarLists.value = tempCarList.value
 }
@@ -696,14 +766,14 @@ function clickPurchaseCar(){
 }
 function calculatePurchaseQuantity(){
   let priceTotal = 0;
-  purchaseCarLists.value.forEach(row =>{
+  commitCarLists.value.forEach(row =>{
     priceTotal += row.demandNumber * row.product.costPrice;
   })
   return priceTotal
 }
 function calculatePurchaseLength(){
   let size = 0;
-  purchaseCarLists.value.forEach(row =>{
+  commitCarLists.value.forEach(row =>{
     size ++;
   })
   return size;
@@ -765,3 +835,35 @@ function getChildProductList(data){
 getList();
 getWarehouseTree();
 </script>
+
+
+<style scoped>
+
+.custom-form .el-form-item {
+  margin-bottom: 12px; /* 调整表单项之间的间距 */
+}
+
+.custom-form .el-form-item .el-input {
+  font-size: 12px; /* 调整输入框中的字体大小 */
+}
+
+.custom-form .el-button {
+  font-size: 12px; /* 调整按钮中的字体大小 */
+  padding-top: 6px; /* 调整按钮的内边距 */
+  padding-bottom: 6px; /* 调整按钮的内边距 */
+  margin-right: 8px; /* 调整按钮之间的间距 */
+}
+.custom-form .el-form-item .el-form-item__label {
+  max-width: 100px; /* 设置 label 的最大宽度 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出部分显示省略号 */
+  white-space: nowrap; /* 不换行 */
+}
+.custom-form .el-button:last-child {
+  margin-right: 0; /* 最后一个按钮不需要右边距 */
+}
+
+.operRow{
+  margin-top: 10px;
+}
+</style>

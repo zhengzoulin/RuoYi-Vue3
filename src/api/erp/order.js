@@ -52,6 +52,15 @@ export function updateOrder(data) {
   })
 }
 
+// 修改采购订单
+export function updateOrderName(data) {
+  return request({
+    url: '/erp/order/updateOrderName',
+    method: 'post',
+    data: data
+  })
+}
+
 // 删除采购订单
 export function delOrder(purchaseOrderId) {
   return request({

@@ -12,14 +12,7 @@
       <div style="margin-left: 38%">
         <span style="color: #1c84c6;font-size: 25px"> {{ displayTitleText }}</span>
       </div>
-<!--      <div>-->
-<!--        <el-col :span="24" style="position: absolute; top: 0; right: 105px; width: auto;">-->
-<!--          <el-button type="primary" plain  icon="primary" @click="subMitAddStockAndAuditPass">保存并审核通过</el-button>-->
-<!--        </el-col>-->
-<!--        <el-col :span="24"    style="position: absolute; top: 0; right: 20px; width: auto;">-->
-<!--          <el-button type="primary" plain icon="primary" @click="submitForm">保存</el-button>-->
-<!--        </el-col>-->
-<!--      </div>-->
+
     </el-row>
     <el-row :gutter="10" class="mb8" style="border-top: dashed 1.3px rgba(187,199,191,0.35) ; padding: 8px">
       <el-col :span="1.5">
@@ -38,7 +31,7 @@
             plain
             icon="Plus"
             :disabled="isAudited"
-            @click="handleOrderAuditPass"
+            @click="submitOrderAudit(1)"
             v-hasPermi="['erp:order:edit']"
         >审核通过</el-button>
       </el-col>
@@ -48,7 +41,7 @@
             plain
             icon="Delete"
             :disabled="isAudited"
-            @click="handleOrderAuditNotPass"
+            @click="submitOrderAudit(2)"
             v-hasPermi="['erp:order:remove']"
         >审核不通过</el-button>
       </el-col>
@@ -69,11 +62,11 @@
       </span>
       </el-row>
 
-        <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" v-show="orderDetailFormShow">
+        <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" v-show="orderDetailFormShow" width="900px">
           <el-descriptions-item label="订单编号"  label-align="center">{{form.purchaseOrderCode}}</el-descriptions-item>
           <el-descriptions-item label="单据名称"  label-align="center">
             <span>{{form.purchaseOrderName}}</span>
-            <el-button link type="primary"  @click=" "  icon="Edit" class="followButton"> </el-button>
+            <el-button link type="primary"  @click="editOrderName"  icon="Edit" class="followButton"> </el-button>
            </el-descriptions-item>
           <el-descriptions-item label="供应商"  label-align="center">{{form.unit.unitName}}</el-descriptions-item>
           <el-descriptions-item label="下单时间"  label-align="center">{{form.createTime}}</el-descriptions-item>
@@ -126,10 +119,10 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="需求数量" prop="demandNumber" >
+        <el-table-column label="需求数量" prop="demandNumber" align="center" >
           <template #default="scope">
             <span>
-              <el-input v-model="scope.row.demandNumber"  type="number" maxlength="26" placeholder="请输入需求" size="mini"  />
+              {{scope.row.demandNumber}}
             </span>
           </template>
         </el-table-column>
@@ -137,11 +130,11 @@
         <el-table-column label="采购价" align="center" prop="costPrice" >
           <template #default="scope">
             <span>
-              <el-input v-model="scope.row.costPrice"  type="number" maxlength="26" placeholder="请输入" size="mini"  />
+             {{ scope.row.costPrice }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="金额" prop="orderMoney" class="select-container">
+        <el-table-column label="金额" prop="orderMoney" class="select-container" align="center">
           <template #default="scope">
             <span>
               <span class="readonly-tree-select">{{ scope.row.orderMoney ? scope.row.orderMoney : '0.00' }}</span>
@@ -151,7 +144,7 @@
         <el-table-column label="备注" prop="remark">
           <template #default="scope">
             <span>
-              <el-input v-model="scope.row.remark" type="text" maxlength="50" placeholder="备注" size="mini"  />
+             {{scope.row.remark }}
             </span>
           </template>
         </el-table-column>
@@ -165,38 +158,19 @@
       </el-table>
     </div>
 
-
-
-
-    <el-dialog :title="title" v-model="openWarehouse" width="500px" append-to-body>
-      <el-form-item label="选择目标仓库" prop="warehouseName">
-        <el-tree-select
-            v-model="form.warehouseId"
-            :data="warehouseOptions"
-            :props="{ value: 'id', label: 'label', children: 'children' }"
-            value-key="id"
-            placeholder="请选择仓库"
-            @change="handleChange"
-        />
-      </el-form-item>
-      <el-button type="primary" @click="nextStep">确 定</el-button>
+    <el-dialog title="修改单据名称" v-model="editNameDialog" width="450px" style="margin-top: 15%">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="单据名称" prop="newOrderName"   >
+          <el-input v-model="newOrderName"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" align="right">
+        <el-button @click="editNameDialog = false" style="margin-right: 0px">取消</el-button>
+        <el-button type="primary" @click="saveName">确定</el-button>
+      </div>
     </el-dialog>
 
-    <!--  商品选择框-->
-    <el-dialog :title="title" v-model="openProduct" width="950px"  append-to-body >
-      <!-- 查看商品详细对话框 -->
-      <el-button style="margin-right: 10px" @click="submitProductList">确 定</el-button>
-      <!--      //第二步:定义form表单-->
-      <ProductTable  :productList="productList"
-                     :productRows="productRows"
-                     @queryProduct="childProductQuery"
-                     @getSelectProduct="getChildProductList"
-                     @getProductDetail="getChildProductDetail"
-      >
 
-      </ProductTable>
-
-    </el-dialog>
   </div>
 </template>
 
@@ -207,7 +181,7 @@ import {AddStockList, updateAddStock} from "../../../../../api/erp/addStock";
 import {warehouseParentTreeSelect} from "../../../../../api/erp/position";
 import {listUnit} from "../../../../../api/erp/unit";
 import {getProduct, listProduct} from "../../../../../api/erp/product";
-import {addOrder, getOrder, updateOrder} from "../../../../../api/erp/order";
+import {addOrder, addOrderAudit, getOrder, updateOrder, updateOrderName} from "../../../../../api/erp/order";
 import {catalogTreeSelect} from "../../../../../api/erp/catalog";
 import {getBom} from "../../../../../api/erp/bom";
 import ProductTable from "../../../../../components/zerp/table/productTable";
@@ -223,6 +197,7 @@ const openWarehouse = ref(false);
 const openProduct = ref(false);
 const orderDetailFormShow = ref(true);
  const openProductDetail = ref(false);
+ const editNameDialog = ref(false)
  const isAudited = ref(false)
 
 const ids = ref([]);
@@ -319,6 +294,8 @@ const data = reactive({
 
 const { queryParams, form, rules ,productForm,queryProductParams} = toRefs(data);
 
+
+
 const displayTitleText = computed(() => {
   if (purchaseOrderId.value == null) {
     return '新增采购订单';
@@ -327,6 +304,27 @@ const displayTitleText = computed(() => {
   }
 });
 
+
+const newOrderName = ref(null)
+function editOrderName(){
+  editNameDialog.value = true;
+  // newOrderName.value =  form.value.purchaseOrderName
+}
+//修改名称
+function saveName(){
+
+  if(newOrderName.value === form.value.purchaseOrderName){
+    editNameDialog.value = false
+  }else{
+    form.value.purchaseOrderName = newOrderName.value
+    updateOrderName(form.value).then(response =>{
+      proxy.$modal.msgSuccess("修改成功");
+    })
+  }
+  editNameDialog.value = false;
+
+  console.log(form.value)
+}
 //提交入库单到后端
 function subMitAddStockList(){
 
@@ -476,6 +474,41 @@ function getCurrentDate() {
   const day = String(currentDate.getDate()).padStart(2, '0');
   form.value.createTime = `${year}-${month}-${day}`;
 }
+
+function handleOrderUpdate(){
+
+  const _purchaseOrderId = form.value.purchaseOrderId
+
+  router.push({
+    path:'/purchaseManage/order/addOrder',
+    query:{purchaseOrderId : _purchaseOrderId}
+  });
+}
+
+//审核订单
+
+//提交审核
+const auditAddDTO = ref({})
+
+function submitOrderAudit(auditType){
+  auditAddDTO.value.auditType = auditType;
+
+  if(auditType == 1){
+  }else{
+  }
+  auditAddDTO.value.orderId = form.value.purchaseOrderId;
+
+  addOrderAudit(auditAddDTO.value).then(response => {
+    proxy.$modal.msgSuccess("审核成功");
+
+    setTimeout(function (){
+      location.reload();
+    },500)
+   })
+
+
+  console.log(auditAddDTO.value)
+}
 //父子件方法********************************************
 
 
@@ -599,8 +632,10 @@ getUnitList();
 /*描述框*/
 
 .my-descriptions {
+
   margin-bottom: 20px !important;
   border-width: 12px !important;
+  width: 90%;
 }
 
 /* 给蒙版添加样式 */
@@ -613,6 +648,10 @@ getUnitList();
   left: 0;
   z-index: 1;
   background-color: rgba(219,238,242,0.3); /* 淡灰色 */
+}
+
+.el-table{
+
 }
 </style>
 

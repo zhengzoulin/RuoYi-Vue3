@@ -2,9 +2,9 @@
   <div class="app-container">
    <el-row>
      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
-         <el-form-item  prop="bomKey" v-show="showQuery">
+         <el-form-item   v-show="showQuery">
            <el-input
-               v-model="queryParams.bomKey"
+               v-model="queryParams.keyWord"
                placeholder="请输入关键字"
                clearable
                @keyup.enter="handleQuery"
@@ -26,46 +26,52 @@
               @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="成品编号" prop="bomProductId" v-show="!showQuery">
+        <el-form-item label="成品编号/名称" prop="bomProductJson" v-show="!showQuery">
           <el-input
-              v-model="queryParams.bomProductId"
-              placeholder="请输入成品编号"
+              v-model="queryParams.bomProductJson"
+              placeholder="请输入成品编号或名称"
               clearable
               @keyup.enter="handleQuery"
           />
         </el-form-item>
-       <el-form-item label="成品商品名称" prop="bomProductId" v-show="!showQuery">
+       <el-form-item label="材料编号/名称" prop="bomMaterialJson" v-show="!showQuery">
          <el-input
-             v-model="queryParams.bomProductId"
-             placeholder="请输入成品编号"
+             v-model="queryParams.bomMaterialJson"
+             placeholder="请输入原材料编号或名称"
              clearable
              @keyup.enter="handleQuery"
          />
        </el-form-item>
-
-       <el-form-item label="品牌名称" prop="bomProductId" v-show="!showQuery">
+       <el-form-item label="品牌名称" prop="bomProductJson" v-show="!showQuery">
          <el-input
-             v-model="queryParams.bomProductId"
-             placeholder="请输入成品编号"
+             v-model="queryParams.bomProductJson"
+             placeholder="请输入品牌名称"
              clearable
              @keyup.enter="handleQuery"
          />
        </el-form-item>
-       <el-form-item label="审核状态" prop="bomProductId" v-show="!showQuery">
-         <el-input
-             v-model="queryParams.bomProductId"
-             placeholder="请输入成品编号"
+       <el-form-item label="审核状态" prop="auditId" v-if="!showQuery">
+         <el-select
+             v-model="queryParams.auditId"
+             placeholder="请选择审核状态"
              clearable
-             @keyup.enter="handleQuery"
-         />
+         >
+           <el-option label="未审核" value="0"></el-option>
+           <el-option label="审核通过" value="1"></el-option>
+           <el-option label="审核未通过" value="2"></el-option>
+         </el-select>
        </el-form-item>
-       <el-form-item label="创建人" prop="bomProductId" v-show="!showQuery">
-         <el-input
-             v-model="queryParams.bomProductId"
-             placeholder="请输入成品编号"
-             clearable
-             @keyup.enter="handleQuery"
-         />
+       <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
+         <el-select v-model="queryParams.createBy"  placeholder="请选择">
+           <el-option
+               v-for="item in userOptions"
+               :key="item.userId"
+               :label="item.userName"
+               :value="item.userId"
+               :disabled="item.status == 1"
+               style="width: 140px;"
+           ></el-option>
+         </el-select>
        </el-form-item>
 
 
@@ -99,7 +105,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-dropdown class="el-dropdown-order" trigger="click"  @command="handleAuditCommand">
-          <el-button type="primary" :disabled="auditDisabled"  style="width: 80px;">
+          <el-button type="primary" :disabled="auditDisabled"  style="width: 90px;">
             审核订单<el-icon class="el-icon--right"><arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
@@ -239,6 +245,7 @@ import AuditDialog from "../../../components/zerp/public/auditDialog";
 import {ref} from "vue";
 import {getAuditRecord} from "../../../api/erp/bom";
 import path from "path";
+import {listUser} from "../../../api/system/user";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -260,11 +267,13 @@ const title = ref("");
 const AuditTitle = ref("");
 const tooltipAuditContent = ref({})
 const auditAddDTO = ref({})
+const userOptions =  ref([])
+
 
 const data = reactive({
   form: {},
   queryParams: {
-    bomKey: null,
+    keyWord: null,
     pageNum: 1,
     pageSize: 10,
     bomCode: null,
@@ -312,7 +321,12 @@ function getList() {
     loading.value = false;
   });
 }
-
+/** 查询user列表 */
+function getUserList() {
+  listUser().then(response => {
+    userOptions.value = response.rows;
+  });
+}
 // 取消按钮
 function cancel() {
   open.value = false;
@@ -495,13 +509,15 @@ const handleAuditCommand = (command) => {
    });
  }
 
+getUserList();
 getList();
 </script>
 
 
 <style>
 .custom-form .el-form-item {
-  margin-bottom: 12px; /* 调整表单项之间的间距 */
+  margin-bottom: 14px; /* 调整表单项之间的间距 */
+  padding-right: 8px;
 }
 
 .custom-form .el-form-item .el-input {
@@ -512,11 +528,10 @@ getList();
   font-size: 12px; /* 调整按钮中的字体大小 */
   padding-top: 6px; /* 调整按钮的内边距 */
   padding-bottom: 6px; /* 调整按钮的内边距 */
-  margin-right: 8px; /* 调整按钮之间的间距 */
-}
+ }
 .custom-form .el-form-item .el-form-item__label {
   max-width: 100px; /* 设置 label 的最大宽度 */
-  overflow: hidden;
+  /*overflow: hidden;*/
   text-overflow: ellipsis; /* 超出部分显示省略号 */
   white-space: nowrap; /* 不换行 */
 }

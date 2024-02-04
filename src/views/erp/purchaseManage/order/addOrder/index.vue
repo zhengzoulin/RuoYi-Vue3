@@ -584,8 +584,16 @@ function addOrUpdate() {
     isShowP.value = demandRows.value;
     demandRows.value = JSON.parse(demandRows.value);
     form.value.demandProductsList = Array.from(demandRows.value);
+    form.value.demandProductsList.forEach(row =>{
+      row.productCode = row.product.productCode
+      row.productName = row.product.productName
+      row.productImage = row.product.productImage
+    })
     loading.value = false;
     form.value.warehouseId = form.value.demandProductsList[0].warehouseId;
+    console.log("xuqiu")
+
+    console.log(form.value.demandProductsList)
   }else if(produceData.value !== null){
     openWarehouse.value = false;
 

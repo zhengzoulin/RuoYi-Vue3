@@ -1,8 +1,6 @@
 <template>
   <div >
 
-
-
     <el-table v-loading="props.loading" :data="props.salesList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="订单编号1" align="center" prop="salesOrderCode" >
