@@ -80,6 +80,12 @@ export const constantRoutes = [
         meta: { title: '采购订单详情', icon: 'dashboard', affix: true }
       },
       {
+        path: '/purchaseManage/purchaseReturn/addAndEditReturnOrder',
+        component: () => import('@/views/erp/purchaseManage/purchaseReturn/addAndEditReturnOrder'),
+        hidden: true,
+        meta: { title: '新增采购退货', icon: 'dashboard', affix: true }
+      },
+      {
         path: '/bom',
         name: 'Bom',
         component: () => import('@/views/erp/bom'),
@@ -142,6 +148,7 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '采购入库', icon: 'dashboard', affix: true }
       },
+
       {
         path: '/outAddManage/outStock',
         name: 'OutStock',
@@ -159,7 +166,12 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '销售出库', icon: 'dashboard', affix: true }
       },
-
+      {
+        path: '/outAddManage/outStock/purchaseReturnOutStock',
+        component: () => import('@/views/erp/outAddManage/outStock/purchaseReturnOutStock'),
+        hidden: true,
+        meta: { title: '采购退货出库', icon: 'dashboard', affix: true }
+      },
       {
         path: '/salesManage/sales/addSales',
         component: () => import('@/views/erp/salesManage/sales/addSales'),
@@ -172,6 +184,7 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '销售订单详情', icon: 'dashboard', affix: true }
       },
+
 
 
     ]

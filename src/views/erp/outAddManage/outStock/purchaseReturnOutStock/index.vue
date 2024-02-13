@@ -23,7 +23,7 @@
       </div>
 
     </el-row>
-    <span > 出库单基本信息
+    <span > 退货出库单基本信息
         <el-button link type="primary" icon="list" @click="orderDetailFormShow = !orderDetailFormShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
     <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
@@ -86,7 +86,7 @@
 
 
     <br>
-    <div style="margin-top: 10px "> <span >销售订单信息 </span>
+    <div style="margin-top: 10px "> <span >采购退货订单信息 </span>
       <el-button
           type="primary"
           plain
@@ -94,18 +94,18 @@
           size="small"
           style="margin-left: 10px;"
           @click="handleSelectOrder"
-      >选择销售订单</el-button>
+      >选择退货订单</el-button>
     </div>
 
     <el-table
-        :data="salesOrderSelection"
+        :data="returnOrderSelection"
         height="220px"
         style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
     >
 
       <el-table-column type="selection" width="55" align="center" />
 
-      <el-table-column label="销售单号" align="center" width="120px" >
+      <el-table-column label="采购退货单号" align="center" width="120px" >
         <template #default="scope">
           <!-- 使用 <a> 标签来包装数据，并添加样式 -->
           <a
@@ -113,21 +113,21 @@
               style="color: rgba(40,177,232,0.83); text-decoration: underline;"
               @click="handleOrderDetailClick(scope.row)"
           >
-            {{ scope.row.salesOrderCode }}
+            {{ scope.row.purchaseOrderReturnCode }}
           </a>
         </template>
       </el-table-column>
 
-      <el-table-column label="单据名称" align="center" prop="salesOrderName"  />
+      <el-table-column label="单据名称" align="center" prop="purchaseOrderReturnName"  />
+      <el-table-column label="采购单号" align="center" prop="purchaseOrderCode"  />
+
       <el-table-column label="创建日期" prop="createTime" align="center"/>
-      <el-table-column label="交货日期" prop="salesOrderTime" align="center"/>
-      <el-table-column label="客户" align="center" prop="unit.unitName"  />
-      <el-table-column label="出货仓库" align="center" prop="warehouse.warehousePath"  />
-      <el-table-column label="订单备注" prop="remark"  align="center"/>
+      <el-table-column label="交货日期" prop="purchaseOrderReturnTime" align="center"/>
+      <el-table-column label="退货订单备注" prop="remark"  align="center"/>
 
     </el-table>
 
-    <div style="margin-top: 10px "> <span >销售出库商品明细 </span>
+    <div style="margin-top: 10px "> <span >退货出库商品明细 </span>
       <el-button
           type="danger"
           plain
@@ -140,8 +140,8 @@
     </div>
 
     <br>
-    <span style="margin-top:50px"> 出库种数：{{form.orderPlanProductsList.length}}   </span>
-    <!--      待领料出库商品明细表格-->
+    <span style="margin-top:50px"> 退货出库种数：{{form.orderPlanProductsList.length}}   </span>
+    <!--      待出库商品明细表格-->
     <el-table
         :data="form.orderPlanProductsList"
         height="350"
@@ -161,20 +161,15 @@
           <span style="display: block;">最小包装数量:{{ scope.row.minpacketNumber }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="销售数量" prop="salesNumber" align="center" class="select-container" width="110px"/>
+      <el-table-column label="退货数量" prop="returnNumber" align="center" class="select-container" width="220px"/>
 
-      <el-table-column label="在库数量" prop="balanceNumber" align="center" class="select-container" width="110px"/>
-      <el-table-column label="占用数量" prop="availableNumber" align="center" width="110px">
-        <template #default="scope">
-          {{scope.row.balanceNumber - scope.row.availableNumber}}
-        </template>
-      </el-table-column>
-      <el-table-column label="可出库数量" prop="availableNumber" align="center" width="110px"/>
+      <el-table-column label="在库数量" prop="balanceNumber" align="center" class="select-container" width="220px"/>
 
-      <el-table-column label="出库数量"   align="center"  >
+
+      <el-table-column label="出库数量"   align="center" width="190px" >
         <template #default="scope">
                   <span>
-                    <el-input-number v-model="scope.row.outStockNumber"  type="number" maxlength="20" placeholder="请输入出库量" size="mini"  />
+                    <el-input v-model="scope.row.outStockNumber"  type="number"  placeholder="请输入出库量" size="mini"  />
                   </span>
         </template>
       </el-table-column>
@@ -194,14 +189,14 @@
     </el-table>
 
 
-    <el-dialog title="选择销售订单" v-model="openSelectOrder"
+    <el-dialog title="选择采购退货订单" v-model="openSelectOrder"
                append-to-body class="dialog-selectOrder">
       <div style="">
         <el-row>
-          <el-form :model="querySalesParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
+          <el-form :model="queryPurchaseReturnParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
             <el-form-item  prop="bomKey" v-show="showQuery">
               <el-input
-                  v-model="querySalesParams.bomKey"
+                  v-model="queryPurchaseReturnParams.bomKey"
                   placeholder="请输入关键字"
                   clearable
                   @keyup.enter="handleQuery"
@@ -209,7 +204,7 @@
             </el-form-item>
             <el-form-item label="订单编号" prop="salesOrderCode" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.salesOrderCode"
+                  v-model="queryPurchaseReturnParams.salesOrderCode"
                   placeholder="请输入订单编号"
                   clearable
                   @keyup.enter="handleQuery"
@@ -217,7 +212,7 @@
             </el-form-item>
             <el-form-item label="单据名称" prop="salesOrderName" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.salesOrderName"
+                  v-model="queryPurchaseReturnParams.salesOrderName"
                   placeholder="请输入单据名称"
                   clearable
                   @keyup.enter="handleQuery"
@@ -225,7 +220,7 @@
             </el-form-item>
             <el-form-item label="客户信息" prop="unit" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.unit"
+                  v-model="queryPurchaseReturnParams.unit"
                   placeholder="请输入客户信息"
                   clearable
                   @keyup.enter="handleQuery"
@@ -233,7 +228,7 @@
             </el-form-item>
             <el-form-item label="所属仓库" prop="warehouseId" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.warehouseId"
+                  v-model="queryPurchaseReturnParams.warehouseId"
                   placeholder="请输入所属仓库"
                   clearable
                   @keyup.enter="handleQuery"
@@ -241,7 +236,7 @@
             </el-form-item>
             <el-form-item label="订单交货日期" prop="salesOrderTime" v-show="!showQuery">
               <el-date-picker clearable
-                              v-model="querySalesParams.salesOrderTime"
+                              v-model="queryPurchaseReturnParams.salesOrderTime"
                               type="date"
                               value-format="YYYY-MM-DD"
                               placeholder="请选择订单交货日期">
@@ -249,7 +244,7 @@
             </el-form-item>
             <el-form-item label="订单审核状态" prop="auditId" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.auditId"
+                  v-model="queryPurchaseReturnParams.auditId"
                   placeholder="请输入订单审核状态"
                   clearable
                   @keyup.enter="handleQuery"
@@ -257,7 +252,7 @@
             </el-form-item>
             <el-form-item label="订单进度(0待出库，1已出库)" prop="orderProgress" v-show="!showQuery">
               <el-input
-                  v-model="querySalesParams.orderProgress"
+                  v-model="queryPurchaseReturnParams.orderProgress"
                   placeholder="请输入订单进度(0待出库，1已出库)"
                   clearable
                   @keyup.enter="handleQuery"
@@ -272,14 +267,20 @@
           </el-form>
 
         </el-row>
-        <sales-order-table
-            :salesList = "salesList"
+
+        <return-order-table
             :total="total"
             :loading="loading"
             :queryParams="queryParams"
+            :orderList="returnOrderList"
+            :single="single"
+            :tooltipAuditContent="tooltipAuditContent"
             @handleSelectionChange="handleOrderSelectionChange"
+            @handleOrderDetailClick="handleOrderDetailClick"
+            @showAuditTooltip="showAuditTooltip"
+            @handleUpdate="handleUpdate"
         />
-        <div style="padding-top: 10px; margin-bottom: 10px; display: flex; justify-content: flex-end;">
+         <div style="padding-top: 10px; margin-bottom: 10px; display: flex; justify-content: flex-end;">
           <el-button type="primary"   style="width: 60px;">
             取消
           </el-button>
@@ -424,10 +425,10 @@ import {listUnit} from "../../../../../api/erp/customer";
 import {getProductBatchNumberList, getWarehousePosition, warehouseTreeSelect} from "../../../../../api/erp/position";
 import {getOrderAuditRecord, listOrder} from "../../../../../api/erp/order";
 import {listPlan} from "../../../../../api/erp/plan";
-import SalesOrderTable from "../../../../../components/zerp/table/salesOrderTable";
 
 import {getSales, listSales} from "../../../../../api/erp/sales";
-
+import {getPurchaseReturn, listPurchaseReturn} from "../../../../../api/erp/purchaseReturn";
+import ReturnOrderTable from "../../../purchaseManage/purchaseReturn/returnOrderTable";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -452,8 +453,8 @@ const warehouseOptions = ref(undefined);
 const orderList = ref([]);
 const tooltipAuditContent = ref({})
 const PositionOptions = ref([])
-const salesList = ref([]);
-const salesOrderSelection = ref();
+const returnOrderList = ref([]);
+const returnOrderSelection = ref();
 const total = ref(0);
 
 
@@ -464,7 +465,7 @@ const productBatchNumbers = ref([])
 const data = reactive({
   form: ref( {
 
-    outStockType: "销售出库",
+    outStockType: "采购退货出库",
     outStockCode:null,
     outStockName:null,
     unit: {
@@ -500,7 +501,7 @@ const data = reactive({
     auditId: null,
     status: null,
   },
-  querySalesParams: {
+  queryPurchaseReturnParams: {
     pageNum: 1,
     pageSize: 10,
     auditId: 1,
@@ -533,7 +534,7 @@ const data = reactive({
     ],
   }
 });
-const { queryParams, form,querySalesParams, rules } = toRefs(data);
+const { queryParams, form,queryPurchaseReturnParams, rules } = toRefs(data);
 
 
 const validateMaxNumber = (rule, value, callback) => {
@@ -546,7 +547,7 @@ const validateMaxNumber = (rule, value, callback) => {
 };
 const displayTitleText = computed(() => {
   if (outStockId.value == null) {
-    return '新增销售出库单';
+    return '新增采购退货出库单';
   } else {
     return '修改销售出库单';
   }
@@ -564,13 +565,13 @@ function getWarehouseTree() {
   });
 };
 /** 查询生产管理列表 */
-function getSalesOrderList() {
+function purchaseReturnList() {
   loading.value = true;
-  querySalesParams.value.auditId="1"
-  querySalesParams.value.orderProgress="1"
+  queryPurchaseReturnParams.value.auditId="1"
+  queryPurchaseReturnParams.value.orderProgress="returnOrderList"
 
-  listSales(querySalesParams.value).then(response => {
-    salesList.value = response.rows;
+  listSales(queryPurchaseReturnParams.value).then(response => {
+    returnOrderList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -608,7 +609,7 @@ function returnOutStock(){
 //提交出库单到后端
 function subMitOutStockList(){
   // form.value orderPlanProductsList
-  form.value.salesOrderSelection = salesOrderSelection.value;
+  form.value.returnOrderSelection = returnOrderSelection.value;
   // form.value.orderPlanProductsList = orderPlanProductsList.value
 
   console.log(form.value)
@@ -626,8 +627,8 @@ function subMitOutStockList(){
 }
 /** 搜索按钮操作 */
 function handleQuery() {
-  querySalesParams.value.pageNum = 1;
-  getSalesOrderList();
+  queryPurchaseReturnParams.value.pageNum = 1;
+  getPurchaseReturnOrderList();
 }
 
 /** 重置按钮操作 */
@@ -654,7 +655,19 @@ function selectedOrderList(){
 
 function handleSelectOrder(){
   openSelectOrder.value = true;
-  getSalesOrderList()
+  getPurchaseReturnOrderList()
+}
+/** 查询退货订单管理列表 */
+function getPurchaseReturnOrderList() {
+  loading.value = true;
+  queryPurchaseReturnParams.value.auditId="1"
+  queryPurchaseReturnParams.value.orderProgress="待出库"
+
+  listPurchaseReturn(queryPurchaseReturnParams.value).then(response => {
+    returnOrderList.value = response.rows;
+    total.value = response.total;
+    loading.value = false;
+  });
 }
 /** 查询采购订单列表 */
 
@@ -719,26 +732,24 @@ function SelectOutStockPosition(row){
 // 采购订单多选框选中数据（单选）
 function handleOrderSelectionChange(data) {
 
-  // alert("sw")
-    salesOrderSelection.value = Array.from(data);
+     returnOrderSelection.value = Array.from(data);
 
-    console.log(salesOrderSelection.value)
+    console.log(returnOrderSelection.value)
 
-  if(salesOrderSelection.value.length > 1){
+  if(returnOrderSelection.value.length > 1){
     return "只能选择一条订单出库"
   }
-  // orderIds.value = salesOrderSelection.value.map(item => item.planId);
-
-  multiple.value = !salesOrderSelection.value.length;
+ 
+  multiple.value = !returnOrderSelection.value.length;
 
   // console.log("选中销售订单")
-   salesOrderSelection.value.forEach(item=>{
-      getSales(item.salesOrderId).then(response =>{
+   returnOrderSelection.value.forEach(item=>{
+     getPurchaseReturn(item.purchaseOrderReturnId).then(response =>{
 
        form.value.warehouse = response.data.warehouse;
        form.value.warehouseId = response.data.warehouseId;
        form.value.unitId = response.data.unitId
-       form.value.orderPlanProductsList = response.data.saleProductsList;
+       form.value.orderPlanProductsList = response.data.orderProductsList;
        console.log(form.value.orderPlanProductsList )
      })
    });
@@ -848,7 +859,7 @@ const showAuditTooltip = (row) => {
   if(row.auditId == 0){
     return;
   }
-  getOrderAuditRecord(row.outStockId).then(response=>{
+  getOrderAuditRecord(row.purchaseOrderReturnId).then(response=>{
     tooltipAuditContent.value= response.data
 
     tooltipAuditContent.value = '审核人: '+tooltipAuditContent.value.userName +
@@ -906,7 +917,8 @@ function addOrUpdate(){
     alert("修改xiaos")
     getOutStock(outStockId.value).then(response => {
       form.value = response.data;
-      salesOrderSelection.value = form.value.salesOrderSelection;
+      returnOrderSelection.value = form.value.returnOrderSelection;
+      console.log(form.value)
       // form.value.orderPlanProductsList = form.value.orderPlanProductsList;
     });
   }

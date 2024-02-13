@@ -4,7 +4,7 @@
   <div>
     <el-table v-loading="props.loading" :data="props.orderList" :style="props.tableStyle" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center"  />
-      <el-table-column label="订单编号" align="center"  >
+      <el-table-column label="采购退货单号" align="center"  >
         <template #default="scope">
           <!-- 使用 <a> 标签来包装数据，并添加样式 -->
           <a
@@ -12,11 +12,12 @@
               style="color: rgba(40,177,232,0.83); text-decoration: underline;"
               @click="handleOrderDetailClick(scope.row)"
           >
-            {{ scope.row.purchaseOrderCode }}
+            {{ scope.row.purchaseOrderReturnCode }}
           </a>
         </template>
       </el-table-column>
-      <el-table-column label="单据名称" align="center" prop="purchaseOrderName" />
+      <el-table-column label="采购订单单号" align="center" prop="purchaseOrderCode" />
+      <el-table-column label="单据名称" align="center" prop="purchaseOrderReturnName" />
       <el-table-column label="供应商" align="center" prop="unit.unitName" />
       <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
 
@@ -39,32 +40,39 @@
 
         </template>
       </el-table-column>
-      <el-table-column label="订单交货日期" align="center" prop="purchaseOrderTime" width="180">
+      <el-table-column label="订单交货日期" align="center" prop="purchaseOrderReturnTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.purchaseOrderTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.purchaseOrderReturnTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="采购订单总金额" align="center" prop="purchaseAllAmount" />
-      <el-table-column align="center" label="付款状态" prop="paymentId">
-        <template #default="scope">
-          <el-tag :type="{
-            '0': 'info',       // 未审核状态
-            '1': 'success',    // 审核通过状态
-            '2': 'danger'      // 审核未通过状态
-          }[scope.row.paymentId]"> {{ orderPayStatus(scope.row.paymentId) }} </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="订单进度" align="center" prop="orderProgress" />
+      <el-table-column label="退货金额" align="center" prop="purchaseAllAmount" />
+<!--      <el-table-column align="center" label="付款状态" prop="paymentId">-->
+<!--        <template #default="scope">-->
+<!--          <el-tag :type="{-->
+<!--            '0': 'info',       // 未审核状态-->
+<!--            '1': 'success',    // 审核通过状态-->
+<!--            '2': 'danger'      // 审核未通过状态-->
+<!--          }[scope.row.paymentId]"> {{ orderPayStatus(scope.row.paymentId) }} </el-tag>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+      <el-table-column label="进度" align="center" prop="orderProgress" />
 
       <el-table-column label="订单备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" v-if="props.disabledOper">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button :disabled="props.single" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['erp:order:edit']">修改</el-button>
+          <el-button :disabled="props.single" link type="primary" icon="Edit" @click="handleUpdate(scope.row.purchaseOrderReturnId)" v-hasPermi="['erp:order:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['erp:order:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
+    <pagination
+        v-show="props.total>0"
+        :total="props.total"
+        v-model:page="props.queryParams.pageNum"
+        v-model:limit="props.queryParams.pageSize"
+        @pagination="getList"
+    />
   </div>
 
 </template>
@@ -121,9 +129,9 @@ const props = defineProps({
     type:Boolean,
     default: true
   },
-  disabledOper:{
-    type: Boolean,
-    default: true
+  queryParams:{
+    type:Object,
+    default:{}
   }
 })
 
@@ -140,8 +148,8 @@ function handleOrderDetailClick(row){
 function showAuditTooltip(row){
   emit('showAuditTooltip', row)
 }
-function handleUpdate(row){
-  emit('handleUpdate', row)
+function handleUpdate(purchaseOrderReturnId){
+  emit('handleUpdate', purchaseOrderReturnId)
 }
 //-----------------------------------------------------------------------------------------------
 

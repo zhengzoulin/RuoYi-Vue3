@@ -48,7 +48,7 @@
                 style="width: 160px;"
             />
           </el-form-item>
-          <el-form-item label="客户" prop="unitName">
+          <el-form-item label="客户" prop="unitName" >
             <el-select v-model="form.unitId"  placeholder="请选择">
               <el-option
                   v-for="item in unitOptions"

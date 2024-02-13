@@ -72,6 +72,8 @@
               <el-dropdown-item @click="handleAdd">新增出库单</el-dropdown-item>
               <el-dropdown-item @click="handSalesOutOrder">新增销售出库单</el-dropdown-item>
               <el-dropdown-item @click="handlePlanOutOrder">新增生产领料出库单</el-dropdown-item>
+              <el-dropdown-item @click="handlePurchaseReturnOutOrder">新增采购退货出库单</el-dropdown-item>
+
               <el-dropdown-item >新增调拨出库单</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -142,7 +144,7 @@
       <el-table-column label="出库类型" align="center" prop="outStockType" />
       <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
       <el-table-column label="出库日期" align="center" prop="outStockTime" />
-      <el-table-column label="发货方" align="center" prop="unit.unitName" />
+<!--      <el-table-column label="发货方" align="center" prop="unit.unitName" />-->
       <el-table-column label="操作人" align="center" prop="createBy" />
 
       <el-table-column align="center" label="审核状态" prop="auditId">
@@ -836,6 +838,11 @@ function handSalesOutOrder(){
   router.push('/outAddManage/outStock/salesOutStock');
 
 }
+/** 新增采购退货出库单按钮操作 */
+function handlePurchaseReturnOutOrder(){
+  router.push('/outAddManage/outStock/purchaseReturnOutStock');
+}
+
 
 
 /** 修改按钮操作 */
@@ -855,7 +862,13 @@ function handleUpdate(row) {
       path:'/outAddManage/outStock/salesOutStock',
       query:{outStockId : outStockId}
     });
-  }else{
+  }else  if(outStockType === "采购退货出库"){
+    router.push({
+      path:'/outAddManage/outStock/purchaseReturnOutStock',
+      query:{outStockId : outStockId}
+    });
+  }
+  else{
     router.push({
       path:'/outAddManage/outStock/producePlanOutStock',
       query:{outStockId : outStockId}
@@ -1166,13 +1179,28 @@ const showAuditTooltip = (row) => {
 
     return;
   }
-  getOrderAuditRecord(row.outStockId).then(response=>{
-    tooltipAuditContent.value= response.data
+  getOrderAuditRecord(row.outStockId).then(response => {
+    tooltipAuditContent.value = response.data;
 
-    tooltipAuditContent.value = '审核人: '+tooltipAuditContent.value.userName +
-        '  审核时间:'+ tooltipAuditContent.value.createTime +
-        '  备注:'+tooltipAuditContent.value.auditRemark;
-  })
+    // Parse the existing timestamp into a Date object
+    const auditTime = new Date(tooltipAuditContent.value.createTime);
+
+    // Format the date as yyyy-mmdd-hh:mm:ss
+    const formattedAuditTime =
+        auditTime.getFullYear() +
+        '-' + ('0' + (auditTime.getMonth() + 1)).slice(-2) +
+        '-' + ('0' + auditTime.getDate()).slice(-2) +
+        ' ' + ('0' + auditTime.getHours()).slice(-2) +
+        ':' + ('0' + auditTime.getMinutes()).slice(-2) +
+        ':' + ('0' + auditTime.getSeconds()).slice(-2);
+
+    // Update tooltipAuditContent.value with the formatted timestamp
+    tooltipAuditContent.value = '审核人: ' + tooltipAuditContent.value.userName +
+        '  审核时间: ' + formattedAuditTime +
+        '  备注: ' + tooltipAuditContent.value.auditRemark;
+  });
+
+
 };
 // 子组件交互**********************子组件交互**********************************子组件交互
 //审核订单
