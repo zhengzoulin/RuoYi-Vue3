@@ -1125,28 +1125,22 @@ function subMitAddStockList(){
 
 }
 
-
+//查看入库单详情
 function handleAddStockDetailClick(row){
-
   reset();
-  openAddOrderStock.value = true;
-  const _addStockId = row.addStockId
-  getAddStock(_addStockId).then(response => {
-    form.value = response.data;
-    form.value.auditId = response.data.auditId
-    form.value.selectedOrder = []
-    form.value.orderProductsList = [];
-    // productListSize.value=Object.keys(response.data.demandProductsList).length
-    title.value = "订单详情";
 
-    if(response.data.auditId != 0){
-      orderAuditShow.value = true;
-      updateOrderShow.value = true;
-    }else{
-      orderAuditShow.value = false;
-      updateOrderShow.value = false;
-    }
-  });
+  if(row.addStockType === "采购入库"){
+    router.push({
+      path:'/outAddManage/addStock/purchaseAddStock/purchaseAddStockDetail',
+      query:{addStockId : row.addStockId}
+    });
+  }else if(row.addStockType === "生产计划入库"){
+    router.push({
+      path:'/outAddManage/addStock/producePlanAddStock/producePlanAddStockDetail',
+      query:{addStockId : row.addStockId}
+    });
+  }
+
 }
 //状态显示
 function addStockAuditStatus(auditId) {

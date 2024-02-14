@@ -143,10 +143,22 @@ export const constantRoutes = [
         meta: { title: '生产计划入库', icon: 'dashboard', affix: true }
       },
       {
+        path: '/outAddManage/addStock/producePlanAddStock/producePlanAddStockDetail',
+        component: () => import('@/views/erp/outAddManage/addStock/producePlanAddStock/producePlanAddStockDetail'),
+        hidden: true,
+        meta: { title: '生产计划入库', icon: 'dashboard', affix: true }
+      },
+      {
         path: '/outAddManage/addStock/purchaseAddStock',
         component: () => import('@/views/erp/outAddManage/addStock/purchaseAddStock'),
         hidden: true,
         meta: { title: '采购入库', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/outAddManage/addStock/purchaseAddStock/purchaseAddStockDetail',
+        component: () => import('@/views/erp/outAddManage/addStock/purchaseAddStock/purchaseAddStockDetail'),
+        hidden: true,
+        meta: { title: '采购入库详情', icon: 'dashboard', affix: true }
       },
 
       {

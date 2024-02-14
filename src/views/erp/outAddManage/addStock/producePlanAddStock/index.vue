@@ -154,19 +154,6 @@
 
 
     </el-table>
-
-<!--    <div style="margin-top: 10px "> <span >采购入库商品明细 </span>-->
-<!--      <el-button-->
-<!--          type="danger"-->
-<!--          plain-->
-<!--          icon="Plus"-->
-<!--          size="small"-->
-<!--          style="margin-left: 10px;"-->
-<!--          @click="handleAddProduct"-->
-<!--          v-hasPermi="['erp:order:add']"-->
-<!--      >移出明细</el-button>-->
-<!--    </div>-->
-
     <br>
     <span style="margin-top:50px"> 剩余物料种数：{{orderPlanProductsList.length}}   </span>
     <!--      待二次入库商品明细表格-->
