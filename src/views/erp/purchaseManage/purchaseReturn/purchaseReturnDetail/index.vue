@@ -2,7 +2,7 @@
 
   <div class="app-container" v-loading="loading">
     <el-row class="header">
-      <router-link to="/purchaseManage/order">
+      <router-link to="/purchaseManage/purchaseReturn">
         <el-button type="primary"     icon="Back"
                    plain style=" color: #fff;background-color: #909399;
                                   border-color: #909399; font-size: 12px;padding-left: 18px">
@@ -25,26 +25,7 @@
             v-hasPermi="['erp:order:add']"
         >修改</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-            type="primary"
-            plain
-            icon="Plus"
-            :disabled="isAudited"
-            @click="submitOrderAudit(1)"
-            v-hasPermi="['erp:order:edit']"
-        >审核通过</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-            type="danger"
-            plain
-            icon="Delete"
-            :disabled="isAudited"
-            @click="submitOrderAudit(2)"
-            v-hasPermi="['erp:order:remove']"
-        >审核不通过</el-button>
-      </el-col>
+
       <el-col :span="1.5">
         <el-button
             plain
@@ -57,41 +38,65 @@
     </el-row>
     <div >
       <el-row style="  margin-bottom: 20px !important;">
-             <span > 采购订单基本信息
+             <span > 采购退货单基本信息
         <el-button link type="primary" icon="list" @click="orderDetailFormShow = !orderDetailFormShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
       </span>
       </el-row>
 
         <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" v-show="orderDetailFormShow" width="900px">
-          <el-descriptions-item label="订单编号"  label-align="center">{{form.purchaseOrderCode}}</el-descriptions-item>
+          <el-descriptions-item label="退货单号"  label-align="center">{{form.purchaseOrderReturnCode}}</el-descriptions-item>
           <el-descriptions-item label="单据名称"  label-align="center">
-            <span>{{form.purchaseOrderName}}</span>
+            <span>{{form.purchaseOrderReturnName}}</span>
             <el-button link type="primary"  @click="editOrderName"  icon="Edit" class="followButton"> </el-button>
            </el-descriptions-item>
-          <el-descriptions-item label="供应商"  label-align="center">{{form.unit.unitName}}</el-descriptions-item>
-          <el-descriptions-item label="下单时间"  label-align="center">{{form.createTime}}</el-descriptions-item>
-          <el-descriptions-item label="交货日期"  label-align="center">{{form.purchaseOrderTime}}</el-descriptions-item>
-          <el-descriptions-item label="目标仓库"  label-align="center">{{form.warehouse.warehousePath}}</el-descriptions-item>
-          <el-descriptions-item label="入库单数"  label-align="center">{{form.demandProductsList.length}}</el-descriptions-item>
-          <el-descriptions-item label="订单总金额"  label-align="center">{{form.purchaseAllAmount}}</el-descriptions-item>
-          <el-descriptions-item label="创建人"  label-align="center">{{form.createBy}}</el-descriptions-item>
+          <el-descriptions-item label="退货原因"  label-align="center">{{form.outStockType}}</el-descriptions-item>
+          <el-descriptions-item label="创建时间"  label-align="center">{{form.createTime}}</el-descriptions-item>
+          <el-descriptions-item label="退货日期"  label-align="center">{{form.purchaseOrderReturnTime}}</el-descriptions-item>
+          <el-descriptions-item label="所属仓库"  label-align="center">{{form.warehouse.warehousePath}}</el-descriptions-item>
           <el-descriptions-item label="审核人"  label-align="center">{{form.createBy}}</el-descriptions-item>
-
           <el-descriptions-item label="备注"  label-align="center">{{form.remark}}</el-descriptions-item>
-
+          <el-descriptions-item label="供应商"  label-align="center">{{form.unit.unitName}}</el-descriptions-item>
         </el-descriptions>
 
+      <div style="margin-top: 10px "> <span >采购订单信息 </span></div>
 
+      <el-table
+          :data="form.purchaseOrderSelection"
+          height="140px"
+          style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
+      >
+
+        <el-table-column label="#" type="index" width="55" align="center" />
+        <el-table-column label="采购单号" align="center"   >
+          <template #default="scope">
+            <!-- 使用 <a> 标签来包装数据，并添加样式 -->
+            <a
+                href="#"
+                style="color: rgba(40,177,232,0.83); text-decoration: underline;"
+                @click="handleOrderDetailClick(scope.row)"
+            >
+              {{ scope.row.purchaseOrderCode }}
+            </a>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="单据名称" align="center" prop="purchaseOrderName"  />
+        <el-table-column label="创建日期" prop="createTime" align="center"/>
+        <el-table-column label="交货日期" prop="purchaseOrderTime" align="center"/>
+        <!--      <el-table-column label="出货仓库" align="center" prop="warehouse.warehousePath"  />-->
+        <el-table-column label="订单备注" prop="remark"  align="center"/>
+
+      </el-table>
       <el-row>
         <span style="font-size: 16px;margin-bottom: 10px"> 采购订单商品信息 </span>
       </el-row>
 
 
-      <span >采购种数：{{form.demandProductsList.length}}</span>
+      <span >采购种数：{{form.purchaseOrderSelection.length}}</span>
       <span style="margin: 20px">采购总额：{{getPurchaseAllAmount()}}</span>
 
       <el-table v-loading="loading"
-                :data="form.demandProductsList"
+                :data="form.orderProductsList"
                 height="450">
 
         <el-table-column type="index" width="55" align="center" label="#" />
@@ -148,31 +153,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
-            <el-button link type="primary" icon="list" @click="handleDetail(scope.row)" v-hasPermi="['erp:product:edit']">详细</el-button>
-            <el-button link type="danger" icon="delete" @click="removeRow(scope.row)">移除</el-button>
-          </template>
-        </el-table-column>
       </el-table>
     </div>
 
 
     <div id="pdfDom" v-show="loading">
-      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.warehouse.warehousePath}}-采购订单-{{form.purchaseOrderCode}}-{{form.createTime}}</span></el-row>
+      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.purchaseOrderReturnCode}}-采购退货订单-{{form.createTime}}</span></el-row>
 
       <div class="description-container">
         <el-row style="justify-content: center;margin: 10px">   <span > 采购单基本信息</span></el-row>
         <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" v-show="orderDetailFormShow" width="900px">
-          <el-descriptions-item label="订单编号"  label-align="left">{{form.purchaseOrderCode}}</el-descriptions-item>
+          <el-descriptions-item label="订单编号"  label-align="left">{{form.purchaseOrderReturnCode}}</el-descriptions-item>
           <el-descriptions-item label="单据名称"  label-align="left">
-            <span>{{form.purchaseOrderName}}</span>
+            <span>{{form.purchaseOrderReturnName}}</span>
            </el-descriptions-item>
           <el-descriptions-item label="供应商"  label-align="left">{{form.unit.unitName}}</el-descriptions-item>
           <el-descriptions-item label="下单时间"  label-align="left">{{form.createTime}}</el-descriptions-item>
-          <el-descriptions-item label="交货日期"  label-align="left">{{form.purchaseOrderTime}}</el-descriptions-item>
+          <el-descriptions-item label="交货日期"  label-align="left">{{form.purchaseOrderReturnTime}}</el-descriptions-item>
           <el-descriptions-item label="目标仓库"  label-align="left">{{form.warehouse.warehousePath}}</el-descriptions-item>
-          <el-descriptions-item label="入库单数"  label-align="left">{{form.demandProductsList.length}}</el-descriptions-item>
+          <el-descriptions-item label="入库单数"  label-align="left">{{form.purchaseOrderSelection.length}}</el-descriptions-item>
           <el-descriptions-item label="订单总金额"  label-align="left">{{form.purchaseAllAmount}}</el-descriptions-item>
           <el-descriptions-item label="创建人"  label-align="left">{{form.createBy}}</el-descriptions-item>
           <el-descriptions-item label="审核人"  label-align="left">{{form.createBy}}</el-descriptions-item>
@@ -181,23 +180,47 @@
 
         </el-descriptions>
       </div>
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > 采购订单信息</span></el-row>
+
+        <el-table :data="form.purchaseOrderSelection">
+
+          <el-table-column label="#" type="index" width="55" align="center" />
+
+          <el-table-column label="采购订单编号" align="center" prop="purchaseOrderReturnId">
+            <template #default="scope">
+              <!-- 使用 <a> 标签来包装数据，并添加样式 -->
+              <a
+                  href="#"
+                  style="color: rgba(40,177,232,0.83); text-decoration: underline;"
+                  @click="handleOrderDetailClick(scope.row)"
+              >
+                {{ scope.row.purchaseOrderCode }}
+              </a>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="单据名称" align="center" prop="purchaseOrderName"/>
+
+          <el-table-column label="下单日期" prop="createTime" align="center" />
+          <el-table-column label="交货日期" prop="purchaseOrderTime" align="center" />
+
+          <el-table-column label="供应商" align="center" prop="unit.unitName"/>
+          <el-table-column label="备注" prop="remark"/>
+
+        </el-table>
+      </div>
 
       <div class="table-container">
         <el-row style="justify-content: center;margin-top: 10px">   <span > 采购商品信息</span></el-row>
         <el-table
-                  :data="form.demandProductsList">
+            :data="form.orderProductsList">
 
           <el-table-column type="index" width="55" align="center" label="#" />
 
-          <el-table-column label="商品编号" align="center" prop="productCode">
-            <template #default="scope">
-          <span>
-              {{ scope.row.productCode}}
-          </span>
-            </template>
-          </el-table-column>
+          <el-table-column label="商品编号" align="center" prop="productCode" width="120px"/>
 
-          <el-table-column label="商品信息" align="center" width="120px">
+          <el-table-column label="商品信息" align="center" width="140px">
             <template #default="scope">
               <span style="display: block;"> {{ scope.row.productName }}</span>
               <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
@@ -205,51 +228,24 @@
               <span style="display: block;">最小包装数量:{{ scope.row.minpacketNumber }}</span>
             </template>
           </el-table-column>
+          <el-table-column label="采购数量" prop="demandNumber" align="center" class="select-container" width="130px"/>
 
-          <el-table-column label="商品图片" prop="productImage" align="center" >
-            <template  #default="scope" width="90">
-              <ImagePreview style="width:60px;height:60px;" :src="scope.row.productImage" />
-            </template>
-          </el-table-column>
+          <el-table-column label="采购价格" prop="costPrice" align="center" class="select-container" width="130px"/>
+          <el-table-column label="金额" prop="orderMoney" align="center" class="select-container" width="130px"/>
 
-          <el-table-column label="需求数量" prop="demandNumber" align="center" >
+          <el-table-column label="已入库数量" prop="alreadyAddStockNumber" align="center" width="130px"/>
+
+          <el-table-column label="可退货数量" prop="canReturnNumber" align="center" width="130px">
             <template #default="scope">
-            <span>
-              {{scope.row.demandNumber}}
-            </span>
+              <span style="color: red;">{{scope.row.canReturnNumber}}</span>
             </template>
           </el-table-column>
 
-          <el-table-column label="采购价" align="center" prop="costPrice" >
-            <template #default="scope">
-            <span>
-             {{ scope.row.costPrice }}
-            </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="金额" prop="orderMoney" class="select-container" align="center">
-            <template #default="scope">
-            <span>
-              <span class="readonly-tree-select">{{ scope.row.orderMoney ? scope.row.orderMoney : '0.00' }}</span>
-            </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="备注" prop="remark">
-            <template #default="scope">
-            <span>
-             {{scope.row.remark }}
-            </span>
-            </template>
-          </el-table-column>
+          <el-table-column label="退货数量"  prop="canReturnNumber"  align="center" />
 
         </el-table>
       </div>
-
-
-
       </div>
-
-
 
 
     <el-dialog title="修改单据名称" v-model="editNameDialog" width="450px" style="margin-top: 15%">
@@ -280,6 +276,7 @@ import {catalogTreeSelect} from "../../../../../api/erp/catalog";
 import {getBom} from "../../../../../api/erp/bom";
 import ProductTable from "../../../../../components/zerp/table/productTable";
 import htmlToPdf from "../../../../../utils/htmlToPdf";
+import {getPurchaseReturn} from "../../../../../api/erp/purchaseReturn";
 
 const router = useRouter();
 const route = useRoute();
@@ -287,7 +284,7 @@ const { proxy } = getCurrentInstance();
 
 const total = ref(0);
 const title = ref("");
-const loading = ref(true);
+const loading = ref(false);
 const openWarehouse = ref(false);
 const openProduct = ref(false);
 const orderDetailFormShow = ref(true);
@@ -309,7 +306,7 @@ const pdfFunc = () => {
   loading.value = true;
   // 调用htmlToPdf工具函数
   setTimeout(() => {
-    let fileName = form.value.warehouse.warehousePath+'-采购订单-'+form.value.outStockTime
+    let fileName = form.value.purchaseOrderReturnCode+'-采购退货订单-'+form.value.createTime
     htmlToPdf.getPdf(fileName);  }, 100);
   // 定时器模拟按钮loading动画的时间
   setTimeout(() => {
@@ -326,13 +323,13 @@ const data = reactive({
       warehousePath:''
     },
     createTime: "",
-    demandProductsList: ref([]),
+    purchaseOrderSelection: ref([]),
   },
 
   productForm:{},
 
   rules: {
-    purchaseOrderName: [
+    purchaseOrderReturnName: [
       { required: true, message: "单据名称不能为空", trigger: "blur" }
     ]
   }
@@ -343,10 +340,10 @@ const {  form, rules ,productForm} = toRefs(data);
 
 
 const displayTitleText = computed(() => {
-  if (purchaseOrderId.value == null) {
+  if (purchaseOrderReturnId.value == null) {
     return '新增采购订单';
   } else {
-    return '采购订单详情';
+    return '采购退货订单详情';
   }
 });
 
@@ -354,15 +351,15 @@ const displayTitleText = computed(() => {
 const newOrderName = ref(null)
 function editOrderName(){
   editNameDialog.value = true;
-  // newOrderName.value =  form.value.purchaseOrderName
+  // newOrderName.value =  form.value.purchaseOrderReturnName
 }
 //修改名称
 function saveName(){
 
-  if(newOrderName.value === form.value.purchaseOrderName){
+  if(newOrderName.value === form.value.purchaseOrderReturnName){
     editNameDialog.value = false
   }else{
-    form.value.purchaseOrderName = newOrderName.value
+    form.value.purchaseOrderReturnName = newOrderName.value
     updateOrderName(form.value).then(response =>{
       proxy.$modal.msgSuccess("修改成功");
     })
@@ -417,7 +414,7 @@ function getProductList() {
 function submitForm() {
   proxy.$refs["orderRef"].validate(valid => {
     if (valid) {
-      if (form.value.purchaseOrderId != null) {
+      if (form.value.purchaseOrderReturnId != null) {
         updateOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
         });
@@ -448,9 +445,9 @@ function handleDetail(row) {
 const removeRow = (row) => {
   const confirmResult = confirm('确定要移除这一行吗？');
   if (confirmResult) {
-    const index = form.value.demandProductsList.findIndex(item => item.productId === row.productId);
+    const index = form.value.purchaseOrderSelection.findIndex(item => item.productId === row.productId);
     if (index !== -1) {
-      form.value.demandProductsList.splice(index, 1);
+      form.value.purchaseOrderSelection.splice(index, 1);
       alert('成功移除该行');
     } else {
       alert('未找到对应行');
@@ -464,7 +461,7 @@ function submitProductList(){
   // productRows.value = [];
   openProduct.value=false;
   console.log(productRows.value)
-  form.value.demandProductsList = productRows.value
+  form.value.purchaseOrderSelection = productRows.value
 }
 /** 商品搜索按钮操作 */
 function handleProductQuery() {
@@ -490,7 +487,7 @@ function nextStep() {
 //采购总额
 function getPurchaseAllAmount(){
   let price = 0
-  form.value.demandProductsList.forEach(row=>{
+  form.value.purchaseOrderSelection.forEach(row=>{
     row.orderMoney = (row.costPrice * row.demandNumber || 0).toFixed(3);
 
     price += parseFloat(row.orderMoney) || 0;
@@ -513,11 +510,11 @@ function getCurrentDate() {
 
 function handleOrderUpdate(){
 
-  const _purchaseOrderId = form.value.purchaseOrderId
+  const _purchaseOrderReturnId = form.value.purchaseOrderReturnId
 
   router.push({
     path:'/purchaseManage/order/addOrder',
-    query:{purchaseOrderId : _purchaseOrderId}
+    query:{purchaseOrderReturnId : _purchaseOrderReturnId}
   });
 }
 
@@ -532,7 +529,7 @@ function submitOrderAudit(auditType){
   if(auditType == 1){
   }else{
   }
-  auditAddDTO.value.orderId = form.value.purchaseOrderId;
+  auditAddDTO.value.orderId = form.value.purchaseOrderReturnId;
 
   addOrderAudit(auditAddDTO.value).then(response => {
     proxy.$modal.msgSuccess("审核成功");
@@ -565,38 +562,36 @@ function getChildProductDetail(data){
 }
 function getChildProductList(data){
   openProduct.value=false;
-  form.value.demandProductsList = data
+  form.value.purchaseOrderSelection = data
 }
 
 //******************************************************
 function getOrderDetail(){
-  getOrder(purchaseOrderId.value).then(response => {
+  getOrder(purchaseOrderReturnId.value).then(response => {
     form.value = response.data;
-    form.value.demandProductsList =response.data.demandProductsList;
+    form.value.purchaseOrderSelection =response.data.purchaseOrderSelection;
     if(form.value.auditId === "1"){
       isAudited.value = true
     }
-    console.log(form.value.demandProductsList)
+    console.log(form.value.purchaseOrderSelection)
    });
 }
+ 
 // 接收参数
-const isShowP = ref()
-const purchaseOrderId = ref(route.query.purchaseOrderId ? route.query.purchaseOrderId : null);
-
-
-function addOrUpdate() {
-  getCurrentDate();
-  console.log(purchaseOrderId.value);
-
-if (purchaseOrderId.value !== null ) {
-    alert("订单详情")
-    isShowP.value = purchaseOrderId.value;
-    openWarehouse.value = false;
-    loading.value = false;
-    getOrderDetail();
+const purchaseOrderReturnId = ref(route.query.purchaseOrderReturnId);
+function addOrUpdate(){
+  if(purchaseOrderReturnId.value == null){
+    alert("新增")
+  }else{
+    alert("修改xiaos")
+    getPurchaseReturn(purchaseOrderReturnId.value).then(response => {
+      form.value = response.data;
+      if(form.value.auditId !== "0"){
+        isAudited.value = true
+      }
+     });
   }
 }
-
 
 addOrUpdate()
 getWarehouseTree()
@@ -685,9 +680,16 @@ getUnitList();
   z-index: 1;
   background-color: rgba(219,238,242,0.3); /* 淡灰色 */
 }
+.description-container {
+  /* 描述框的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
+}
 
-.el-table{
-
+.table-container {
+  /* 表格的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
 }
 </style>
 

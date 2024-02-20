@@ -1140,24 +1140,23 @@ function subMitOutStockList(){
 function handleOutStockDetailClick(row){
 
   reset();
-  openAddOrderStock.value = true;
-  const _outStockId = row.outStockId
-  getOutStock(_outStockId).then(response => {
-    form.value = response.data;
-    form.value.auditId = response.data.auditId
-    form.value.selectedOrder = []
-    form.value.orderProductsList = [];
-    // productListSize.value=Object.keys(response.data.demandProductsList).length
-    title.value = "订单详情";
+  if(row.outStockType === "生产计划出库"){
+    router.push({
+      path:'/outAddManage/outStock/producePlanOutStock/producePlanOutStockDetail',
+      query:{outStockId : row.outStockId}
+    });
+  }else if(row.outStockType === "销售出库"){
+    router.push({
+      path:'/outAddManage/outStock/salesOutStock/salesOutStockDetail',
+      query:{outStockId : row.outStockId}
+    });
+  }else if(row.outStockType === "采购退货出库"){
+    router.push({
+      path:'/outAddManage/outStock/purchaseReturnOutStock/purchaseReturnOutStockDetail',
+      query:{outStockId : row.outStockId}
+    });
+  }
 
-    if(response.data.auditId != 0){
-      orderAuditShow.value = true;
-      updateOrderShow.value = true;
-    }else{
-      orderAuditShow.value = false;
-      updateOrderShow.value = false;
-    }
-  });
 }
 //状态显示
 function outStockAuditStatus(auditId) {

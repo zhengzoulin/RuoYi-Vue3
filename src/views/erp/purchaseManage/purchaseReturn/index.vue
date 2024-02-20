@@ -391,10 +391,9 @@ function handleOrderDetailClick(row){
   reset();
   // openOrderDetail.value = true;
   const _purchaseOrderReturnId = row.purchaseOrderReturnId
-  alert(_purchaseOrderReturnId)
 
   router.push({
-    path:'/purchaseManage/order/purchaseOrderRetuenShow',
+    path:'/purchaseManage/purchaseReturn/purchaseReturnDetail',
     query:{purchaseOrderReturnId : _purchaseOrderReturnId}
   });
 

@@ -1,7 +1,7 @@
 <template>
 
-  <div class="app-container">
-    <el-row class="header">
+  <div class="app-container" v-loading="loading">
+    <el-row class="header"  >
       <router-link to="/salesManage/sales">
         <el-button type="primary"     icon="Back"
                    plain style=" color: #fff;background-color: #909399;
@@ -48,7 +48,7 @@
             plain
             type="primary"
             icon="Download"
-            @click="handleExport"
+            @click="pdfFunc"
             v-hasPermi="['erp:order:export']"
         >打印</el-button>
       </el-col>
@@ -78,22 +78,10 @@
           {{form.warehouse.warehousePath}}
         </el-descriptions-item>
         <el-descriptions-item label="创建日期" prop="warehouseId"  label-align="center">
-          <el-date-picker clearable
-                          v-model="form.createTime"
-                          type="date"
-                          value-format="YYYY-MM-DD"
-                          placeholder="请选择订单交货日期"
-                          style="height: 40px">
-          </el-date-picker>
+         {{form.createTime}}
         </el-descriptions-item>
         <el-descriptions-item label="交货日期" prop="planTime"  label-align="center">
-          <el-date-picker clearable
-                          v-model="form.salesOrderTime"
-                          type="date"
-                          value-format="YYYY-MM-DD"
-                          placeholder="请选择订单交货日期"
-                          style="height: 40px">
-          </el-date-picker>
+          {{form.salesOrderTime}}
         </el-descriptions-item>
 
 
@@ -104,7 +92,7 @@
       </el-descriptions>
 
       <el-row style="margin-top: 10px">
-        <span > 采购订单商品信息 </span>
+        <span > 销售商品信息 </span>
       </el-row>
 
       <span >出售种数：{{form.saleProductsList.length}}</span>
@@ -118,8 +106,8 @@
                 @cell-click="tabClick"
                 style="font-size: 14px">
 
-        <el-table-column type="selection" width="55"  align="center" />
-        <el-table-column type="index" width="30" align="center"/>
+        <el-table-column label="#" type="index" width="55" align="center" />
+
 
 
 
@@ -195,38 +183,122 @@
       </el-table>
     </div>
 
+    <div id="pdfDom" v-show="loading">
+      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.salesOrderCode}}-销售订单-{{form.createTime}}</span></el-row>
+
+      <div class="description-container">
+        <el-row style="justify-content: center;margin: 10px">   <span > 销售订单基本信息</span></el-row>
+        <el-descriptions border="true" column="3" size="large" class="my-descriptions"  >
+          <el-descriptions-item label="销售编号"  label-align="center">
+            {{form.salesOrderCode }}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="单据名称"  label-align="center">
+            {{form.salesOrderName }}
+            <el-button link type="primary"  icon="Edit"  @click=" " class="followButton"></el-button>
+          </el-descriptions-item>
+
+          <el-descriptions-item label="客户"  label-align="center">
+            {{form.unit.unitName}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="出货仓库"  label-align="center">
+            {{form.warehouse.warehousePath}}
+          </el-descriptions-item>
+          <el-descriptions-item label="创建日期" prop="warehouseId"  label-align="center">
+            {{form.createTime}}
+          </el-descriptions-item>
+          <el-descriptions-item label="交货日期" prop="planTime"  label-align="center">
+            {{form.salesOrderTime}}
+          </el-descriptions-item>
+          <el-descriptions-item label="订单备注"  label-align="center">
+            {{form.remark}}
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > 销售商品信息</span></el-row>
+        <el-table
+                  :data="form.saleProductsList"
+                   :row-style="{ height: '140px'}"
+                  @cell-click="tabClick"
+                  style="font-size: 14px">
+
+          <el-table-column label="#" type="index" width="55" align="center" />
 
 
 
-    <el-dialog :title="title" v-model="openWarehouse" width="500px" append-to-body>
-      <el-form-item label="选择出货仓库" prop="warehouseName">
-        <el-tree-select
-            v-model="form.warehouseId"
-            :data="warehouseOptions"
-            :props="{ value: 'id', label: 'label', children: 'children' }"
-            value-key="id"
-            placeholder="请选择仓库"
-            @change="handleChange"
-        />
-      </el-form-item>
-      <el-button type="primary" @click="nextStep">确 定</el-button>
-    </el-dialog>
+          <el-table-column label="商品编号" width="110" align="center" prop="productCode" >
+            <template #default="scope">
+          <span class="readonly-column-select">
+              {{ scope.row.productCode}}
+          </span>
+            </template>
+          </el-table-column>
 
-    <!--  商品选择框-->
-    <el-dialog :title="title" v-model="openProduct" width="950px"  append-to-body >
-      <!-- 查看商品详细对话框 -->
-      <el-button style="margin-right: 10px" @click="submitProductList">确 定</el-button>
-      <!--      //第二步:定义form表单-->
-      <ProductTable  :productList="productList"
-                     :productRows="productRows"
-                     @queryProduct="childProductQuery"
-                     @getSelectProduct="getChildProductList"
-                     @getProductDetail="getChildProductDetail"
-      >
 
-      </ProductTable>
+          <el-table-column label="商品信息" width="140" align="center"  >
+            <template #default="scope" >
+              <span style="display: block;font-weight: bold;" class="readonly-column-select">{{ scope.row.productName }}</span>
+              <span style="display: block;">目录:{{ scope.row.catalog.catalogName }}</span>
+              <span style="display: block;">规格:{{ scope.row.encapStandard }}</span>
+              <span style="display: block;">型号:{{ scope.row.productModel }}</span>
+              <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="商品在库库存" width="110" align="center" prop="balanceNumber" >
+            <template #default="scope">
+          <span class="readonly-column-select" >
+              {{ scope.row.balanceNumber}}
+          </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="占用库存" align="center" prop="occupiedNumber" >
+            <template #default="scope">
+          <span >
+              {{ scope.row.occupiedNumber}}
+          </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="可用库存"  align="center" prop="availableNumber" >
+            <template #default="scope">
+          <span>
+              {{ scope.row.availableNumber}}
+          </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="出售数量" prop="salesNumber" align="center">
+            <template #default="scope">
+              <span style="color: #ed5565">{{scope.row.salesNumber}}</span>
 
-    </el-dialog>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="单价" align="center" prop="salePrice" >
+            <template #default="scope">
+              <span>{{scope.row.salePrice}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="金额" prop="amountPrice"  >
+            <template #default="scope">
+              <span>{{ scope.row.amountPrice ? scope.row.amountPrice : '0.00' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="备注" prop="remark">
+            <template #default="scope">
+              <span>{{scope.row.remark}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+
+
+    </div>
+
+
+
   </div>
 </template>
 
@@ -242,6 +314,7 @@ import {catalogTreeSelect} from "../../../../../api/erp/catalog";
 import {getBom} from "../../../../../api/erp/bom";
 import ProductTable from "../../../../../components/zerp/table/productTable";
 import {addSales, getInventoryBySales, getSales, updateSales} from "../../../../../api/erp/sales";
+import htmlToPdf from "../../../../../utils/htmlToPdf";
 
 const router = useRouter();
 const route = useRoute();
@@ -264,6 +337,19 @@ const warehouseOptions = ref([]);
 const unitOptions = ref([]);
 const catalogOptions = ref(undefined);
 
+const pdfFunc = () => {
+
+  loading.value = true;
+  // 调用htmlToPdf工具函数
+  setTimeout(() => {
+    let fileName = form.value.salesOrderCode+'-销售订单-'+form.value.createTime
+    htmlToPdf.getPdf(fileName);  }, 100);
+  // 定时器模拟按钮loading动画的时间
+  setTimeout(() => {
+    proxy.$modal.msgSuccess("导出成功");
+    loading.value = false;
+  }, 1000);
+}
 const data = reactive({
   form: ref({
     createTime: "",
@@ -660,9 +746,17 @@ getUnitList();
   margin-right: 10px;
   display: flex;
 }
-.el-table{
 
+.description-container {
+  /* 描述框的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
 }
 
+.table-container {
+  /* 表格的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
+}
 </style>
 

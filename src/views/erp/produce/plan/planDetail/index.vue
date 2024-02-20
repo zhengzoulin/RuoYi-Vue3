@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" v-loading="loading">
     <!-- Header section with buttons -->
     <el-row class="header">
       <router-link to="/produce/plan">
@@ -15,7 +15,7 @@
       </div>
       <div>
         <el-button type="warning" plain @click="handleUpdate">修改</el-button>
-        <el-button type="primary" plain >打印</el-button>
+        <el-button type="primary" plain @click="pdfFunc">导出pdf</el-button>
       </div>
     </el-row>
 
@@ -205,11 +205,139 @@
         @submitBomSelect="submitBomSelect"
     />
 
+    <div id="pdfDom" v-show="loading">
+      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.planCode}}生产计划-{{form.createTime}}</span></el-row>
+
+      <div class="description-container">
+        <el-row style="justify-content: center;margin: 10px">   <span > 生产计划基本信息</span></el-row>
+        <el-descriptions border="true" column="3" size="large" class="my-descriptions"  >
+          <el-descriptions-item label="计划编号"  label-align="left">
+            {{form.planCode }}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="单据名称"  label-align="left">
+            {{form.planName }}
+            <el-button link type="primary"  icon="Edit"  @click=" " class="followButton"></el-button>
+          </el-descriptions-item>
+
+          <el-descriptions-item label="生产线"  label-align="left">
+            {{form.line.lineName}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="目标仓库"  label-align="left">
+            {{form.warehouse.warehousePath}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="计划日期" prop="planTime"  label-align="left">
+            {{form.planTime}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="交货日期" prop="warehouseId"  label-align="left">
+           {{form.planTime}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="订单备注"  label-align="left">
+            {{form.remark}}
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <div class="description-container">
+        <el-row style="justify-content: center;margin: 10px">   <span > 成品信息</span></el-row>
+        <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" >
+          <el-descriptions-item label="成品商品名称"  label-align="left">{{form.productForm.productName}}</el-descriptions-item>
+          <el-descriptions-item label="封装规格"  label-align="left">
+            <span>{{form.productForm.encapStandard}}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="厂家型号"  label-align="left">{{form.productForm.productModel}}</el-descriptions-item>
+          <el-descriptions-item label="成品商品编号"  label-align="left">{{form.productForm.productCode}}</el-descriptions-item>
+          <el-descriptions-item label="包装单位"  label-align="left">{{form.productForm.minpacketUnit}}</el-descriptions-item>
+          <el-descriptions-item label="包装数量"  label-align="left">{{form.productForm.minpacketNumber}}</el-descriptions-item>
+          <el-descriptions-item label="品牌"  label-align="left">{{form.productForm.brand.brandName}}</el-descriptions-item>
+          <el-descriptions-item label="重量"  label-align="left">{{form.productForm.productWeight}}</el-descriptions-item>
+          <el-descriptions-item label="目录"  label-align="left">{{form.createBy}}</el-descriptions-item>
+          <el-descriptions-item label="备注"  label-align="left">{{form.productForm.remark}}</el-descriptions-item>
+          <el-descriptions-item label="套数"  label-align="left">{{form.groupNumber}}</el-descriptions-item>
+
+        </el-descriptions>
+      </div>
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > Bom用料信息</span></el-row>
+        <el-table
+            :data="form.productList"
+             style="width: 100%"
+            :cell-class-name="addSeparate"
+            :header-cell-style="tableHeaderColor"
+        >
+          <el-table-column type="index" width="55" align="center" label="#" />
+          <el-table-column label="编号" align="center" prop="productCode" >
+            <template #default="scope">
+                      <span class="readonly-column-select">
+                          {{ scope.row.productCode}}
+                      </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="商品信息" align="center"  width="140" prop="productName" class="readonly-column-select">
+            <template #default="scope">
+              <span style="display: block;font-family: '微软雅黑'" class="readonly-column-select">商品:{{ scope.row.productName }}</span>
+              <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+              <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+              <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单套用量" prop="usageAmount" align="center" width="124px" >
+            <template #default="scope">
+                       <span >
+                        {{scope.row.usageAmount}}
+                      </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="用料总数" align="center" prop="encapStandard" >
+            <template #default="scope">
+                      <span style="color: rgba(40,177,232,0.83); ">
+                        {{scope.row.usageAmount * form.groupNumber}}
+                      </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
+            <template #default="scope">
+                       <span >
+                        {{scope.row.costPrice}}
+                      </span>
+            </template>
+
+          </el-table-column>
+          <el-table-column label="金额" align="center" prop="remark" >
+            <template #default="scope">
+                      <span>
+                        {{scope.row.usageAmount * scope.row.costPrice}}
+                      </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
+            <template #default="scope">
+                       <span >
+                        {{scope.row.estimatedLoss}}
+                      </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="备注" align="center" prop="remark" />
+
+          <el-table-column label="库存数量" align="center" prop="balanceNumber" />
+          <el-table-column label="占用数量" align="center">
+            <template #default="scope">
+              <a  style="color: rgb(241,54,36); text-decoration: underline;">{{scope.row.balanceNumber - scope.row.availableNumber}}</a>
+            </template>
+          </el-table-column>
+          <el-table-column label="可用数量" align="center" prop="availableNumber" />
+        </el-table>
+      </div>
 
 
 
-<!--    分布弹窗-->
-    <!--    商品选择框-->
+    </div>
+
+
+
 
   </div>
 </template>
@@ -226,13 +354,15 @@ import {warehouseParentTreeSelect} from "../../../../../api/erp/position";
 import {addPlan, getInventoryByBom, getPlan, updatePlan} from "../../../../../api/erp/plan";
 import {addLineAudit, getLinesByWarehouse} from "../../../../../api/erp/line";
 import {addAddStockAudit} from "../../../../../api/erp/addStock";
+import htmlToPdf from "../../../../../utils/htmlToPdf";
+const { proxy } = getCurrentInstance();
 
 const router = useRouter();
 const route = useRoute();
 const title = ref("");
 
 
-const loading = ref(true)
+const loading = ref(false)
 const orderBOMDetailFormShow = ref(true)
 const openProduct = ref(false);
 const openPlanAdd = ref(true)
@@ -251,6 +381,20 @@ const warehouseOptions = ref(undefined);
 
 const queryBom = ref({});
 const bomList = ref([]);
+
+const pdfFunc = () => {
+
+  loading.value = true;
+  // 调用htmlToPdf工具函数
+  setTimeout(() => {
+    let fileName = form.value.planCode+'-生产计划-'+form.value.createTime
+    htmlToPdf.getPdf(fileName);  }, 100);
+  // 定时器模拟按钮loading动画的时间
+  setTimeout(() => {
+    proxy.$modal.msgSuccess("导出成功");
+    loading.value = false;
+  }, 1000);
+}
 const data = reactive({
   form: ref({
     line:{
@@ -275,44 +419,11 @@ const data = reactive({
         usageAmount: 0
     }
     ])
-  }),
-  queryParams: {
-    pageNum: 1,
-    pageSize: 10,
-    purchaseOrderCode: null,
-    purchaseOrderName: null
-  },
-  queryProductParams: {
-    pageNum: 1,
-    pageSize: 10,
-    brandId: null,
-    productId: null,
-    catalogId: null,
-    productCode: null,
-    productName: null,
-    productSource: null,
-    productAddOrigin: null,
-    status: null,
-    statusValue: false
-  },
-  rules: {
-    planTime: [
-      { required: true, message: "日期不能为空", trigger: "blur" }
-    ],
-    planName: [
-      { required: true, message: "名称不能为空", trigger: "blur" }
-    ],
-    groupNumber: [
-      { required: true, message: "套数不能为空", trigger: "blur" }
-    ],
-    productId: [
-      { required: true, message: "商品id不能为空", trigger: "blur" }
-    ],
+  })
 
-  }
 });
 
-const { queryParams, form, rules ,productForm,queryProductParams} = toRefs(data);
+const { form, productForm} = toRefs(data);
 /** 商品搜索按钮操作 */
 function handleProductQuery() {
   queryProductParams.value.pageNum = 1;

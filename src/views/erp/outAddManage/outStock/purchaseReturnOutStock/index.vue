@@ -36,7 +36,7 @@
         <el-form-item label="出库类型" prop="outStockType" class="select-container" >
           <el-input v-model="form.outStockType" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
         </el-form-item>
-        <el-form-item label="客户" prop="unitName" class="select-container"  >
+        <el-form-item label="供应商" prop="unitName" class="select-container"  >
           <el-select v-model="form.unitId"  placeholder="请选择" class="readonly-tree-select">
             <el-option
                 v-for="item in unitOptions"

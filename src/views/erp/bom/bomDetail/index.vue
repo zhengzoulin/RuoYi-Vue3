@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" v-loading="loading">
     <!-- Header section with buttons -->
     <el-row class="header">
       <router-link to="/bom">
@@ -15,7 +15,7 @@
       </div>
       <div>
         <el-button type="warning" plain @click="handleUpdate"  :disabled="isAudited" >修改</el-button>
-        <el-button type="primary" plain >打印</el-button>
+        <el-button type="primary" @click="pdfFunc" plain >打印</el-button>
       </div>
     </el-row>
 
@@ -104,8 +104,7 @@
               <el-table
                   :data="form.productList"
                   v-loading="loading"
-                  class="el-table"
-               >
+                >
                 <el-table-column label="原材料商品信息"  align="center" >
                   <el-table-column type="selection" width="55" align="center" />
                   <el-table-column type="index" label="序号" width="55" align="center" />
@@ -131,6 +130,83 @@
       </el-form>
     </el-row>
 
+
+
+    <div id="pdfDom" v-show="loading">
+      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.bomCode}}表-{{form.createTime}}</span></el-row>
+
+      <div class="description-container">
+        <el-row style="justify-content: center;margin: 10px">   <span > BOM单基本信息</span></el-row>
+        <el-descriptions border="true" column="3" size="large" class="my-descriptions" >
+          <el-descriptions-item label="BOM表编号"  label-align="center">
+            {{form.bomCode}}
+          </el-descriptions-item>
+          <el-descriptions-item label="单据名称"  label-align="center">
+            {{form.bomName }}
+           </el-descriptions-item>
+
+          <el-descriptions-item label="BOM表备注"  label-align="center">
+            {{form.remark}}
+          </el-descriptions-item>
+          <el-descriptions-item label="交货日期" label-align="center">
+           {{form.createTime}}
+          </el-descriptions-item>
+
+        </el-descriptions>
+
+      </div>
+      <div class="description-container">
+        <el-row style="justify-content: center;margin: 10px">   <span > BOM成品信息</span></el-row>
+        <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" >
+          <el-descriptions-item label="成品商品名称"  label-align="center">{{form.productForm.productName}}</el-descriptions-item>
+          <el-descriptions-item label="封装规格"  label-align="center">
+            <span>{{form.productForm.encapStandard}}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="厂家型号"  label-align="center">{{form.productForm.productModel}}</el-descriptions-item>
+          <el-descriptions-item label="成品商品编号"  label-align="center">{{form.productForm.productCode}}</el-descriptions-item>
+          <el-descriptions-item label="包装单位"  label-align="center">{{form.productForm.minpacketUnit}}</el-descriptions-item>
+          <el-descriptions-item label="包装数量"  label-align="center">{{form.productForm.minpacketNumber}}</el-descriptions-item>
+          <el-descriptions-item label="品牌"  label-align="center">{{form.productForm.brand.brandName}}</el-descriptions-item>
+          <el-descriptions-item label="重量"  label-align="center">{{form.productForm.productWeight}}</el-descriptions-item>
+          <el-descriptions-item label="目录"  label-align="center">{{form.catalogId}}</el-descriptions-item>
+          <el-descriptions-item label="备注"  label-align="center">{{form.productForm.remark}}</el-descriptions-item>
+          <el-descriptions-item label="套数"  label-align="center">{{form.groupNumber}}</el-descriptions-item>
+
+        </el-descriptions>
+      </div>
+
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > Bom用料信息</span></el-row>
+        <el-table
+            :data="form.productList"
+             class="el-table"
+        >
+          <el-table-column label="原材料商品信息"  align="center" >
+            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column type="index" label="序号" width="55" align="center" />
+            <el-table-column label="商品编号" align="center" prop="productCode" />
+            <el-table-column label="商品名称" align="center" prop="productName" />
+            <el-table-column label="厂家型号" align="center" prop="productModel" />
+            <el-table-column label="封装" align="center" prop="encapStandard" />
+            <el-table-column label="品牌" align="center" prop="brand.brandName" />
+            <el-table-column label="成本" align="center" prop="costPrice" />
+          </el-table-column>
+          <el-table-column label="商品用量" align="center" >
+            <el-table-column label="用量" prop="singleGroupNumber" align="center" >
+            </el-table-column>
+            <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
+            </el-table-column>
+          </el-table-column>
+          <el-table-column label="备注" align="center" prop="remark" />
+
+
+        </el-table>
+      </div>
+
+
+
+    </div>
+
   </div>
 </template>
 
@@ -140,6 +216,8 @@ import {getProduct, listProduct} from "../../../../api/erp/product";
 import ProductTable from "../../../../components/zerp/table/productTable";
 import {addBom, getBom, updateBom} from "../../../../api/erp/bom";
 import {useRoute, useRouter} from "vue-router";
+import htmlToPdf from "../../../../utils/htmlToPdf";
+const { proxy } = getCurrentInstance();
 
 const router = useRouter();
 const route = useRoute();
@@ -155,6 +233,19 @@ const bomTotalCount = ref(0);
 const bomTotalCost = ref(0);
 
 // Your reactive data
+const pdfFunc = () => {
+
+  loading.value = true;
+  // 调用htmlToPdf工具函数
+  setTimeout(() => {
+    let fileName = form.value.bomCode+'表-'+form.value.createTime
+    htmlToPdf.getPdf(fileName);  }, 100);
+  // 定时器模拟按钮loading动画的时间
+  setTimeout(() => {
+    proxy.$modal.msgSuccess("导出成功");
+    loading.value = false;
+  }, 1000);
+}
 
 const data = reactive({
   form: ref({
@@ -316,7 +407,7 @@ const bomId = ref(route.query.bomId);
 getBomRow()
 </script>
 
-<style >
+<style scoped >
 
 
 .header {

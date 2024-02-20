@@ -122,9 +122,6 @@
       </el-table-column>
       <el-table-column label="生产数量" align="center" prop="groupNumber" />
 
-
-
-
     </el-table>
 
     <div style="margin-top: 10px "> <span >领料出库商品明细 </span>

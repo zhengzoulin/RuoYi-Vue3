@@ -86,6 +86,12 @@ export const constantRoutes = [
         meta: { title: '新增采购退货', icon: 'dashboard', affix: true }
       },
       {
+        path: '/purchaseManage/purchaseReturn/purchaseReturnDetail',
+        component: () => import('@/views/erp/purchaseManage/purchaseReturn/purchaseReturnDetail'),
+        hidden: true,
+        meta: { title: '采购退货详情', icon: 'dashboard', affix: true }
+      },
+      {
         path: '/bom',
         name: 'Bom',
         component: () => import('@/views/erp/bom'),
@@ -160,7 +166,6 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '采购入库详情', icon: 'dashboard', affix: true }
       },
-
       {
         path: '/outAddManage/outStock',
         name: 'OutStock',
@@ -173,16 +178,34 @@ export const constantRoutes = [
         meta: { title: '生产计划出库', icon: 'dashboard', affix: true }
       },
       {
+        path: '/outAddManage/outStock/producePlanOutStock/producePlanOutStockDetail',
+        component: () => import('@/views/erp/outAddManage/outStock/producePlanOutStock/producePlanOutStockDetail'),
+        hidden: true,
+        meta: { title: '生产计划出库详细', icon: 'dashboard', affix: true }
+      },
+      {
         path: '/outAddManage/outStock/salesOutStock',
         component: () => import('@/views/erp/outAddManage/outStock/salesOutStock'),
         hidden: true,
         meta: { title: '销售出库', icon: 'dashboard', affix: true }
       },
       {
+        path: '/outAddManage/outStock/salesOutStock/salesOutStockDetail',
+        component: () => import('@/views/erp/outAddManage/outStock/salesOutStock/salesOutStockDetail'),
+        hidden: true,
+        meta: { title: '销售出库详细', icon: 'dashboard', affix: true }
+      },
+      {
         path: '/outAddManage/outStock/purchaseReturnOutStock',
         component: () => import('@/views/erp/outAddManage/outStock/purchaseReturnOutStock'),
         hidden: true,
         meta: { title: '采购退货出库', icon: 'dashboard', affix: true }
+      },
+      {
+        path: '/outAddManage/outStock/purchaseReturnOutStock/purchaseReturnOutStockDetail',
+        component: () => import('@/views/erp/outAddManage/outStock/purchaseReturnOutStock/purchaseReturnOutStockDetail'),
+        hidden: true,
+        meta: { title: '采购退货出库详细', icon: 'dashboard', affix: true }
       },
       {
         path: '/salesManage/sales/addSales',
@@ -196,9 +219,6 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '销售订单详情', icon: 'dashboard', affix: true }
       },
-
-
-
     ]
   },
 

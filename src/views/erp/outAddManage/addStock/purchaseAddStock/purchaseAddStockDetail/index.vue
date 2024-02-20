@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" v-loading="loading" >
     <el-row class="header">
       <router-link to="/outAddManage/addStock">
         <el-button type="primary"     icon="Back"
@@ -9,12 +9,13 @@
         </el-button>
 
       </router-link>
-      <div>
+      <div >
         <span style="color: #1c84c6;font-size: 24px">入库单详情</span>
       </div>
       <div>
         <el-button type="warning" plain @click="handleUpdate" :disabled="updateShow">修改</el-button>
-        <el-button type="primary" plain >打印</el-button>
+        <el-button type="primary" plain @click="pdfFunc" :loading="loading">导出pdf</el-button>
+
       </div>
     </el-row>
 
@@ -56,7 +57,7 @@
 
     </div>
 
-    <br>
+
     <div style="margin-top: 10px "> <span >采购订单信息 </span>
 
     </div>
@@ -65,8 +66,7 @@
               :data="form.selectedOrder"
               :rules="rules"
               height="150px"
-              @cell-click="tabClick"
-              style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
+               style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
     >
 
       <el-table-column label="#" type="index" width="55" align="center" />
@@ -101,10 +101,9 @@
     <el-table v-loading="ProductsListLoading"
               :data="form.orderProductsList"
               :rules="rules"
-              height="350"
-              class="productAddDetailTable"
-              style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
-              @cell-click="tabClick">
+              height="300"
+               style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
+              >
 
       <el-table-column type="index" width="55" align="center" label="#" />
       <el-table-column label="商品编号" align="center" prop="productCode"/>
@@ -131,16 +130,120 @@
         </template>
       </el-table-column>
 
-
     </el-table>
 
 
-    <el-button size="mini" type="primary" @click="pdfFunc" :loading="loading">
-      转成pdf
-    </el-button>
-    ...
-    <div id="pdfDom">
-      <!-- 此处是希望转成pdf的部分的内容，用一个大div盒子包起来 -->
+
+    <div id="pdfDom" v-show="loading">
+
+      <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.warehouse.warehousePath}}-{{form.addStockType}}单-{{form.addStockTime}}</span></el-row>
+
+      <div class="description-container">
+         <el-row style="justify-content: center;margin-top: 10px">   <span > 入库单基本信息</span></el-row>
+
+        <el-descriptions border="true" column="3" size="large" class="my-descriptions"  >
+          <el-descriptions-item label="入库单号"  label-align="left">
+            {{form.addStockCode }}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="单据名称"  label-align="left">
+            {{form.addStockName }}
+           </el-descriptions-item>
+
+          <el-descriptions-item label="入库类型"  label-align="left">
+            {{form.addStockType}}
+          </el-descriptions-item>
+
+
+          <el-descriptions-item label="发货方"  label-align="left">
+            {{form.unit.unitName}}
+          </el-descriptions-item>
+          <el-descriptions-item label="目标仓库"  label-align="left">
+            {{form.warehouse.warehousePath}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="入库日期" prop="addStockTime"  label-align="left">
+            {{form.addStockTime}}
+          </el-descriptions-item>
+
+          <el-descriptions-item label="订单备注"  label-align="left">
+            {{form.remark}}
+          </el-descriptions-item>
+
+        </el-descriptions>
+
+      </div>
+
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > 采购订单信息</span></el-row>
+
+        <el-table v-loading="ProductsListLoading"
+                  :data="form.selectedOrder"
+                  :rules="rules">
+
+          <el-table-column label="#" type="index" width="55" align="center" />
+
+          <el-table-column label="采购订单编号" align="center" prop="purchaseOrderId">
+            <template #default="scope">
+              <!-- 使用 <a> 标签来包装数据，并添加样式 -->
+              <a
+                  href="#"
+                  style="color: rgba(40,177,232,0.83); text-decoration: underline;"
+                  @click="handleOrderDetailClick(scope.row)"
+              >
+                {{ scope.row.purchaseOrderCode }}
+              </a>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="单据名称" align="center" prop="purchaseOrderName"/>
+
+          <el-table-column label="下单日期" prop="createTime" align="center" />
+          <el-table-column label="交货日期" prop="purchaseOrderTime" align="center" />
+
+          <el-table-column label="供应商" align="center" prop="unit.unitName"/>
+          <el-table-column label="备注" prop="remark"/>
+
+        </el-table>
+      </div>
+
+      <div class="table-container">
+        <el-row style="justify-content: center;margin-top: 10px">   <span > 入库商品明细</span></el-row>
+
+
+        <!--      待入库商品明细表格-->
+        <el-table v-loading="ProductsListLoading"
+                  :data="form.orderProductsList"
+                  :rules="rules">
+
+          <el-table-column type="index" width="55" align="center" label="#" />
+          <el-table-column label="商品编号" align="center" prop="productCode"/>
+
+          <el-table-column label="商品信息" align="center" prop="productName"/>
+          <el-table-column label="可入库数量" prop="demandNumber" align="center" >
+
+          </el-table-column>
+
+          <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
+          <el-table-column label="成本价" align="center" prop="costPrice" width="100px"/>
+
+          <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
+
+          <el-table-column label="入库数量" prop="demandNumber" align="center"  width="120px"/>
+
+          <el-table-column label="入库位置相关信息" align="center" width="240px">
+            <template #default="scope">
+              <a
+                  href="#"
+                  class="custom-link-style"
+                  v-html="String.raw`${formatBatchPosition(scope.row)}`"
+              ></a>
+            </template>
+          </el-table-column>
+
+        </el-table>
+      </div>
+
     </div>
 
 
@@ -153,23 +256,33 @@
 import {ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {AddStockList, getAddStock, updateAddStock} from "../../../../../../api/erp/addStock";
-import htmlToPdf from 'src/utils/htmlToPdf'; // 导入htmlToPdf.js
+import htmlToPdf from "../../../../../../utils/htmlToPdf"; // 导入htmlToPdf.js
 
+
+const { proxy } = getCurrentInstance();
+const router = useRouter();
+const route = useRoute();
 
 const orderDetailFormShow = ref(true)
 const updateShow = ref(true)
-const { proxy } = getCurrentInstance();
+const loading = ref(false)
 
 
 const pdfFunc = () => {
+
   loading.value = true;
   // 调用htmlToPdf工具函数
-  htmlToPdf.getPdf('文档名称');
+  setTimeout(() => {
+    htmlToPdf.getPdf('文档名称');
+  }, 100);
   // 定时器模拟按钮loading动画的时间
   setTimeout(() => {
+    proxy.$modal.msgSuccess("导出成功");
     loading.value = false;
-    // ElMessage.success('打印成功!');
+
+
   }, 1000);
+
 }
 
 const data = reactive({
@@ -218,9 +331,6 @@ const data = reactive({
 });
 
 const { queryParams, form, rules } = toRefs(data);
-const { proxy } = getCurrentInstance();
-const router = useRouter();
-const route = useRoute();
 
 
 /** 修改按钮操作 */
@@ -335,6 +445,19 @@ addOrUpdate();
   justify-content: space-between;
   margin-bottom: 10px;
   padding-right: 2%;
+}
+
+
+.description-container {
+  /* 描述框的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
+}
+
+.table-container {
+  /* 表格的样式 */
+  border: 1px solid #ddd;
+  border-color: #ddd; /* 设置边框颜色与描述框默认边框颜色一致 */
 }
 
 </style>
