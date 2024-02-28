@@ -1,47 +1,82 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="出库单号" prop="outStockCode">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="75px" class="custom-form">
+      <el-form-item  prop="keyWord" v-show="showQuery">
+        <el-input
+            v-model="queryParams.keyWord"
+            placeholder="请输入关键字"
+            clearable
+            @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="出库单号" prop="outStockCode" v-if="!showQuery">
         <el-input
           v-model="queryParams.outStockCode"
           placeholder="请输入出库单号"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 180px;"
+
         />
       </el-form-item>
-      <el-form-item label="单据名称" prop="outStockName">
+      <el-form-item label="单据名称" prop="outStockName" v-if="!showQuery">
         <el-input
           v-model="queryParams.outStockName"
           placeholder="请输入单据名称"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 185px;"
         />
       </el-form-item>
-      <el-form-item label="所属仓库" prop="warehouseName">
-        <el-input
-          v-model="queryParams.warehouseId"
-          placeholder="请输入所属仓库"
-          clearable
-          @keyup.enter="handleQuery"
+      <el-form-item label="收货方" prop="unitName" v-if="!showQuery">
+        <el-select v-model="queryParams.unitId"  placeholder="请选择"  style="width: 185px;">
+          <el-option
+              v-for="item in unitOptions"
+              :key="item.unitId"
+              :label="item.unitName"
+              :value="item.unitId"
+              :disabled="item.status == 1"
+
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="出库仓库" prop="warehouseName" v-if="!showQuery" style="width: 290px">
+        <el-tree-select
+            v-model="queryParams.warehouseId"
+            :data="warehouseOptions"
+            :props="{ value: 'id', label: 'label', children: 'children' }"
+            value-key="id"
+            placeholder="请选择仓库"
+
         />
       </el-form-item>
-      <el-form-item label="仓库名" prop="warehousePath">
-        <el-input
-          v-model="queryParams.warehousePath"
-          placeholder="请输入仓库名"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+      <el-form-item label="审核状态" prop="auditId" v-if="!showQuery">
+        <el-select
+            v-model="queryParams.auditId"
+            placeholder="请选择审核状态"
+            clearable
+            style="width: 170px"
+        >
+          <el-option label="未审核" value="0"></el-option>
+          <el-option label="审核通过" value="1"></el-option>
+          <el-option label="审核未通过" value="2"></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item label="发货供应商" prop="unitName">
-        <el-input
-          v-model="queryParams.unitName"
-          placeholder="请输入发货供应商"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+
+      <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
+        <el-select v-model="queryParams.createBy"  placeholder="请选择" style="width: 180px">
+          <el-option
+              v-for="item in userOptions"
+              :key="item.userId"
+              :label="item.userName"
+              :value="item.userId"
+              :disabled="item.status == 1"
+
+          ></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item label="日期" v-if="!showQuery">
+
+      <el-form-item label="日期" v-if="!showQuery"  >
         <el-date-picker
             v-model="queryParams.timeRange"
             type="daterange"
@@ -52,11 +87,14 @@
             format="YYYY/MM/DD"
             value-format="YYYY-MM-DD"
             ref="queryRef"
+            style="width: 220px;"
         />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
+
       </el-form-item>
     </el-form>
 
@@ -142,7 +180,9 @@
       <el-table-column label="单据名称" align="center" prop="outStockName" />
 
       <el-table-column label="出库类型" align="center" prop="outStockType" />
-      <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
+      <el-table-column label="出库仓库" align="center" prop="warehouse.warehousePath" />
+      <el-table-column label="收货方" align="center" prop="unit.unitName" />
+
       <el-table-column label="出库日期" align="center" prop="outStockTime" />
 <!--      <el-table-column label="发货方" align="center" prop="unit.unitName" />-->
       <el-table-column label="操作人" align="center" prop="createBy" />
@@ -185,239 +225,6 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改出库表对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="outStockRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="出库单号" prop="outStockCode">
-          <el-input v-model="form.outStockCode" placeholder="请输入出库单号" />
-        </el-form-item>
-        <el-form-item label="单据名称" prop="outStockName">
-          <el-input v-model="form.outStockName" placeholder="请输入单据名称" />
-        </el-form-item>
-        <el-form-item label="所属仓库" prop="warehouseId">
-          <el-input v-model="form.warehouseId" placeholder="请输入所属仓库" />
-        </el-form-item>
-        <el-form-item label="出库类型" prop="outStockType">
-          <el-input v-model="form.outStockType" placeholder="请输入所属仓库" />
-        </el-form-item>
-        <el-form-item label="发货供应商" prop="unitName">
-          <el-input v-model="form.unitName" placeholder="请输入发货供应商" />
-        </el-form-item>
-        <el-form-item label="订单备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- （最主要的弹窗）新增（采购订单）出库对话框 -->
-    <el-dialog :title="title" v-model="openAddOrderStock"
-               append-to-body class="dialog-addOrder" style="position: relative;">
-      <el-row>
-        <el-col :span="24" style="position: absolute; top: 0; right: 105px; width: auto;">
-          <el-button type="primary" plain size="small" icon="primary" @click="subMitoutStockAndAuditPass">保存并审核通过</el-button>
-        </el-col>
-        <el-col :span="24"    style="position: absolute; top: 0; right: 20px; width: auto;">
-          <el-button type="primary" plain size="small" icon="primary" @click="subMitOutStockList">保存</el-button>
-        </el-col>
-      </el-row>
-
-      <span > 出库单基本信息
-        <el-button link type="primary" icon="list" @click="changeOrderShow"> {{ orderDetailFormShow ? '收起' : '详细' }}</el-button>
-      </span>
-      <el-form ref="orderRef" v-show="orderDetailFormShow"  :model="form" :rules="rules" :inline="true" label-width="80px"
-               style="border-top: dashed 1.3px rgba(187,199,191,0.35) ;padding: 8px">
-        <el-row>
-          <el-form-item label="出库单号" prop="outStockCode" class="select-container" >
-            <el-input v-model="form.outStockCode" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
-          </el-form-item>
-          <el-form-item label="单据名称" prop="outStockName">
-            <el-input v-model="form.outStockName" placeholder="请输入单据名称" style="width: 180px;" />
-          </el-form-item>
-          <el-form-item label="出库类型" prop="outStockType" class="select-container" >
-            <el-input v-model="form.outStockType" placeholder="保存后自动生成" class="readonly-tree-select" style="width: 180px;"/>
-          </el-form-item>
-
-
-          <el-form-item label="发货方" prop="unitId">
-            <el-select v-model="form.unitId"  placeholder="采购订单获取" class="readonly-tree-select"
-            >
-              <el-option
-                  v-for="item in unitOptions"
-                  :key="item.unitId"
-                  :label="item.unitName"
-                  :value="item.unitId"
-                  style="width: 140px;"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-        </el-row>
-        <el-row>
-          <el-form-item label="所属仓库" prop="warehouseName" class="select-container">
-            <el-tree-select
-                v-model="form.warehouseId"
-                :data="warehouseOptions"
-                :props="{ value: 'id', label: 'label', children: 'children' }"
-                value-key="id"
-                placeholder="请选择仓库"
-                class="readonly-tree-select"
-                style="width: 160px;"
-            />
-          </el-form-item>
-
-
-          <el-form-item label="出库日期" prop="outStockTime">
-            <el-date-picker clearable
-                            v-model="form.outStockTime"
-                            type="date"
-                            value-format="YYYY-MM-DD"
-                            placeholder="请选择订单交货日期"
-                            style="width: 180px;">
-            </el-date-picker>
-          </el-form-item>
-
-          <el-form-item label="订单备注" prop="remark">
-            <el-input v-model="form.remark" type="text" placeholder="请输入" style="width: 180px;"/>
-          </el-form-item>
-        </el-row>
-      </el-form>
-
-      <br>
-          <div style="margin-top: 10px "> <span >采购订单信息 </span>
-            <el-button
-                type="primary"
-                plain
-                icon="Plus"
-                size="small"
-                style="margin-left: 10px;"
-                @click="handleSelectOrder"
-            >选择采购订单</el-button>
-          </div>
-
-            <el-table v-loading="ProductsListLoading"
-                      :data="form.selectedOrder"
-                      :rules="rules"
-                      height="150px"
-                      @cell-click="tabClick"
-                      style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
-                      >
-
-              <el-table-column type="selection" width="55" align="center" />
-
-              <el-table-column label="采购订单编号" align="center" prop="purchaseOrderId">
-                <template #default="scope">
-                  <!-- 使用 <a> 标签来包装数据，并添加样式 -->
-                  <a
-                      href="#"
-                      style="color: rgba(40,177,232,0.83); text-decoration: underline;"
-                      @click="handleOrderDetailClick(scope.row)"
-                  >
-                    {{ scope.row.purchaseOrderCode }}
-                  </a>
-                </template>
-              </el-table-column>
-
-              <el-table-column label="单据名称" align="center" prop="purchaseOrderName"/>
-
-              <el-table-column label="下单日期" prop="createTime" align="center" />
-              <el-table-column label="交货日期" prop="purchaseOrderTime" />
-      <!--          <template #default="scope">-->
-      <!--            <span>-->
-      <!--              <el-input v-model="scope.row.demandNumber" @input="calculateorderMoney(scope.row)" type="number" maxlength="26" placeholder="请输入需求" size="mini"  />-->
-      <!--            </span>-->
-      <!--          </template>-->
-
-              <el-table-column label="供应商" align="center" prop="unit.unitName"/>
-              <el-table-column label="备注" prop="remark"/>
-              <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-                <template #default="scope">
-                  <el-button link type="danger" icon="delete" @click="removeOrderRow(scope.row)">移除</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-
-            <div style="margin-top: 10px "> <span >采购出库商品明细 </span>
-              <el-button
-                  type="danger"
-                  plain
-                  icon="Plus"
-                  size="small"
-                  style="margin-left: 10px;"
-                  @click="handleAddProduct"
-                  v-hasPermi="['erp:order:add']"
-              >移出明细</el-button>
-            </div>
-
-            <br>
-            <span style="margin-top:50px"> 出库种数：       出库总额：</span>
-      <!--      待出库商品明细表格-->
-            <el-table v-loading="ProductsListLoading"
-                      :data="form.orderProductsList"
-                      :rules="rules"
-                      height="350"
-                      style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
-                      @cell-click="tabClick">
-
-              <el-table-column type="selection" width="55" align="center" />
-              <el-table-column type="index" width="55" align="center" label="序号" />
-              <el-table-column label="编号" align="center" prop="product.productCode"/>
-
-              <el-table-column label="商品信息" align="center" prop="product.productName"/>
-              <el-table-column label="可出库数量" prop="demandNumber" align="center" >
-
-              </el-table-column>
-
-              <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
-              <el-table-column label="成本价" align="center" prop="costPrice" width="80px">
-                <template #default="scope">
-                  <span>
-                    <el-input v-model="scope.row.costPrice"  type="number" maxlength="20" placeholder="请输入"  size="mini"  />
-                  </span>
-                </template>
-              </el-table-column>
-
-              <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
-
-              <el-table-column label="出库数量" prop="demandNumber" align="center"  width="120px">
-                <template #default="scope">
-                  <span>
-                    <el-input v-model="scope.row.demandNumber"  type="number" maxlength="20" placeholder="请输入需求" size="mini"  />
-                  </span>
-                </template>
-              </el-table-column>
-
-              <el-table-column label="出库位置相关信息" align="center" width="240px">
-                <template #default="scope">
-                  <a
-                      href="#"
-                      class="custom-link-style"
-                      @click="SelectoutStockPosition(scope.row)"
-                      v-html="String.raw`${formatBatchPosition(scope.row)}`"
-                  ></a>
-                </template>
-              </el-table-column>
-
-
-            </el-table>
-    </el-dialog>
-
-    <!--   出库订单详情查看 -->
-    <add-stock-detail
-        :openAddOrderStockDetail="openAddOrderStockDetail"
-        :form="form"
-
-        :selectedOrder="form.selectedOrder"
-        :ProductsListLoading="ProductsListLoading"
-        :orderProductsList="form.orderProductsList"
-        :title="title"
-        :orderAuditShow="orderAuditShow"
-        :updateOrderShow="updateOrderShow"
-    />
 
 <!--    审核弹窗-->
     <AuditDialog
@@ -427,181 +234,7 @@
         @submitOrderAudit="submitOrderAudit"
     />
 
-<!--    选择采购订单-->
-    <el-dialog
-        title="选择采购订单" v-model="openSelectOrder"
-        append-to-body class="dialog-selectOrder">
 
-      <el-form :model="queryOrderParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-        <el-form-item label="订单编号" prop="purchaseOrderCode">
-          <el-input
-              v-model="queryOrderParams.queryOrderParams"
-              placeholder="请输入订单编号"
-              clearable
-              @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="单据名称" prop="purchaseOrderName">
-          <el-input
-              v-model="queryOrderParams.purchaseOrderName"
-              placeholder="请输入单据名称"
-              clearable
-              @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="出库仓库" prop="warehouseName">
-          <el-tree-select
-              v-model="queryOrderParams.warehouseId"
-              :data="warehouseOptions"
-              :props="{ value: 'id', label: 'label', children: 'children' }"
-              value-key="id"
-              placeholder="请选择仓库"
-              check-strictly
-              @change="handleChange"
-          />
-        </el-form-item>
-        <el-form-item label="订单交货日期" prop="purchaseOrderTime">
-          <el-date-picker clearable
-                          v-model="queryOrderParams.purchaseOrderTime"
-                          type="date"
-                          value-format="YYYY-MM-DD"
-                          placeholder="请选择订单交货日期">
-          </el-date-picker>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleOrderQuery">搜索</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-
-      <order-table
-          :loading="loading"
-          :orderList="orderList"
-          :tooltipAuditContent="tooltipAuditContent"
-          @handleSelectionChange="handleOrderSelectionChange"
-          @handleOrderDetailClick="handleOrderDetailClick"
-          @showAuditTooltip="showAuditTooltip"
-          @handleUpdate="handleUpdate"
-          :tableStyle="{ height: '350px' }"
-      />
-
-     <div style="padding-top: 10px; margin-bottom: 10px; display: flex; justify-content: flex-end;">
-         <el-button type="primary" size="small"  style="width: 60px;">
-           取消
-         </el-button>
-         <el-button type="primary" size="small"  style="width: 60px;" @click="selectedOrderList">
-           确定
-         </el-button>
-     </div>
-
-    </el-dialog>
-
-<!--  选择出库位置批次  //-->
-    <el-dialog
-        title="选择出库位置" v-model="openSelectoutStockPosition"
-        append-to-body class="dialog-selectOrder"
-        :style="{ 'max-height': '60vh' }"
-    >
-
-      <table :data="form.orderProductsList.outStockProduct.product" class="tab-top-centent" style="border: 1px solid rgb(230, 235, 245);">
-        <tr ><td  class="tex">
-          <div  class="dis">
-          商品编号：
-          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productCode}}</div></div></td>
-          <td  class="tex">
-          <div  class="dis">
-          商品名称：
-          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productName}}</div></div></td>
-          <td  class="tex">
-          <div  class="dis">
-          厂家型号：
-          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.productModel }} </div></div></td>
-          <td  class="tex">
-          <div  class="dis">
-          封装规格：
-          <div   tabindex="0">{{ form.orderProductsList.outStockProduct.product.encapStandard }}</div></div></td>
-          <td  class="tex">
-          <div  class="dis">
-          封装单位：
-          <div  tabindex="0">{{ form.orderProductsList.outStockProduct.product.minpacketUnit}}</div></div></td>
-        </tr></table>
-
-      <div  class="el-row" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
-        <span >
-         可出库数量：<span  style="color: rgb(82, 153, 252);">{{ form.orderProductsList.outStockProduct.demandNumber }}</span> &nbsp;&nbsp;
-        </span>
-         已输入出库数量：<span  style="color: rgb(82, 153, 252);">66  </span>
-      </div>
-
-      <el-form
-          :style="{ 'max-height': '60vh' }"
-      >
-
-        <el-table
-                  :data="form.orderProductsList.outStockProduct.batchPositionList"
-                  height="250px"
-                  @cell-click="tabClick"
-                  style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
-                  :span-method="objectSpanMethod"
-        >
-
-          <el-table-column label="出库位置" align="center">
-            <template #default="scope">
-              <el-cascader
-                  v-model="scope.row.selectValue"
-                  :options="PositionOptions"
-                  :props="{ value: 'id', label: 'label', children: 'children' }"
-                  @change="handlePositionChange(scope.row.selectValue)"
-              />
-            </template>
-          </el-table-column>
-
-          <el-table-column label="批次" align="center">
-            <template #default="scope">
-            <span>
-              <el-input v-model="scope.row.batchCode"  type="text" maxlength="26" placeholder="请输入批次" size="mini"  />
-            </span>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="库存已有数量" align="center" />
-
-          <el-table-column label="出库数量" align="center" >
-            <template #default="scope">
-            <span>
-              <el-input v-model="scope.row.addNumber"  type="number" maxlength="26" placeholder="请输入需求" size="mini"  />
-            </span>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-            <template #default="scope">
-              <el-button link type="danger" icon="delete" @click="removeProductBatchRow(scope.row)">移除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-
-
-        <div  class="el-row is-justify-end el-row--flex">
-          <button  type="button" class="el-button lc-success el-button--text el-button--mini"
-                   style="font-size: 18px;" @click="addProductBatchRow">
-            <span>+新增行</span>
-          </button></div>
-
-        <div style="text-align: right;">
-          <button type="button" class="el-button el-button--default el-button--mini">
-            <span>取消</span>
-          </button>
-          <button type="button" class="el-button el-button--primary el-button--mini" @click="getReturnBatchPosition">
-            <span>确定</span>
-          </button>
-        </div>
-
-      </el-form>
-
-    </el-dialog>
 
 
   </div>
@@ -610,13 +243,14 @@
 <script setup name="OutStock">
 import {ref} from "vue";
 import {addOrderAudit, getOrder, getOrderAuditRecord, listOrder} from "../../../../api/erp/order";
-import {getWarehousePosition, warehouseTreeSelect} from "../../../../api/erp/position";
+import {getWarehousePosition, warehouseParentTreeSelect, warehouseTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
 import AuditDialog from "../../../../components/zerp/public/auditDialog";
 import addStockDetail from "./addStockDetail/addStockDetail";
 import OrderTable from "../../purchaseManage/order/orderTable";
 import {useRoute, useRouter} from "vue-router";
 import {addOutStock, addOutStockAudit, delOutStock, getOutStock, listOutStock, updateOutStock,OutStockList} from "../../../../api/erp/outStock";
+import {listUser} from "../../../../api/system/user";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -639,12 +273,16 @@ const auditAddDTO = ref({})
 const loading = ref(true);
 const ProductsListLoading = ref(openSelectOrder);
 const showSearch = ref(true);
+const showQuery = ref(true);
+
 const orderDetailFormShow = ref(true);
 const auditDisabled = ref(true);
 
 const ids = ref([]);
 const orderIds = ref([]);
 const unitOptions = ref([]);
+const userOptions =  ref([])
+
 const PositionOptions = ref([])
 const warehouseOptions = ref(undefined);
 const tabClickIndex = ref();
@@ -781,9 +419,15 @@ function handleOrderQuery() {
 }
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+  queryParams.value = {}
   handleQuery();
 }
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  queryParams.value = {}
+  proxy.resetForm("queryRef");
+}
+
 
 // 多选框选中数据
 function handleSelectionChange(data) {
@@ -899,7 +543,7 @@ function submitForm() {
 }
 /** 查询仓库下拉树结构 */
 function getWarehouseTree() {
-  warehouseTreeSelect().then(response => {
+  warehouseParentTreeSelect().then(response => {
     warehouseOptions.value = response.data;
   });
 };
@@ -910,7 +554,12 @@ function getUnitList() {
     unitOptions.value = response.rows;
   });
 }
-
+/** 查询user列表 */
+function getUserList() {
+  listUser().then(response => {
+    userOptions.value = response.rows;
+  });
+}
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _outStockIds = row.outStockId || ids.value;
@@ -1174,8 +823,7 @@ function outStockAuditStatus(auditId) {
 const showAuditTooltip = (row) => {
   // 生成tooltip的内容，可以根据rowData的信息来设置tooltip内容
   if(row.auditId == 0){
-    tooltipAuditContent.value= {}
-
+    tooltipAuditContent.value = {}
     return;
   }
   getOrderAuditRecord(row.outStockId).then(response => {
@@ -1302,6 +950,7 @@ onBeforeMount(() => {
 });
 
 getUnitList();
+getUserList()
 getWarehouseTree();
 getList();
 </script>
@@ -1376,4 +1025,28 @@ getList();
   background-color: rgba(176,196,222, 0.2); /* 淡灰色 */
 }
 
+
+
+.custom-form .el-form-item {
+  margin-bottom: 12px; /* 调整表单项之间的间距 */
+}
+
+.custom-form .el-form-item .el-input {
+  font-size: 12px; /* 调整输入框中的字体大小 */
+}
+
+.custom-form .el-button {
+  font-size: 12px; /* 调整按钮中的字体大小 */
+  padding-top: 6px; /* 调整按钮的内边距 */
+  padding-bottom: 6px; /* 调整按钮的内边距 */
+}
+.custom-form .el-form-item .el-form-item__label {
+  max-width: 80px; /* 设置 label 的最大宽度 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出部分显示省略号 */
+  white-space: nowrap; /* 不换行 */
+}
+.custom-form .el-button:last-child {
+  margin-right: 0; /* 最后一个按钮不需要右边距 */
+}
 </style>

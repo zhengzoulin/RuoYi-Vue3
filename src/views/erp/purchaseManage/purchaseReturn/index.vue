@@ -56,6 +56,7 @@
             v-model="queryParams.orderProgress"
             placeholder="请选择订单进度"
             clearable
+            style="width: 170px;"
         >
           <el-option label="未开始" value="未开始"></el-option>
           <el-option label="待入库" value="待入库"></el-option>
@@ -70,6 +71,7 @@
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
+            style="width: 170px;"
         />
       </el-form-item>
       <el-form-item label="日期" v-if="!showQuery">
@@ -83,6 +85,7 @@
             format="YYYY/MM/DD"
             value-format="YYYY-MM-DD"
             ref="queryRef"
+            style="width: 220px;"
          />
       </el-form-item>
 <!--      <el-form-item label="支付状态" prop="paymentStatus" v-if="!showQuery">-->
@@ -208,7 +211,6 @@
 </template>
 
 <script setup name="Order">
-import { listOrder, getOrder, delOrder, addOrder, updateOrder } from "@/api/erp/order";
 import {ref} from "vue";
 import {warehouseParentTreeSelect, warehouseTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
@@ -225,7 +227,7 @@ import ProductDetail from "../../productManage/product/productDetail";
  import {useRoute, useRouter} from "vue-router";
 import {listUser} from "../../../../api/system/user";
 import ReturnOrderTable from "./returnOrderTable";
-import {addOrderReturnAudit, listPurchaseReturn} from "../../../../api/erp/purchaseReturn";
+import {addOrderReturnAudit, delPurchaseReturn, listPurchaseReturn} from "../../../../api/erp/purchaseReturn";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -400,9 +402,6 @@ function handleOrderDetailClick(row){
 }
 
 
-
-
-
 /** 新增采购订单按钮操作，第一步选择仓库 */
 function handleAdd() {
   reset();
@@ -501,11 +500,12 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+  queryParams.value ={}
   handleQuery();
 }
 function changeQuery(){
   showQuery.value = !showQuery.value;
+  queryParams.value = {}
   proxy.resetForm("queryRef");
 }
 
@@ -572,7 +572,7 @@ function submitForm() {
 function handleDelete(row) {
   const _purchaseOrderReturnIds = row.purchaseOrderReturnId || ids.value;
   proxy.$modal.confirm('是否确认删除采购订单编号为"' + _purchaseOrderReturnIds + '"的数据项？').then(function() {
-    return delOrder(_purchaseOrderReturnIds);
+    return delPurchaseReturn(_purchaseOrderReturnIds);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");

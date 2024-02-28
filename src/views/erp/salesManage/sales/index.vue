@@ -2,9 +2,9 @@
   <div class="app-container">
     <el-row>
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
-        <el-form-item  prop="bomKey" v-show="showQuery">
+        <el-form-item  prop="keyWord" v-show="showQuery">
           <el-input
-              v-model="queryParams.bomKey"
+              v-model="queryParams.keyWord"
               placeholder="请输入关键字"
               clearable
               @keyup.enter="handleQuery"
@@ -26,21 +26,64 @@
               @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="客户信息" prop="unit" v-show="!showQuery">
-          <el-input
-              v-model="queryParams.unit"
-              placeholder="请输入客户信息"
-              clearable
-              @keyup.enter="handleQuery"
+        <el-form-item label="客户" prop="unitName" v-if="!showQuery">
+          <el-select v-model="queryParams.unitId"  placeholder="请选择"  style="width: 185px;">
+            <el-option
+                v-for="item in unitOptions"
+                :key="item.unitId"
+                :label="item.unitName"
+                :value="item.unitId"
+                :disabled="item.status == 1"
+
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="目标仓库" prop="warehouseName" v-if="!showQuery">
+          <el-tree-select
+              v-model="queryParams.warehouseId"
+              :data="warehouseOptions"
+              :props="{ value: 'id', label: 'label', children: 'children' }"
+              value-key="id"
+              placeholder="请选择仓库"
+              style="width: 170px"
           />
         </el-form-item>
-        <el-form-item label="所属仓库" prop="warehouseId" v-show="!showQuery">
-          <el-input
-              v-model="queryParams.warehouseId"
-              placeholder="请输入所属仓库"
+        <el-form-item label="审核状态" prop="auditId" v-if="!showQuery">
+          <el-select
+              v-model="queryParams.auditId"
+              placeholder="请选择审核状态"
               clearable
-              @keyup.enter="handleQuery"
-          />
+              style="width: 180px"
+          >
+            <el-option label="未审核" value="0"></el-option>
+            <el-option label="审核通过" value="1"></el-option>
+            <el-option label="审核未通过" value="2"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="订单进度" prop="orderProgress" v-if="!showQuery">
+          <el-select
+              v-model="queryParams.orderProgress"
+              placeholder="请选择订单进度"
+              clearable
+              style="width: 175px"
+          >
+            <el-option label="待处理" value="0"></el-option>
+            <el-option label="待出库" value="1"></el-option>
+            <el-option label="已出库" value="2"></el-option>
+
+          </el-select>
+        </el-form-item>
+        <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
+          <el-select v-model="queryParams.createBy"  placeholder="请选择" style="width: 175px">
+            <el-option
+                v-for="item in userOptions"
+                :key="item.userId"
+                :label="item.userName"
+                :value="item.userId"
+                :disabled="item.status == 1"
+
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="交货日期" v-if="!showQuery">
           <el-date-picker
@@ -53,29 +96,15 @@
               format="YYYY/MM/DD"
               value-format="YYYY-MM-DD"
               ref="queryRef"
+              style="width: 220px;"
           />
         </el-form-item>
-        <el-form-item label="订单审核状态" prop="auditId" v-show="!showQuery">
-          <el-input
-              v-model="queryParams.auditId"
-              placeholder="请输入订单审核状态"
-              clearable
-              @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="订单进度(0待出库，1已出库)" prop="orderProgress" v-show="!showQuery">
-          <el-input
-              v-model="queryParams.orderProgress"
-              placeholder="请输入订单进度(0待出库，1已出库)"
-              clearable
-              @keyup.enter="handleQuery"
-          />
-        </el-form-item>
+
 
         <el-form-item>
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-          <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
+          <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
         </el-form-item>
       </el-form>
 
@@ -178,12 +207,14 @@ import AuditDialog from "../../../../components/zerp/public/auditDialog";
 import {warehouseParentTreeSelect} from "../../../../api/erp/position";
 import {listUnit} from "../../../../api/erp/unit";
 import SalesOrderTable from "../../../../components/zerp/table/salesOrderTable";
+import {listUser} from "../../../../api/system/user";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
 
 const salesList = ref([]);
+ const userOptions =  ref([])
 const open = ref(false);
 const openAudit = ref(false);
 
@@ -320,8 +351,14 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+   queryParams.value = {}
+
   handleQuery();
+}
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  queryParams.value = {}
+  proxy.resetForm("queryRef");
 }
 
 // 多选框选中数据
@@ -349,7 +386,18 @@ function handleSelectionChange(selection) {
 
   }
 }
-
+/** 查询user列表 */
+function getUserList() {
+  listUser().then(response => {
+    userOptions.value = response.rows;
+  });
+}
+/** 查询仓库下拉树结构 */
+function getWarehouseTree() {
+  warehouseParentTreeSelect().then(response => {
+    warehouseOptions.value = response.data;
+  });
+};
 /** 新增按钮操作 */
 function handleAdd() {
   reset();
@@ -394,12 +442,7 @@ function submitForm() {
     }
   });
 }
-/** 查询仓库下拉树结构 */
-function getWarehouseTree() {
-  warehouseParentTreeSelect().then(response => {
-    warehouseOptions.value = response.data;
-  });
-};
+
 
 /** 查询往来单位列表 */
 function getUnitList() {
@@ -469,6 +512,8 @@ function submitOrderAudit(data){
 
 getWarehouseTree()
 getUnitList();
+getUserList();
+
 getList();
 </script>
 

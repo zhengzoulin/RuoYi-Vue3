@@ -3,7 +3,7 @@
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
       <el-form-item   prop="planCode" v-show="showQuery">
         <el-input
-          v-model="queryParams.planCode"
+          v-model="queryParams.keyWord"
           placeholder="请输入关键字"
           clearable
           @keyup.enter="handleQuery"
@@ -41,15 +41,62 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="生产线id" prop="lineId" v-show="!showQuery">
+      <el-form-item label="生产线" prop="lineId" v-show="!showQuery">
         <el-input
           v-model="queryParams.lineId"
-          placeholder="请输入生产线id"
+          placeholder="请输入生产线"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="日期" v-if="!showQuery">
+      <el-form-item label="目标仓库" prop="warehouseName" v-if="!showQuery">
+        <el-tree-select
+            v-model="queryParams.warehouseId"
+            :data="warehouseOptions"
+            :props="{ value: 'id', label: 'label', children: 'children' }"
+            value-key="id"
+            placeholder="请选择仓库"
+            style="width: 170px"
+        />
+      </el-form-item>
+      <el-form-item label="审核状态" prop="auditId" v-if="!showQuery">
+        <el-select
+            v-model="queryParams.auditId"
+            placeholder="请选择审核状态"
+            clearable
+            style="width: 180px"
+        >
+          <el-option label="未审核" value="0"></el-option>
+          <el-option label="审核通过" value="1"></el-option>
+          <el-option label="审核未通过" value="2"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="生产进度" prop="planStatus" v-if="!showQuery">
+        <el-select
+            v-model="queryParams.planStatus"
+            placeholder="请选择订单进度"
+            clearable
+            style="width: 175px"
+        >
+          <el-option label="待领料" value="0"></el-option>
+          <el-option label="已领料" value="1"></el-option>
+          <el-option label="正在生产" value="2"></el-option>
+          <el-option label="生产完成" value="3"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
+        <el-select v-model="queryParams.createBy"  placeholder="请选择" style="width: 175px">
+          <el-option
+              v-for="item in userOptions"
+              :key="item.userId"
+              :label="item.userName"
+              :value="item.userId"
+              :disabled="item.status == 1"
+
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="日期区间" v-if="!showQuery">
         <el-date-picker
             v-model="queryParams.timeRange"
             type="daterange"
@@ -60,12 +107,13 @@
             format="YYYY/MM/DD"
             value-format="YYYY-MM-DD"
             ref="queryRef"
+            style="width: 220px;"
         />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
+        <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
       </el-form-item>
     </el-form>
 
@@ -153,64 +201,6 @@
     />
 
 
-    <!-- 添加或修改生产管理对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="planRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="计划单号" prop="planCode">
-          <el-input v-model="form.planCode" placeholder="请输入计划单号" />
-        </el-form-item>
-        <el-form-item label="计划单据名称" prop="planName">
-          <el-input v-model="form.planName" placeholder="请输入计划单据名称" />
-        </el-form-item>
-        <el-form-item label="关联单据号" prop="associatedCode">
-          <el-input v-model="form.associatedCode" placeholder="请输入关联单据号" />
-        </el-form-item>
-        <el-form-item label="bom单json" prop="bom">
-          <el-input v-model="form.bom" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="计划日期" prop="planTime">
-          <el-date-picker clearable
-            v-model="form.planTime"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择计划日期">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="商品编号" prop="productCode">
-          <el-input v-model="form.productCode" placeholder="请输入商品编号" />
-        </el-form-item>
-        <el-form-item label="商品json" prop="product">
-          <el-input v-model="form.product" placeholder="请输入商品json" />
-        </el-form-item>
-        <el-form-item label="已生产数量" prop="produceNumber">
-          <el-input v-model="form.produceNumber" placeholder="请输入已生产数量" />
-        </el-form-item>
-        <el-form-item label="未生产数量" prop="noProduceNumber">
-          <el-input v-model="form.noProduceNumber" placeholder="请输入未生产数量" />
-        </el-form-item>
-        <el-form-item label="生产线id" prop="lineId">
-          <el-input v-model="form.lineId" placeholder="请输入生产线id" />
-        </el-form-item>
-        <el-form-item label="生产线" prop="line">
-          <el-input v-model="form.line" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="生产所属仓库" prop="warehouse">
-          <el-input v-model="form.warehouse" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标志" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标志" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
 
     <!--    审核弹窗-->
     <AuditDialog
@@ -232,12 +222,17 @@ import AuditDialog from "../../../../components/zerp/public/auditDialog";
 import produceOrderTable from "../../../../components/zerp/table/produceOrderTable"
 import {getAuditRecord} from "../../../../api/erp/bom";
 import {beganProduce} from "../../../../api/erp/plan";
+import {listUser} from "../../../../api/system/user";
+import {warehouseParentTreeSelect} from "../../../../api/erp/position";
 
 const router = useRouter();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
 
 const planList = ref([]);
+const warehouseOptions = ref([]);
+const userOptions =  ref([])
+
 const open = ref(false);
 const openAudit = ref(false);
 const auditAddDTO = ref({})
@@ -250,7 +245,7 @@ const updateItem = ref(true);
 const MRPCalculate = ref(true)
 const beganProduction = ref(true)
 const auditDisabled = ref(true);
-const showQuery = ref(false);
+const showQuery = ref(true);
 
 const multiple = ref(true);
 const total = ref(0);
@@ -296,7 +291,12 @@ function getList() {
     loading.value = false;
   });
 }
-
+/** 查询user列表 */
+function getUserList() {
+  listUser().then(response => {
+    userOptions.value = response.rows;
+  });
+}
 // 取消按钮
 function cancel() {
   open.value = false;
@@ -340,7 +340,13 @@ function handleQuery() {
 /** 重置按钮操作 */
 function resetQuery() {
   proxy.resetForm("queryRef");
+  queryParams.value = {}
   handleQuery();
+}
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  queryParams.value = {}
+  proxy.resetForm("queryRef");
 }
 
 // 多选框选中数据
@@ -391,7 +397,12 @@ function handleSelectionChange(selection) {
   console.log(auditDisabled.value+" "+updateItem.value+" "+MRPCalculate.value)
 
 }
-
+/** 查询仓库下拉树结构 */
+function getWarehouseTree() {
+  warehouseParentTreeSelect().then(response => {
+    warehouseOptions.value = response.data;
+  });
+};
 /** 新增按钮操作 */
 function handleAdd() {
   reset();
@@ -547,6 +558,8 @@ onBeforeMount(() => {
 });
 
 getList();
+getUserList();
+getWarehouseTree();
 </script>
 
 <style lang="less"  >

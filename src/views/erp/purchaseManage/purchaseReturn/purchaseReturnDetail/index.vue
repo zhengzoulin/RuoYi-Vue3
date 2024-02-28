@@ -1,40 +1,23 @@
 <template>
 
   <div class="app-container" v-loading="loading">
+
     <el-row class="header">
       <router-link to="/purchaseManage/purchaseReturn">
         <el-button type="primary"     icon="Back"
                    plain style=" color: #fff;background-color: #909399;
-                                  border-color: #909399; font-size: 12px;padding-left: 18px">
+                              border-color: #909399; font-size: 12px">
           <span>返回</span>
         </el-button>
+
       </router-link>
-      <div style="margin-left: 38%">
-        <span style="color: #1c84c6;font-size: 25px"> {{ displayTitleText }}</span>
+      <div>
+        <span style="color: #1c84c6;font-size: 24px">BOM详情</span>
       </div>
-
-    </el-row>
-    <el-row :gutter="10" class="mb8" style="border-top: dashed 1.3px rgba(187,199,191,0.35) ; padding: 8px">
-      <el-col :span="1.5">
-        <el-button
-            type="warning"
-            plain
-            icon="Edit"
-            :disabled="isAudited"
-            @click="handleOrderUpdate"
-            v-hasPermi="['erp:order:add']"
-        >修改</el-button>
-      </el-col>
-
-      <el-col :span="1.5">
-        <el-button
-            plain
-            type="primary"
-            icon="Download"
-            @click="pdfFunc"
-            v-hasPermi="['erp:order:export']"
-        >打印</el-button>
-      </el-col>
+      <div>
+        <el-button type="warning" plain @click="handleOrderUpdate"  :disabled="isAudited" >修改</el-button>
+        <el-button type="primary" @click="pdfFunc" plain >打印</el-button>
+      </div>
     </el-row>
     <div >
       <el-row style="  margin-bottom: 20px !important;">
@@ -88,7 +71,7 @@
 
       </el-table>
       <el-row>
-        <span style="font-size: 16px;margin-bottom: 10px"> 采购订单商品信息 </span>
+        <span style="font-size: 16px;margin-bottom: 10px"> 退货商品信息 </span>
       </el-row>
 
 
@@ -161,7 +144,7 @@
       <el-row style="justify-content: center;margin: 15px;font-size: 28px">   <span >{{form.purchaseOrderReturnCode}}-采购退货订单-{{form.createTime}}</span></el-row>
 
       <div class="description-container">
-        <el-row style="justify-content: center;margin: 10px">   <span > 采购单基本信息</span></el-row>
+        <el-row style="justify-content: center;margin: 10px">   <span > 退货单基本信息</span></el-row>
         <el-descriptions  border="true" column="3" size="large"   class="my-descriptions" v-show="orderDetailFormShow" width="900px">
           <el-descriptions-item label="订单编号"  label-align="left">{{form.purchaseOrderReturnCode}}</el-descriptions-item>
           <el-descriptions-item label="单据名称"  label-align="left">
@@ -212,7 +195,7 @@
       </div>
 
       <div class="table-container">
-        <el-row style="justify-content: center;margin-top: 10px">   <span > 采购商品信息</span></el-row>
+        <el-row style="justify-content: center;margin-top: 10px">   <span > 退货商品信息</span></el-row>
         <el-table
             :data="form.orderProductsList">
 
@@ -601,7 +584,8 @@ getUnitList();
 <style scoped>
 
 .header {
-  margin-bottom: 10px;
+  justify-content: space-between;
+  margin-bottom: 20px;
   padding-right: 2%;
 }
 .select-container {

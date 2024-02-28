@@ -35,7 +35,7 @@
               :label="item.userName"
               :value="item.userId"
               :disabled="item.status == 1"
-              style="width: 140px;"
+              style="width: 180px"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -45,6 +45,7 @@
             v-model="queryParams.auditId"
             placeholder="请选择审核状态"
             clearable
+            style="width: 180px"
         >
           <el-option label="未审核" value="0"></el-option>
           <el-option label="审核通过" value="1"></el-option>
@@ -56,6 +57,7 @@
             v-model="queryParams.orderProgress"
             placeholder="请选择订单进度"
             clearable
+            style="width: 175px"
         >
           <el-option label="未开始" value="未开始"></el-option>
           <el-option label="待入库" value="待入库"></el-option>
@@ -70,6 +72,7 @@
             :props="{ value: 'id', label: 'label', children: 'children' }"
             value-key="id"
             placeholder="请选择仓库"
+            style="width: 170px"
         />
       </el-form-item>
       <el-form-item label="日期" v-if="!showQuery">
@@ -83,6 +86,7 @@
             format="YYYY/MM/DD"
             value-format="YYYY-MM-DD"
             ref="queryRef"
+            style="width: 223px"
          />
       </el-form-item>
 <!--      <el-form-item label="支付状态" prop="paymentStatus" v-if="!showQuery">-->
@@ -94,14 +98,14 @@
 <!--        />-->
 <!--      </el-form-item>-->
       <el-form-item label="供应商" prop="unitName" v-if="!showQuery">
-        <el-select v-model="queryParams.unitId"  placeholder="请选择">
+        <el-select v-model="queryParams.unitId"  placeholder="请选择"  style="width: 185px;">
           <el-option
               v-for="item in unitOptions"
               :key="item.unitId"
               :label="item.unitName"
               :value="item.unitId"
               :disabled="item.status == 1"
-              style="width: 140px;"
+
           ></el-option>
         </el-select>
       </el-form-item>
@@ -813,11 +817,12 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+  queryParams.value = {}
   handleQuery();
 }
 function changeQuery(){
   showQuery.value = !showQuery.value;
+  queryParams.value = {}
   proxy.resetForm("queryRef");
 }
 

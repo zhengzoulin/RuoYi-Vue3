@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" v-loading="loading" >
     <el-row class="header">
-      <router-link to="/outAddManage/addStock">
+      <router-link to="/outAddManage/outStock">
         <el-button type="primary"     icon="Back"
                    plain style=" color: #fff;background-color: #909399;
                               border-color: #909399; font-size: 12px">
@@ -10,7 +10,7 @@
 
       </router-link>
       <div >
-        <span style="color: #1c84c6;font-size: 24px">入库单详情</span>
+        <span style="color: #1c84c6;font-size: 24px">生产领取物料出库单</span>
       </div>
       <div>
         <el-button type="warning" plain @click="handleUpdate" :disabled="updateShow">修改</el-button>

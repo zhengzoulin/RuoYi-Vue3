@@ -44,7 +44,7 @@
        </el-form-item>
        <el-form-item label="品牌名称" prop="bomProductJson" v-show="!showQuery">
          <el-input
-             v-model="queryParams.bomProductJson"
+             v-model="queryParams.bomProductBrand"
              placeholder="请输入品牌名称"
              clearable
              @keyup.enter="handleQuery"
@@ -55,6 +55,7 @@
              v-model="queryParams.auditId"
              placeholder="请选择审核状态"
              clearable
+             style="width: 172px"
          >
            <el-option label="未审核" value="0"></el-option>
            <el-option label="审核通过" value="1"></el-option>
@@ -62,14 +63,14 @@
          </el-select>
        </el-form-item>
        <el-form-item label="制单人" prop="createBy" v-if="!showQuery">
-         <el-select v-model="queryParams.createBy"  placeholder="请选择">
+         <el-select v-model="queryParams.createBy"  placeholder="请选择"  style="width: 170px">
            <el-option
                v-for="item in userOptions"
                :key="item.userId"
                :label="item.userName"
                :value="item.userId"
                :disabled="item.status == 1"
-               style="width: 140px;"
+
            ></el-option>
          </el-select>
        </el-form-item>
@@ -78,7 +79,7 @@
        <el-form-item>
          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-         <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
+         <el-button class="el-button--text" @click="changeQuery"><span>切换高级搜素</span></el-button>
        </el-form-item>
      </el-form>
    </el-row>
@@ -363,8 +364,13 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+   queryParams.value = {}
   handleQuery();
+}
+function changeQuery(){
+  showQuery.value = !showQuery.value;
+  queryParams.value = {}
+  proxy.resetForm("queryRef");
 }
 
 // 多选框选中数据

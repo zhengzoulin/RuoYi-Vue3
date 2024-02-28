@@ -2,9 +2,9 @@
   <div class="app-container">
     <el-row>
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
-        <el-form-item  prop="bomKey" v-show="showQuery">
+        <el-form-item  prop="keyWord" v-show="showQuery">
           <el-input
-              v-model="queryParams.bomKey"
+              v-model="queryParams.keyWord"
               placeholder="请输入关键字"
               clearable
               @keyup.enter="handleQuery"
@@ -24,6 +24,7 @@
               v-model="queryParams.demandSource"
               placeholder="请选择需求来源"
               clearable
+              style="width: 200px"
            >
             <el-option label="手动添加" value="手动"></el-option>
             <el-option label="生产补料" value="生产补料"></el-option>
@@ -35,6 +36,7 @@
             v-model="queryParams.demandStatus"
             placeholder="请选择需求状态"
             clearable
+            style="width: 190px"
         >
           <el-option label="待处理" value="待处理"></el-option>
           <el-option label="已处理" value="已处理"></el-option>
@@ -43,16 +45,16 @@
 
       <el-form-item label="商品编号" prop="productId"  v-show="!showQuery">
         <el-input
-            v-model="queryParams.productId"
-            placeholder="请输入商品id"
+            v-model="queryParams.productCode"
+            placeholder="请输入商品编号"
             clearable
             @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="商品名称" prop="productId"  v-show="!showQuery">
         <el-input
-            v-model="queryParams.productId"
-            placeholder="请输入商品id"
+            v-model="queryParams.productName"
+            placeholder="请输入商品"
             clearable
             @keyup.enter="handleQuery"
         />
@@ -64,6 +66,7 @@
               :props="{ value: 'id', label: 'label', children: 'children' }"
               value-key="id"
               placeholder="请选择仓库"
+              style="width: 170px"
           />
        </el-form-item>
         <el-form-item label="日期" v-if="!showQuery">
@@ -77,6 +80,7 @@
               format="YYYY/MM/DD"
               value-format="YYYY-MM-DD"
               ref="queryRef"
+              style="width: 220px"
           />
         </el-form-item>
 
@@ -629,12 +633,15 @@ function handleProductQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef");
+  // proxy.resetForm("queryRef");
+  queryParams.value = {}
+
   handleQuery();
 }
 function changeQuery(){
   showQuery.value = !showQuery.value;
-  proxy.resetForm("queryRef");
+  queryParams.value ={}
+
 }
 /** 重置商品按钮操作 */
 function resetProductQuery() {
