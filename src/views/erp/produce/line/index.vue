@@ -84,7 +84,7 @@
 
     <el-row>
       <el-col :span="24" v-for="(line, index) in lineList" :key="index">
-        <el-card>
+        <el-card :class="line.lineStatus == 0 ? 'listCard0' : 'listCard1'">
           <div slot="header" class="clearfix" style="margin-bottom: 7px">
             <span>{{ line.lineCode }}    </span>
             <span style="margin-left: 30px;font-size: 18px !important;">{{ line.lineName }}</span>
@@ -463,7 +463,15 @@ function loadLine(){
     handleQuery()
   }
 }
-
+// const line = document.getElementById('listCard');
+//
+// function setLineBorderColor(line) {
+//   if (line.lineStatus === 0) {
+//     line.style.borderLeft = '6px solid #69C72B';
+//   } else if (line.lineStatus === 1) {
+//     line.style.borderLeft = '6px solid ec4242';
+//   }
+// }
 
 // 在组件挂载前监听路由变化
 onBeforeMount(() => {
@@ -517,7 +525,21 @@ getCurrentHouse();
 .card-item {
   margin-bottom: 10px;
 }
-.el-card {
-  margin-bottom: 10px; /* 调整卡片底部间隔，根据需要调整数值 */
+.listCard1 {
+  margin-bottom: 20px; /* 调整卡片底部间隔，根据需要调整数值 */
+  border-radius: 10px !important;
+  border: none;
+  margin-left: 1%;
+  width: 95%;
+  border-left: 6px solid #ec4242;
 }
+.listCard0 {
+  margin-bottom: 20px; /* 调整卡片底部间隔，根据需要调整数值 */
+  border-radius: 10px !important;
+  border: none;
+  margin-left: 1%;
+  width: 95%;
+  border-left: 6px solid #69C72B;
+}
+
 </style>

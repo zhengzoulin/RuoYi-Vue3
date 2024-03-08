@@ -63,8 +63,7 @@
     <el-table
               :data="props.selectedOrder"
               height="150px"
-              style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
-    >
+     >
 
       <el-table-column type="selection" width="55" align="center" />
 

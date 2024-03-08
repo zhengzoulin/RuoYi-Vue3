@@ -45,18 +45,13 @@
               <el-descriptions-item label="BOM表备注"  label-align="center">
                 {{form.remark}}
               </el-descriptions-item>
-
-
-
-
-              <el-descriptions-item label="交货日期" label-align="center">
-                <el-date-picker clearable
-                                v-model="form.createTime"
-                                type="date"
-                                value-format="YYYY-MM-DD"
-                                style="height: 46px">
-                </el-date-picker>
+              <el-descriptions-item label="交货日期"  label-align="center">
+                {{form.createTime}}
               </el-descriptions-item>
+
+
+
+
 
             </el-descriptions>
 
@@ -175,7 +170,7 @@
         </el-descriptions>
       </div>
 
-      <div class="table-container">
+      <div >
         <el-row style="justify-content: center;margin-top: 10px">   <span > Bom用料信息</span></el-row>
         <el-table
             :data="form.productList"
@@ -407,7 +402,7 @@ const bomId = ref(route.query.bomId);
 getBomRow()
 </script>
 
-<style scoped >
+<style >
 
 
 .header {
@@ -429,27 +424,22 @@ getBomRow()
 
 .section-header {
   width: 100%;
-
   font-weight: bold;
   display: flex;
   font-size: 15px;
   margin: 12px 0;
-  padding-bottom: 6px;
+  padding-bottom: 1px;
   border-bottom: 1px dashed #d8dce5;
   /*justify-content: space-between;*/
 }
 .section-content{
-  font-size: 13px;
+  font-size: 18px;
 }
 .followButton{
   margin-left: 14px;
   font-size: 12px;
 }
 
-/*.el-row{*/
-/*  margin-left : 1%;*/
-/*  width: 100%;*/
-/*}*/
 .BomForm{
   width: 95%;
 }
