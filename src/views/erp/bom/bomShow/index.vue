@@ -79,9 +79,9 @@
               <el-descriptions-item label="包装数量"  label-align="center">{{form.productForm.minpacketNumber}}</el-descriptions-item>
               <el-descriptions-item label="品牌"  label-align="center">{{form.productForm.brand.brandName}}</el-descriptions-item>
               <el-descriptions-item label="重量"  label-align="center">{{form.productForm.productWeight}}</el-descriptions-item>
-<!--              <el-descriptions-item label="目录"  label-align="center">{{form.catalogId}}</el-descriptions-item>-->
+              <!--              <el-descriptions-item label="目录"  label-align="center">{{form.catalogId}}</el-descriptions-item>-->
               <el-descriptions-item label="备注"  label-align="center">{{form.productForm.remark}}</el-descriptions-item>
-<!--              <el-descriptions-item label="套数"  label-align="center">{{// form.groupNumber}}</el-descriptions-item>-->
+              <!--              <el-descriptions-item label="套数"  label-align="center">{{// form.groupNumber}}</el-descriptions-item>-->
 
             </el-descriptions>
 
@@ -99,32 +99,31 @@
               <span>BOM总成本：￥{{ getBomTotalCost() }}</span>
             </el-row>
 
-              <el-table
-                  :data="form.productList"
-                  v-loading="loading"
-                  style="width: 100%"
-                  class="bomTable"
-                >
-                <el-table-column label="原材料商品信息"  align="center" >
-                  <el-table-column type="selection" width="55" align="center" />
-                  <el-table-column type="index" label="序号" width="55" align="center" />
-                  <el-table-column label="商品编号" align="center" prop="productCode" />
-                  <el-table-column label="商品名称" align="center" prop="productName" />
-                  <el-table-column label="厂家型号" align="center" prop="productModel" />
-                  <el-table-column label="封装" align="center" prop="encapStandard" />
-                  <el-table-column label="品牌" align="center" prop="brand.brandName" />
-                  <el-table-column label="备注" align="center" prop="remark" />
-                  <el-table-column label="成本" align="center" prop="costPrice" />
-                </el-table-column>
+            <el-table
+                :data="form.productList"
+                v-loading="loading"
+                class="bomTable"
+            >
+              <el-table-column label="原材料商品信息"  align="center" >
+                <el-table-column type="selection" width="55" align="center" />
+                <el-table-column type="index" label="序号" width="55" align="center" />
+                <el-table-column label="商品编号" align="center" prop="productCode" />
+                <el-table-column label="商品名称" align="center" prop="productName" />
+                <el-table-column label="厂家型号" align="center" prop="productModel" />
+                <el-table-column label="封装" align="center" prop="encapStandard" />
+                <el-table-column label="品牌" align="center" prop="brand.brandName" />
+                <el-table-column label="备注" align="center" prop="remark" />
+                <el-table-column label="成本" align="center" prop="costPrice" />
+              </el-table-column>
 
-                <el-table-column label="商品用量" align="center" >
-                  <el-table-column label="用量" prop="singleGroupNumber" align="center" >
-                  </el-table-column>
-                  <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
-                  </el-table-column>
+              <el-table-column label="商品用量" align="center" >
+                <el-table-column label="用量" prop="singleGroupNumber" align="center" >
                 </el-table-column>
+                <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
+                </el-table-column>
+              </el-table-column>
 
-              </el-table>
+            </el-table>
           </div>
         </div>
       </el-form>
@@ -143,13 +142,13 @@
           </el-descriptions-item>
           <el-descriptions-item label="单据名称"  label-align="center">
             {{form.bomName }}
-           </el-descriptions-item>
+          </el-descriptions-item>
 
           <el-descriptions-item label="BOM表备注"  label-align="center">
             {{form.remark}}
           </el-descriptions-item>
           <el-descriptions-item label="交货日期" label-align="center">
-           {{form.createTime}}
+            {{form.createTime}}
           </el-descriptions-item>
 
         </el-descriptions>
@@ -179,7 +178,7 @@
         <el-row style="justify-content: center;margin-top: 10px">   <span > Bom用料信息</span></el-row>
         <el-table
             :data="form.productList"
-             class="el-table"
+            class="el-table"
         >
           <el-table-column label="原材料商品信息"  align="center" >
             <el-table-column type="selection" width="55" align="center" />
@@ -353,57 +352,5 @@ getBomRow()
 </script>
 
 <style scoped>
-
-.header {
-  justify-content: space-between;
-  margin-bottom: 9px;
-  padding-right: 2%;
-}
-.form-section {
-  width: 100%;
-  padding: 0px 1px 2px 5px;
-  border-radius: 8px;
-  margin-bottom: 5px;
-}
-
-.section-header {
-  width: 100%;
-  font-weight: bold;
-  display: flex;
-  font-size: 15px;
-  margin: 12px 0;
-  padding-bottom: 1px;
-  border-bottom: 1px dashed #d8dce5;
-  /*justify-content: space-between;*/
-}
-.section-content{
-  font-size: 18px;
-}
-.followButton{
-  margin-left: 14px;
-  font-size: 12px;
-}
-
-.BomForm{
-  width: 100%;
-}
-.BomForm .el-form-item {
-  display: flex;
-  align-items: center; /* 让内部元素垂直居中 */
-}
-.BomForm .el-form-item label {
-  flex: 0 0 30%; /* 调整 label 占据的宽度，可以根据需要进行调整 */
-  font-family: '宋体', sans-serif !important;
-}
-.BomForm .el-input {
-  font-size: 12px; /* 设置输入框字体大小为 14px */
-  padding: 8px; /* 调整输入框内边距 */
-
-}
-/* 使用 !important */
-.bomTable thead th {
-  background-color: rgba(30, 240, 240, 0.51) !important;
-  color: #333 !important;
-}
 
 </style>

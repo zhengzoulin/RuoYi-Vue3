@@ -44,7 +44,11 @@
           <span>{{ parseTime(scope.row.purchaseOrderTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="采购订单总金额" align="center" prop="purchaseAllAmount" />
+      <el-table-column label="采购订单总金额" align="center" prop="purchaseAllAmount">
+        <template #default="scope">
+          <span>{{scope.row.purchaseAllAmount.toFixed(2)}}</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="付款状态" prop="paymentId">
         <template #default="scope">
           <el-tag :type="{

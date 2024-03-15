@@ -70,7 +70,11 @@
                 <span style="display: block;">包装数量: {{ scope.row.minpacketNumber }}</span>
               </template>
             </el-table-column>
-             <el-table-column label="销售数量" prop="saleNumber" align="center"  />
+             <el-table-column label="销售数量" prop="salesNumber" align="center" >
+               <template #default="scope">
+                 <span style="color: #69e062">{{scope.row.salesNumber}}</span>
+               </template>
+             </el-table-column>
 
             <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
             <el-table-column label="需生产数量" align="center"   prop="lackNumber">
@@ -119,12 +123,16 @@
                 <span style="display: block;">包装数量: {{ scope.row.minpacketNumber }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="销售数量" prop="saleNumber" align="center"  />
+            <el-table-column label="销售数量" prop="salesNumber" align="center">
+              <template #default="scope">
+                <span style="color: #69e062">{{scope.row.salesNumber}}</span>
+              </template>
+            </el-table-column>
 
             <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
             <el-table-column label="需采购数量" align="center"   prop="lackNumber">
               <template #default="scope">
-                <span style="color: #ed5565">{{scope.row.lackNumber}}</span>
+                <span style="color: #ed5565;font-size: 14px">{{scope.row.lackNumber}}</span>
               </template>
             </el-table-column>
 

@@ -141,7 +141,7 @@
     <!--      待领料出库商品明细表格-->
     <el-table
         :data="orderPlanProductsList"
-        height="350"
+        height="480"
         style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
 
     >

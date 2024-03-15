@@ -128,7 +128,7 @@
     <!--          </template>-->
 
     <el-table-column label="供应商" align="center" prop="unit.unitName"/>
-    <el-table-column label="备注" prop="remark"/>
+    <el-table-column label="备注" align="center" prop="remark"/>
     <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
       <template #default="scope">
         <el-button link type="danger" icon="delete" @click="removeOrderRow(scope.row)">移除</el-button>
@@ -154,40 +154,41 @@
   <el-table v-loading="ProductsListLoading"
             :data="form.orderProductsList"
             :rules="rules"
-            height="350"
+            height="47%"
             class="productAddDetailTable"
             style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
             @cell-click="tabClick">
 
     <el-table-column type="selection" width="55" align="center" />
     <el-table-column type="index" width="55" align="center" label="序号" />
-    <el-table-column label="编号" align="center" prop="productCode"/>
+    <el-table-column label="编号" align="center" prop="productCode" width="140px"/>
 
-    <el-table-column label="商品信息" align="center" prop="productName"/>
-    <el-table-column label="可入库数量" prop="demandNumber" align="center" >
+    <el-table-column label="商品信息" align="center" prop="productName" width="170px"/>
+    <el-table-column label="可入库数量" prop="demandNumber" align="center"  width="120px">
 
     </el-table-column>
 
-    <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
-    <el-table-column label="成本价" align="center" prop="costPrice" width="100px">
+    <el-table-column label="金额" prop="orderMoney" align="center" class="select-container" width="150px"/>
+    <el-table-column label="成本价" align="center" prop="costPrice" width="110px">
       <template #default="scope">
-                  <span>
-                    <el-input v-model="scope.row.costPrice"  type="number" maxlength="20" placeholder="请输入"  size="mini"  />
+          <span>
+              {{scope.row.costPrice}}
+          </span>
+      </template>
+    </el-table-column>
+
+
+    <el-table-column label="备注" prop="remark" align="center"  width="160px"/>
+
+    <el-table-column label="入库数量" prop="demandNumber" align="center"  width="150px">
+      <template #default="scope">
+                  <span style="text-align: center;font-weight: 200">
+                    {{scope.row.demandNumber}}
                   </span>
       </template>
     </el-table-column>
 
-    <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
-
-    <el-table-column label="入库数量" prop="demandNumber" align="center"  width="120px">
-      <template #default="scope">
-                  <span>
-                    <el-input v-model="scope.row.demandNumber"  type="number" maxlength="20" placeholder="请输入需求" size="mini"  />
-                  </span>
-      </template>
-    </el-table-column>
-
-    <el-table-column label="入库位置相关信息" align="center" width="240px">
+    <el-table-column label="入库位置相关信息" align="center" >
       <template #default="scope">
         <a
             href="#"
@@ -936,7 +937,7 @@ getWarehouseTree()
   /*width: 85% ;*/
   /*!*height: 90%;*!*/
   margin-top: 80px;
-  height: 80%;
+  height: 70%;
   width: 65%;
   /*max-width: calc(100% - 300px);*/
 }
@@ -973,7 +974,7 @@ getWarehouseTree()
 .custom-link-style {
   color: rgba(40, 177, 232, 0.83);
   text-decoration: underline;
-  font-size: 10px; /* 设置合适的字体大小 */
+  font-size: 13px; /* 设置合适的字体大小 */
   /* 其他可能的样式 */
 }
 

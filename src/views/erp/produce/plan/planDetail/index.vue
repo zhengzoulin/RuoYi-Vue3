@@ -118,7 +118,7 @@
               <span style="margin-right: 20px">BOM总数：{{ form.productList.length }}</span>
               <span>BOM总成本：￥{{ getBomTotalCost() }}</span>
             </el-row>
-
+            <el-scrollbar style="height: 520px;">
               <el-table
                   :data="form.productList"
                   v-loading="openPlanAdd"
@@ -126,59 +126,59 @@
                   :cell-class-name="addSeparate"
                   :header-cell-style="tableHeaderColor"
               >
-                  <el-table-column type="selection" width="55" align="center" />
-                   <el-table-column label="编号" align="center" prop="productCode" >
-                     <template #default="scope">
+                <el-table-column type="selection" width="55" align="center" />
+                <el-table-column label="编号" align="center" prop="productCode" >
+                  <template #default="scope">
                       <span class="readonly-column-select">
                           {{ scope.row.productCode}}
                       </span>
-                     </template>
+                  </template>
                 </el-table-column>
-                  <el-table-column label="商品信息" align="center"  width="140" prop="productName" class="readonly-column-select">
-                    <template #default="scope">
-                      <span style="display: block;font-family: '微软雅黑'" class="readonly-column-select">商品:{{ scope.row.productName }}</span>
-                      <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
-                      <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
-                      <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="单套用量" prop="usageAmount" align="center" width="124px" >
-                    <template #default="scope">
+                <el-table-column label="商品信息" align="center"  width="140" prop="productName" class="readonly-column-select">
+                  <template #default="scope">
+                    <span style="display: block;font-family: '微软雅黑'" class="readonly-column-select">商品:{{ scope.row.productName }}</span>
+                    <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+                    <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+                    <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="单套用量" prop="usageAmount" align="center" width="124px" >
+                  <template #default="scope">
                        <span >
                         {{scope.row.usageAmount}}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="用料总数" align="center" prop="encapStandard" >
-                    <template #default="scope">
+                  </template>
+                </el-table-column>
+                <el-table-column label="用料总数" align="center" prop="encapStandard" >
+                  <template #default="scope">
                       <span style="color: rgba(40,177,232,0.83); ">
                         {{scope.row.usageAmount * form.groupNumber}}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
-                    <template #default="scope">
+                  </template>
+                </el-table-column>
+                <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
+                  <template #default="scope">
                        <span >
                         {{scope.row.costPrice}}
                       </span>
-                    </template>
+                  </template>
 
-                  </el-table-column>
-                  <el-table-column label="金额" align="center" prop="remark" >
-                    <template #default="scope">
+                </el-table-column>
+                <el-table-column label="金额" align="center" prop="remark" >
+                  <template #default="scope">
                       <span>
-                        {{scope.row.usageAmount * scope.row.costPrice}}
+                          {{ (scope.row.usageAmount * scope.row.costPrice).toFixed(3)}}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
-                    <template #default="scope">
+                  </template>
+                </el-table-column>
+                <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
+                  <template #default="scope">
                        <span >
                         {{scope.row.estimatedLoss}}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="备注" align="center" prop="remark" />
+                  </template>
+                </el-table-column>
+                <el-table-column label="备注" align="center" prop="remark" />
 
                 <el-table-column label="库存数量" align="center" prop="balanceNumber" />
                 <el-table-column label="占用数量" align="center">
@@ -188,6 +188,8 @@
                 </el-table-column>
                 <el-table-column label="可用数量" align="center" prop="availableNumber" />
               </el-table>
+            </el-scrollbar>
+
 
           </div>
         </div>
@@ -309,7 +311,7 @@
           <el-table-column label="金额" align="center" prop="remark" >
             <template #default="scope">
                       <span>
-                        {{scope.row.usageAmount * scope.row.costPrice}}
+                          {{ (scope.row.usageAmount * scope.row.costPrice).toFixed(3)}}
                       </span>
             </template>
           </el-table-column>

@@ -187,77 +187,76 @@
             Bom用料信息
            </div>
           <div class="section-content">
-            <!-- Buttons for importing and downloading -->
-<!--            <el-row>-->
-<!--              <el-button size="mini">导入BOM表</el-button>-->
-<!--              <el-button>下载BOM模板</el-button>-->
-<!--            </el-row>-->
-
-            <!-- Display BOM total count and cost -->
             <el-row>
               <span style="margin-right: 20px">用料总数：{{ form.productList.length }}</span>
               <span>用料总成本：￥{{ getPlanTotalCost() }}</span>
             </el-row>
 
-              <el-table
-                  :data="form.productList"
-                  v-loading="openPlanAdd"
-                  style="width: 100%"
-                  :cell-class-name="addSeparate"
-                  :header-cell-style="tableHeaderColor"
-              >
+           <el-scrollbar style="height: 520px;">
+             <el-table
+                 :data="form.productList"
+                 v-loading="openPlanAdd"
+                 style="width: 100%"
+                 hight="450px"
+                 :cell-class-name="addSeparate"
+                 :header-cell-style="tableHeaderColor"
+             >
 
-                  <el-table-column type="selection" width="55" align="center" />
-                   <el-table-column label="编号" align="center" prop="productCode" />
-                  <el-table-column label="商品信息" align="center" prop="productName" >
-                    <template #default="scope">
-                      <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
-                      <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
-                      <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
-                      <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="124px" >
-                    <template #default="scope">
-                      <el-input v-model="scope.row.singleGroupNumber" type="number" size="small"  :min="1" />
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="总数" align="center" >
-                    <template #default="scope">
+               <el-table-column type="selection" width="55" align="center" />
+               <el-table-column label="编号" align="center" prop="productCode" />
+               <el-table-column label="商品信息" align="center" prop="productName" >
+                 <template #default="scope">
+                   <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
+                   <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+                   <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+                   <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+                 </template>
+               </el-table-column>
+               <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="124px" >
+                 <template #default="scope">
+                   <el-input v-model="scope.row.singleGroupNumber" type="number" size="small"  :min="1" />
+                 </template>
+               </el-table-column>
+               <el-table-column label="总数" align="center" >
+                 <template #default="scope">
                       <span style="color: rgba(40,177,232,0.83); ">
                         {{scope.row.singleGroupNumber * form.groupNumber}}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
-                    <template #default="scope">
-                      <el-input-number v-model="scope.row.costPrice" size="small"  :min="1" />
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="金额" align="center" prop="remark" >
-                    <template #default="scope">
+                 </template>
+               </el-table-column>
+               <el-table-column label="单个成本" align="center" prop="costPrice" width="134px">
+                 <template #default="scope">
+                   <el-input-number v-model="scope.row.costPrice" size="small"  :min="0" :step="0.001" />
+                 </template>
+               </el-table-column>
+               <el-table-column label="金额" align="center" prop="remark">
+                 <template #default="scope">
                       <span>
-                        {{ (scope.row.singleGroupNumber * form.groupNumber) * scope.row.costPrice}}
+                        {{
+                          ((scope.row.singleGroupNumber * form.groupNumber) * scope.row.costPrice).toFixed(3)
+                        }}
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
-                    <template #default="scope">
+                 </template>
+               </el-table-column>
+
+               <el-table-column label="预损耗量" prop="estimatedLoss" align="center">
+                 <template #default="scope">
                       <span>
                         <el-input v-model="scope.row.estimatedLoss"  type="number" maxlength="26" placeholder="请输入" size="mini"  />
                       </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="备注" align="center" prop="remark" />
+                 </template>
+               </el-table-column>
+               <el-table-column label="备注" align="center" prop="remark" />
 
-                <el-table-column label="库存数量" align="center" prop="balanceNumber" />
-                <el-table-column label="占用数量" align="center">
-                  <template #default="scope">
-                    <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
-                  </template>
-                </el-table-column>
-                <el-table-column label="可用数量" align="center" prop="availableNumber" />
-              </el-table>
+               <el-table-column label="库存数量" align="center" prop="balanceNumber" />
+               <el-table-column label="占用数量" align="center">
+                 <template #default="scope">
+                   <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
+                 </template>
+               </el-table-column>
+               <el-table-column label="可用数量" align="center" prop="availableNumber" />
+             </el-table>
+           </el-scrollbar>
 
 
           </div>
@@ -272,15 +271,12 @@
         :queryBom="queryBom"
          :warehouseOptions="warehouseOptions"
          @queryBomSelect="queryBomSelect"
+        @resetBOMQuery="resetBOMQuery"
         @showBomDetail="showBomDetail"
         @submitBomSelect="submitBomSelect"
     />
 
 
-
-
-<!--    分布弹窗-->
-    <!--    商品选择框-->
 
   </div>
 </template>
@@ -392,7 +388,7 @@ function getProductList() {
 /** 新增选择商品按钮操作 */
 function handleSelectProduct() {
   getProductList();
-
+  openPlanAdd.value = true
   productRows.value = []
   openProduct.value = true;
   radioSelect.value = true;
@@ -474,7 +470,7 @@ function getPlanTotalCost(){
     bomTotalCost.value = 0;
   }
   form.value.planTotalPrice = bomTotalCost.value
-  return bomTotalCost.value;
+  return bomTotalCost.value.toFixed(3);
 }
 
 const displayTitleText = computed(() => {
@@ -593,10 +589,16 @@ function submitBomSelect(data){
 /** 分布弹窗搜素Bom单 */
 
 function queryBomSelect(data){
-
+  queryBom.value = data
+  getBomList()
 }
+function resetBOMQuery(){
+  queryBom.value = {}
+  getBomList()
+}
+
 function addOrUpdate(){
-  if(planId.value==null){
+  if(planId.value == null){
 
   }else{
     openPlanAdd.value = false
@@ -690,10 +692,10 @@ getBomList()
 .readonly-tree-select::after {
   content: '';
   position: absolute;
-  top: 6px; /* 调整蒙版顶部偏移 */
-  bottom: 6px; /* 调整蒙版底部偏移 */
-  left: 6px;
-  right: 6px;
+  top: 5px; /* 调整蒙版顶部偏移 */
+  bottom: 5px; /* 调整蒙版底部偏移 */
+  left: 5px;
+  right: 5px;
   z-index: 1;
   background-color: rgba(204, 219, 238, 0.43); /* 淡灰色 */
   box-sizing: border-box; /* 让蒙版尺寸包括 border 和 padding */

@@ -76,62 +76,64 @@
     </el-row>
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane label="商品信息维度" name="first">
-        <el-table v-loading="loading" :data="productLevelList" style="max-height: 214px;" @selection-change="handleSelectionChange" >
+        <el-scrollbar style="height: 600px;">
+          <el-table v-loading="loading" :data="productLevelList" style="max-height: 600px;overflow: auto" @selection-change="handleSelectionChange" >
 
-          <el-table-column label="序号" type="index" width="55" align="center" />
+            <el-table-column label="序号" type="index" width="55" align="center" />
 
-          <el-table-column label="商品编号" align="center" prop="productCode">
-            <template  #default="scope" width="100">
-              <button  class="positionButton" >
-                <span @click="showProductBatchDetail(scope.row.productCode)">{{scope.row.productCode}}</span>
-              </button>
-            </template>
-          </el-table-column>
-          <el-table-column label="商品名称" align="center" prop="productName" />
-          <el-table-column label="厂家型号" align="center" prop="productModel" />
-          <el-table-column label="封装规格" align="center" prop="encapStandard" />
-          <el-table-column label="所属仓库" align="center" prop="warehouseCount" >
-            <template  #default="scope"  >
-              <button  class="positionButton" >
-                <span @click="showProductBatchDetail(scope.row.productCode)">{{scope.row.warehouseCount}}</span>
-              </button>
-            </template>
-          </el-table-column>
-          <el-table-column label="批次数" align="center" prop="batchCount" >
-            <template  #default="scope"  >
-              <button  class="positionButton">
-                <span @click="showProductBatchDetail(scope.row.productCode)" >{{scope.row.batchCount}}</span>
-              </button>
-            </template>
-          </el-table-column>
+            <el-table-column label="商品编号" align="center" prop="productCode">
+              <template  #default="scope" width="100">
+                <button  class="positionButton" >
+                  <span @click="showProductBatchDetail(scope.row.productCode)">{{scope.row.productCode}}</span>
+                </button>
+              </template>
+            </el-table-column>
+            <el-table-column label="商品名称" align="center" prop="productName" />
+            <el-table-column label="厂家型号" align="center" prop="productModel" />
+            <el-table-column label="封装规格" align="center" prop="encapStandard" />
+            <el-table-column label="所属仓库" align="center" prop="warehouseCount" >
+              <template  #default="scope"  >
+                <button  class="positionButton" >
+                  <span @click="showProductBatchDetail(scope.row.productCode)">{{scope.row.warehouseCount}}</span>
+                </button>
+              </template>
+            </el-table-column>
+            <el-table-column label="批次数" align="center" prop="batchCount" >
+              <template  #default="scope"  >
+                <button  class="positionButton">
+                  <span @click="showProductBatchDetail(scope.row.productCode)" >{{scope.row.batchCount}}</span>
+                </button>
+              </template>
+            </el-table-column>
 
-           <el-table-column label="批次商品数量" align="center" prop="productBatchNumber" >
-            <template  #default="scope"  >
-              <button  class="positionButton" >
+            <el-table-column label="批次商品数量" align="center" prop="productBatchNumber" >
+              <template  #default="scope"  >
+                <button  class="positionButton" >
                 <span @click="showProductBatchDetail(scope.row.productCode)" >
                   {{scope.row.productBatchNumber}}
                 </span>
-              </button>
-            </template>
-          </el-table-column>
-           <el-table-column label="批次总额" align="center" prop="productBatchTotal">
-            <template #default="scope">
-              {{ scope.row.productBatchTotal.toFixed(2) }}
-            </template>
-          </el-table-column>
-        </el-table>
+                </button>
+              </template>
+            </el-table-column>
+            <el-table-column label="批次总额" align="center" prop="productBatchTotal">
+              <template #default="scope">
+                {{ scope.row.productBatchTotal }}
+              </template>
+            </el-table-column>
+          </el-table>
+          <pagination
+              v-show="total>0"
+              :total="productTotal"
+              v-model:page="queryParams.pageNum"
+              v-model:limit="queryParams.pageSize"
+              @pagination="getBatchLevelList"
+          />
+        </el-scrollbar>
 
-        <pagination
-            v-show="total>0"
-            :total="productTotal"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="getBatchLevelList"
-        />
       </el-tab-pane>
       <el-tab-pane label="批次信息维度" name="second" style="overflow: auto">
 
-        <el-table v-loading="loading" :data="batchLevelList" style="max-height: 500px;overflow: auto" @selection-change="handleSelectionChange" class="batchTable">
+        <el-table v-loading="loading" :data="batchLevelList" style="max-height: 600px;overflow: auto" @selection-change="handleSelectionChange" class="batchTable">
           <el-table-column label="序号" type="index" width="55" align="center" />
 
           <el-table-column label="批次号" align="center" prop="batchCode" />

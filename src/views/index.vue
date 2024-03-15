@@ -6,7 +6,7 @@
         <el-card class="card-item">
 
           <div class="body">
-            <div class="headTitle" style="margin-bottom: 20px">系统模块</div>
+            <div class="headTitle" style="margin-bottom: 40px">系统模块</div>
             <div class="panel-body scrollbar-hover">
               <el-row class="row row-admin">
                 <div class="flow-item flow-item-0"><div title="系统管理">系统管理</div></div>
@@ -326,26 +326,7 @@
         <el-card class="card-item-row2">
 
           <div class="body" style="height: 230px;">
-            <div class="headTitle"> 述</div>
 
-            <div class="flex">
-              <div  class="wid50 center">
-                <div class="black num-box">
-                  <span  style="cursor: pointer;">0</span>
-                </div>
-                <div class="num-des-box">
-                  <span data-v-432a8bfe="" style="cursor: pointer;">待审核</span>
-                </div>
-              </div>
-              <div  class="wid50 center">
-                <div class="blue num-box">
-                  <span  style="cursor: pointer;">5</span>
-                </div>
-                <div  class="num-des-box">
-                  <span  style="cursor: pointer;">可用BOM</span>
-                </div>
-              </div>
-            </div>
           </div>
         </el-card>
       </el-col>
@@ -401,6 +382,7 @@
                     value-key="id"
                     placeholder="所有仓库"
                     @change="queryNumberChartsStatic"
+                    style="width: 100%;"
                 />
               </el-col>
 
@@ -416,12 +398,12 @@
                     end-placeholder="End"
                     format="YYYY/MM/DD"
                     value-format="YYYY-MM-DD"
-                    style="width:250px;height: 25px"
+                    style="width: 250px;height: 25px"
                     @change="queryNumberChartsStatic"
                 />
               </el-col>
               <el-col :span="12">
-                <el-select v-model="selectedChartType" placeholder="切换图表类型" style="width: 125px;margin-left: 67%">
+                <el-select v-model="selectedChartType" placeholder="切换图表类型" style="width: 50%;margin-left: 67%">
                   <el-option label="柱状图" value="bar" @click="toggleChartType"></el-option>
                   <el-option label="折线图" value="line" @click="toggleChartType"></el-option>
                 </el-select>

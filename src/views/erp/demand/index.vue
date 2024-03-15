@@ -276,10 +276,10 @@
       </el-form>
 
 <!--      第五步:设置上一步和下一步的按钮-->
-      <el-button v-if="active > 1" style="margin-top: 12px" @click="preStep">上一步</el-button>
+      <el-button v-if="active > 1" style="margin-top: 18px;margin-left: 20px" @click="preStep">上一步</el-button>
 
-      <el-button v-if="active < 3" style="margin-top: 12px" @click="nextStep">下一步</el-button>
-      <el-button v-if="active === 3" style="margin-top: 12px" @click="submitDemandForm">确 定</el-button>
+      <el-button v-if="active < 3" style="margin-top: 18px;margin-left: 20px" @click="nextStep">下一步</el-button>
+      <el-button type="primary" v-if="active === 3" style="margin-top: 18px" @click="submitDemandForm">确 定</el-button>
 
     </el-dialog>
 
@@ -474,7 +474,6 @@ const selection = ref();
 const removeRow = (row) => {
   const confirmResult = confirm('确定要移除这一行吗？');
   if (confirmResult) {
-    alert(row)
     const index = demandForm.value.demandProductsList.findIndex(item => item.productId === row.productId);
     if (index !== -1) {
       demandForm.value.demandProductsList.splice(index, 1);

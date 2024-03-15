@@ -121,122 +121,135 @@
     </el-col>
 
     <el-form v-if="planId">
-      <el-table
-          :data="form.productList"
-          v-loading="openPlanAdd"
-          style="width: 100%"
-      >
+      <el-scrollbar style="height: 800px;">
+        <el-table
+            :data="form.productList"
+            v-loading="openPlanAdd"
+            style="width: 100%"
+        >
 
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="编号" align="center" width="90" prop="productCode" />
-        <el-table-column label="商品信息" align="center" width="120"  >
-          <template #default="scope">
-            <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
-            <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
-            <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
-            <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="120px" />
-        <el-table-column label="预损耗量" prop="estimatedLoss" align="center" width="120px"/>
-        <el-table-column label="用量总数(目标)" align="center" prop="usageAmount" >
-          <template #default="scope">
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column label="编号" align="center" width="90" prop="productCode" />
+          <el-table-column label="商品信息" align="center" width="120"  >
+            <template #default="scope">
+              <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
+              <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+              <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+              <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="120px" />
+          <el-table-column label="预损耗量" prop="estimatedLoss" align="center" width="120px"/>
+          <el-table-column label="用量总数(目标)" align="center" prop="usageAmount" >
+            <template #default="scope">
                       <span style="color: rgba(40,177,232,0.83); ">
                         {{scope.row.usageAmount}}
                       </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
-        <el-table-column label="其他单据占用数量(生产计划正在生产的部分)" align="center">
-          <template #default="scope">
-            <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
-          </template>
-        </el-table-column>
-        <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
-        <el-table-column label="缺料数量(计算得出)" align="center"  >
-          <template #default="scope">
+            </template>
+          </el-table-column>
+          <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
+          <el-table-column label="其他单据占用数量(生产计划正在生产的部分)" align="center">
+            <template #default="scope">
+              <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
+            </template>
+          </el-table-column>
+          <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
+          <el-table-column label="缺料数量(计算得出)" align="center"  >
+            <template #default="scope">
                       <span style="color: red; ">
                         {{calculateShortage(scope.row) }}
                       </span>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-scrollbar>
+
     </el-form>
 
     <el-form v-else>
-      <el-table
-          :data="form.productList"
-          v-loading="openPlanAdd"
-          style="width: 100%"
-      >
+      <el-scrollbar style="height: 800px;">
+        <el-table
+            :data="form.productList"
+            v-loading="openPlanAdd"
+            style="width: 100%"
+        >
 
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="编号" align="center" width="90" prop="productCode" />
-        <el-table-column label="商品信息" align="center" width="120"  >
-          <template #default="scope">
-            <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
-            <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
-            <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
-            <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="单价" prop="salePrice" align="center" width="120px" />
-        <el-table-column label="销售数量" prop="saleNumber" align="center" width="120px"/>
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column label="编号" align="center" width="90" prop="productCode" />
+          <el-table-column label="商品信息" align="center" width="120"  >
+            <template #default="scope">
+              <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
+              <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+              <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+              <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单价" prop="salePrice" align="center" width="120px" />
+          <el-table-column label="销售数量" prop="salesNumber" align="center" width="120px">
+            <template #default="scope">
+              <span style="color: #69e062">{{scope.row.salesNumber}}</span>
+            </template>
+          </el-table-column>
 
-        <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
-        <el-table-column label="其他单据占用数量(生产计划正在生产的部分)" align="center">
-          <template #default="scope">
-            <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
-          </template>
-        </el-table-column>
-        <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
-        <el-table-column label="缺料数量(计算得出)" align="center"  >
-          <template #default="scope">
+          <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
+          <el-table-column label="其他单据占用数量(生产计划正在生产的部分)" align="center">
+            <template #default="scope">
+              <a  style="color: rgba(40,177,232,0.83); text-decoration: underline;">{{scope.row.occupiedNumber}}</a>
+            </template>
+          </el-table-column>
+          <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
+          <el-table-column label="缺料数量(计算得出)" align="center"  >
+            <template #default="scope">
                       <span style="color: red; ">
                         {{scope.row.lackNumber}}
                       </span>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-scrollbar>
+
     </el-form>
 
 <!--生产原材料补货订单弹窗-->
     <el-dialog :title="title" v-model="openPurchase" width="950px"  append-to-body>
-      <el-table
-          :data="purchaseProductList"
-          v-loading="openPlanAdd"
-          style="width: 100%"
-      >
+      <el-scrollbar style="height: 600px;">
+        <el-table
+            :data="purchaseProductList"
+            v-loading="openPlanAdd"
+            style="width: 100%"
+        >
 
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="编号" align="center" width="90" prop="productCode" />
-        <el-table-column label="商品信息" align="center" width="120"  >
-          <template #default="scope">
-            <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
-            <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
-            <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
-            <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="120px" />
-        <el-table-column label="预损耗量" prop="estimatedLoss" align="center" width="120px"/>
-        <el-table-column label="用量总数(目标)" align="center" prop="usageAmount" >
-          <template #default="scope">
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column label="编号" align="center" width="90" prop="productCode" />
+          <el-table-column label="商品信息" align="center" width="120"  >
+            <template #default="scope">
+              <span style="display: block;font-family: '微软雅黑'">商品:{{ scope.row.productName }}</span>
+              <span style="display: block;">封装规格:{{ scope.row.encapStandard }}</span>
+              <span style="display: block;">厂家型号:{{ scope.row.productModel }}</span>
+              <span style="display: block;">包装数量:{{ scope.row.minpacketNumber }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单套用量" prop="singleGroupNumber" align="center" width="120px" />
+          <el-table-column label="预损耗量" prop="estimatedLoss" align="center" width="120px"/>
+          <el-table-column label="用量总数(目标)" align="center" prop="usageAmount" >
+            <template #default="scope">
                       <span style="color: rgba(40,177,232,0.83); ">
                         {{scope.row.usageAmount}}
                       </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
-        <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
-        <el-table-column label="需采购数量" align="center"  >
-          <template #default="scope">
+            </template>
+          </el-table-column>
+          <el-table-column label="库存数量(查询)" align="center" prop="balanceNumber" />
+          <el-table-column label="当前可用数量" align="center" prop="availableNumber" />
+          <el-table-column label="需采购数量" align="center"  >
+            <template #default="scope">
                       <span style="color: red; ">
                         {{calculateShortage(scope.row) }}
                       </span>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-scrollbar>
+
 
       <el-row style="margin-top: 20px">
         <el-button style="margin-left: 85%" @click="goPurchase" type="primary" plain >
@@ -463,9 +476,10 @@ if(planId.value != undefined){
   getSales(salesId.value).then(response => {
     sales.value = response.data;
     console.log("ssss")
-    console.log(sales.value)
+    // console.log(sales.value)
     form.value = sales.value;
     form.value.productList = response.data.saleProductsList
+    console.log(form.value.productList)
    });
 }
 </script>

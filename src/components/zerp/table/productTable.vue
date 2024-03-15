@@ -4,10 +4,9 @@
     <el-form :model="queryProductParams" ref="queryProductRef"
              :inline="true"
              v-show="showSearch"
-             label-width="90px"
              label-position="left"
              style="width: 100%;
-                  margin-left: 30px; display:flex;align-items: center;justify-content: center"
+                 display:flex;align-items: center;justify-content: center"
     >
 
       <el-form-item label="商品编号" prop="productCode">
@@ -26,10 +25,10 @@
             @keyup.enter="handleProductQuery"
         />
       </el-form-item>
-      <el-form-item label="商品来源" prop="productSource">
+      <el-form-item  label="关键字" prop="keyWord">
         <el-input
-            v-model="queryProductParams.productSource"
-            placeholder="请输入商品来源"
+            v-model="queryProductParams.keyWord"
+            placeholder="请输入关键字"
             clearable
             @keyup.enter="handleProductQuery"
         />
@@ -98,6 +97,7 @@ const rowData = ref();
 const queryProductParams = ref({
     pageNum: 1,
     pageSize: 100,
+    keyWord:null,
     brandId: null,
     productId: null,
     catalogId: null,
@@ -125,6 +125,7 @@ function reset(){
   queryProductParams.value = {
     pageNum: 1,
     pageSize: 100,
+    keyWord:null,
     brandId: null,
     productId: null,
     catalogId: null,

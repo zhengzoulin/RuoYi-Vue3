@@ -142,13 +142,14 @@
       </el-row>
 
       <span >采购种数：{{form.demandProductsList.length}}</span>
-      <span style="margin-left: 20px">采购总额：{{getPurchaseAllAmount()}}</span>
+      <span style="margin-left: 20px">采购总额：{{getPurchaseAllAmount()}} 元</span>
 
 
       <el-table v-loading="loading"
                 :data="form.demandProductsList"
                 height="450"
-                @cell-click="tabClick">
+                @cell-click="tabClick"
+                style="margin-top: 10px">
 
         <el-table-column type="selection" width="55" align="center" />
 
@@ -233,7 +234,6 @@
     <!--  商品选择框-->
     <el-dialog :title="title" v-model="openProduct" width="950px"  append-to-body >
       <!-- 查看商品详细对话框 -->
-      <el-button style="margin-right: 10px" @click="submitProductList">确 定</el-button>
       <!--      //第二步:定义form表单-->
       <ProductTable  :productList="productList"
                      :productRows="productRows"
@@ -243,6 +243,8 @@
       >
 
       </ProductTable>
+      <el-button type="primary" style="margin-left: 90%;margin-top: 20px" @click="submitProductList"> 确 定 </el-button>
+
 
     </el-dialog>
   </div>
@@ -496,19 +498,19 @@ function nextStep() {
 
 //采购总额
 function getPurchaseAllAmount(){
-  let price = 0
+  let price = 0.0
   form.value.demandProductsList.forEach(row=>{
     if(demandRows.value==null){
-      row.orderMoney = (row.costPrice * row.demandNumber || 0).toFixed(3);
+      row.orderMoney = (row.costPrice * row.demandNumber || 0.0).toFixed(3);
     }else{
-      row.orderMoney = (row.product.costPrice * row.demandNumber || 0).toFixed(3);
+      row.orderMoney = (row.product.costPrice * row.demandNumber || 0.0).toFixed(3);
       row.costPrice = row.product.costPrice;
     }
-    price += parseFloat(row.orderMoney) || 0;
+    price += parseFloat(row.orderMoney) || 0.0;
     form.value.purchaseAllAmount = price;
   })
   if(price < 0 || price==null){
-    price=0
+    price = 0.0
   }
 
   return price;
@@ -566,13 +568,11 @@ function addOrUpdate() {
   console.log(produceData.value)
 
   if (purchaseOrderId.value === null && demandRows.value === null && produceData.value===null) {
-    alert("新增")
 
     openWarehouse.value = true;
     isShowP.value = null; // 或者适当的默认值
 
   } else if (purchaseOrderId.value !== null ) {
-    alert("修改")
 
     isShowP.value = purchaseOrderId.value;
     openWarehouse.value = false;
@@ -580,7 +580,6 @@ function addOrUpdate() {
     getOrderDetail();
 
   } else if (demandRows.value !== null) {
-    alert("需求下推")
     isShowP.value = demandRows.value;
     demandRows.value = JSON.parse(demandRows.value);
     form.value.demandProductsList = Array.from(demandRows.value);
@@ -597,7 +596,6 @@ function addOrUpdate() {
   }else if(produceData.value !== null){
     openWarehouse.value = false;
 
-    alert("缺料")
     displayTitleText.value = "新增缺料采购订单"
 
     produceData.value = JSON.parse(produceData.value);

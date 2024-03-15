@@ -954,7 +954,7 @@ getWarehouseTree()
   /*width: 85% ;*/
   /*!*height: 90%;*!*/
   margin-top: 80px;
-  height: 80%;
+  height: 60%;
   width: 65%;
   /*max-width: calc(100% - 300px);*/
 }

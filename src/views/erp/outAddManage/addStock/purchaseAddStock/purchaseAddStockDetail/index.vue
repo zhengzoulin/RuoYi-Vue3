@@ -101,26 +101,24 @@
     <el-table v-loading="ProductsListLoading"
               :data="form.orderProductsList"
               :rules="rules"
-              height="300"
+              height="47%"
                style="border: dashed 1.3px rgba(187,199,191,0.35);margin-top: 8px;padding: 3px"
               >
 
       <el-table-column type="index" width="55" align="center" label="#" />
-      <el-table-column label="商品编号" align="center" prop="productCode"/>
+      <el-table-column label="商品编号" align="center" prop="productCode" width="180px" />
 
-      <el-table-column label="商品信息" align="center" prop="productName"/>
-      <el-table-column label="可入库数量" prop="demandNumber" align="center" >
+      <el-table-column label="商品信息" align="center" prop="productName" width="180px" />
+      <el-table-column label="可入库数量" prop="demandNumber" align="center" width="155px" />
 
-      </el-table-column>
+      <el-table-column label="金额" prop="orderMoney" align="center" class="select-container" width="155px"/>
+      <el-table-column label="成本价" align="center" prop="costPrice"   width="155px"/>
 
-      <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
-      <el-table-column label="成本价" align="center" prop="costPrice" width="100px"/>
+      <el-table-column label="备注" prop="remark" align="center"  width="165px"/>
 
-      <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
+      <el-table-column label="入库数量" prop="demandNumber" align="center"  width="155px"/>
 
-      <el-table-column label="入库数量" prop="demandNumber" align="center"  width="120px"/>
-
-      <el-table-column label="入库位置相关信息" align="center" width="240px">
+      <el-table-column label="入库位置相关信息" align="center" >
         <template #default="scope">
           <a
               href="#"
@@ -217,21 +215,21 @@
                   :rules="rules">
 
           <el-table-column type="index" width="55" align="center" label="#" />
-          <el-table-column label="商品编号" align="center" prop="productCode"/>
+          <el-table-column label="商品编号" align="center" prop="productCode" width="180px" />
 
-          <el-table-column label="商品信息" align="center" prop="productName"/>
-          <el-table-column label="可入库数量" prop="demandNumber" align="center" >
+          <el-table-column label="商品信息" align="center" prop="productName" width="180px" />
+          <el-table-column label="可入库数量" prop="demandNumber" align="center" width="155px" >
 
           </el-table-column>
 
-          <el-table-column label="金额" prop="orderMoney" align="center" class="select-container"/>
-          <el-table-column label="成本价" align="center" prop="costPrice" width="100px"/>
+          <el-table-column label="金额" prop="orderMoney" align="center" class="select-container" width="155px"/>
+          <el-table-column label="成本价" align="center" prop="costPrice"   width="155px"/>
 
-          <el-table-column label="备注" prop="remark" align="center"  width="90px"/>
+          <el-table-column label="备注" prop="remark" align="center"  width="165px"/>
 
-          <el-table-column label="入库数量" prop="demandNumber" align="center"  width="120px"/>
+          <el-table-column label="入库数量" prop="demandNumber" align="center"  width="155px"/>
 
-          <el-table-column label="入库位置相关信息" align="center" width="240px">
+          <el-table-column label="入库位置相关信息" align="center" >
             <template #default="scope">
               <a
                   href="#"
@@ -433,7 +431,7 @@ addOrUpdate();
 .custom-link-style {
   color: rgba(40, 177, 232, 0.83);
   text-decoration: underline;
-  font-size: 10px; /* 入库详细设置合适的字体大小 */
+  font-size: 13px; /* 入库详细设置合适的字体大小 */
   /* 其他可能的样式 */
 }
 

@@ -1,6 +1,6 @@
 <template>
 <div class="app-container">
-  <el-table v-loading="loading" :data="props.planList"  @selection-change="handleSelectionChange" class="el-table">
+  <el-table v-loading="loading" :data="props.planList"  @selection-change="handleSelectionChange" class="el-table" >
     <el-table-column type="selection" width="55" align="center" />
     <el-table-column label="计划单号" align="center" prop="planCode" width="120px">
       <template #default="scope">
@@ -14,22 +14,22 @@
         </a>
       </template>
     </el-table-column>
-    <el-table-column label="单据名称" align="center" prop="planName" />
+    <el-table-column label="单据名称" align="center" prop="planName" width="150px"/>
     <el-table-column label="计划日期" align="center" prop="planTime" width="160px">
       <template #default="scope">
         <span>{{ parseTime(scope.row.planTime, '{y}-{m}-{d}') }}</span>
       </template>
     </el-table-column>
-    <el-table-column label="成品编号" align="center" prop="productForm.productCode" />
-    <el-table-column label="厂家型号" align="center" prop="productForm.productModel" />
-    <el-table-column label="封装规格" align="center" prop="productForm.encapStandard" />
+    <el-table-column label="成品编号" align="center" prop="productForm.productCode" width="100px"/>
+    <el-table-column label="厂家型号" align="center" prop="productForm.productModel" width="100px"/>
+    <el-table-column label="封装规格" align="center" prop="productForm.encapStandard" width="100px"/>
 
 
-    <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" />
+    <el-table-column label="所属仓库" align="center" prop="warehouse.warehousePath" width="100px"/>
     <el-table-column label="生产线" align="center" prop="line.lineName">
 
     </el-table-column>
-    <el-table-column label="生产状态" align="center" prop="planStatus">
+    <el-table-column label="生产状态" align="center" prop="planStatus" width="100px">
       <template #default="scope">
         <el-tag :type="{
             '0': 'info',       // 未状态
@@ -40,7 +40,7 @@
           }[scope.row.planStatus]" @click="goProduceLine(scope.row)"> {{ PlanStatus(scope.row.planStatus) }} </el-tag>
       </template>
     </el-table-column>
-    <el-table-column label="入库状态" align="center" prop="status">
+    <el-table-column label="入库状态" align="center" prop="status" width="100px">
       <template #default="scope">
         <el-tag :type="{
             '0': 'info',       // 待生产
@@ -70,7 +70,7 @@
 
       </template>
     </el-table-column>
-    <el-table-column label="备注" align="center" prop="remark" />
+    <el-table-column label="备注" align="center" prop="remark" width="100px" />
     <el-table-column label="操作" align="center" class-name="small-padding fixed-width" v-if="props.selectPlanOrderShow">
       <template #default="scope">
         <el-button link type="primary" icon="Edit" :disabled="props.single" @click="handleUpdate(scope.row)" v-hasPermi="['erp:plan:edit']">修改</el-button>

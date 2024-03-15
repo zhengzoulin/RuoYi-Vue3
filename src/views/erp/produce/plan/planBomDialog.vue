@@ -1,7 +1,6 @@
 <template>
 <div>
-  <el-dialog :title="title" v-model="props.openPlanAdd" :width="dialogWidth"
-             class="planSelectDialog" append-to-body>
+  <el-dialog :title="title" v-model="props.openPlanAdd" :width="dialogWidth" style="height: 43%" append-to-body>
 
     <!--      //第一步:定义出4个步骤-->
     <el-steps :active="active" finish-status="success">
@@ -14,7 +13,6 @@
         ref="demandRef"
         :model="form"
         :rules="rules"
-        label-position="left"
         label-width="80px"
         style="width: 850px;
           margin-left: 30px">
@@ -22,16 +20,17 @@
       <!--        //第三步:定义4个盒子对象active => 1 到 4-->
       <div v-show="active === 1">
         <el-row>
-          <el-form :model="props.queryBom" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="custom-form">
-            <el-form-item  prop="bomKey" v-show="showQuery">
+
+          <el-form :model="props.queryBom" ref="queryRef" :inline="true" label-width="75px" class="custom-form">
+            <el-form-item  prop="bomKey" label="关键字">
               <el-input
-                  v-model="props.queryBom.bomKey"
+                  v-model="props.queryBom.keyWord"
                   placeholder="请输入关键字"
                   clearable
                   @keyup.enter="handleQuery"
               />
             </el-form-item>
-            <el-form-item label="bom编号" prop="bomCode" v-show="!showQuery">
+            <el-form-item label="bom编号" prop="bomCode" >
               <el-input
                   v-model="props.queryBom.bomCode"
                   placeholder="请输入bom编号"
@@ -39,32 +38,8 @@
                   @keyup.enter="handleQuery"
               />
             </el-form-item>
-            <el-form-item label="bom单名称" prop="bomName" v-show="!showQuery">
-              <el-input
-                  v-model="props.queryBom.bomName"
-                  placeholder="请输入bom单名称"
-                  clearable
-                  @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-            <el-form-item label="成品编号" prop="bomProductId" v-show="!showQuery">
-              <el-input
-                  v-model="props.queryBom.bomProductId"
-                  placeholder="请输入成品编号"
-                  clearable
-                  @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-            <el-form-item label="成品商品名称" prop="bomProductId" v-show="!showQuery">
-              <el-input
-                  v-model="props.queryBom.bomProductId"
-                  placeholder="请输入成品编号"
-                  clearable
-                  @keyup.enter="handleQuery"
-              />
-            </el-form-item>
 
-            <el-form-item label="品牌名称" prop="bomProductId" v-show="!showQuery">
+            <el-form-item label="成品编号" prop="bomProductId" >
               <el-input
                   v-model="props.queryBom.bomProductId"
                   placeholder="请输入成品编号"
@@ -72,15 +47,7 @@
                   @keyup.enter="handleQuery"
               />
             </el-form-item>
-            <el-form-item label="审核状态" prop="bomProductId" v-show="!showQuery">
-              <el-input
-                  v-model="props.queryBom.bomProductId"
-                  placeholder="请输入成品编号"
-                  clearable
-                  @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-            <el-form-item label="创建人" prop="bomProductId" v-show="!showQuery">
+            <el-form-item label="成品商品" prop="bomProductId" >
               <el-input
                   v-model="props.queryBom.bomProductId"
                   placeholder="请输入成品编号"
@@ -92,8 +59,7 @@
 
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-              <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-              <el-button class="el-button--text" @click="showQuery = !showQuery"><span>切换高级搜素</span></el-button>
+              <el-button icon="Refresh" @click="resetBOMQuery">重置</el-button>
             </el-form-item>
           </el-form>
         </el-row>
@@ -177,10 +143,10 @@
       </div>
     </el-form>
     <!--      第五步:设置上一步和下一步的按钮-->
-    <el-button v-if="active === 2" style="margin-left: 20px;margin-top: 12px" @click="preStep" >上一步</el-button>
+    <el-button v-if="active === 2" style="margin-left: 18%;margin-top: 20px" @click="preStep" >上一步</el-button>
 
-    <el-button v-if="active === 1" style="margin-top: 12px" @click="nextStep" :disabled="single">下一步</el-button>
-    <el-button v-if="active === 2" style="margin-top: 12px" @click="submitBomSelect">确 定</el-button>
+    <el-button v-if="active === 1" style="margin-top: 20px;margin-left: 85%" @click="nextStep" :disabled="single">下一步</el-button>
+    <el-button v-if="active === 2" style="margin-top: 20px;" @click="submitBomSelect">确 定</el-button>
 
   </el-dialog>
 
@@ -197,8 +163,7 @@
 import {defineEmits, defineProps, ref} from "vue";
 import {getAuditRecord} from "../../../../api/erp/bom";
 
-const showQuery = ref(false)
-const single = ref(true)
+ const single = ref(true)
  const active =ref(1);
 const dialogWidth = ref('950px')
 const tooltipAuditContent = ref({})
@@ -277,9 +242,11 @@ function reset(){
   }
 }
 
+function resetBOMQuery(){
+  emit('resetBOMQuery')}
 
 // 接收父组件传递过来的方法--------------------------------------------------------------------------
-const emit = defineEmits(['submitBomSelect','queryBomSelect','getSelectProduct','showBomDetail'])
+const emit = defineEmits(['submitBomSelect','queryBomSelect','getSelectProduct','showBomDetail','resetBOMQuery'])
 
 function handleQuery () {
   //调用父组件传递过来的方法，传入参数修改父组件的值

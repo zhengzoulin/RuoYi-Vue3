@@ -64,7 +64,7 @@ export const constantRoutes = [
       {
         path: '/index',
         component: () => import('@/views/index'),
-        name: 'Index',
+        // name: '首页',
         meta: { title: '首页', icon: 'dashboard', affix: true }
       },
       {
@@ -105,6 +105,11 @@ export const constantRoutes = [
       {
         path: '/bom/bomDetail',
         component: () => import('@/views/erp/bom/bomDetail'),
+        hidden: true
+      },
+      {
+        path: '/bom/bomShow',
+        component: () => import('@/views/erp/bom/bomShow'),
         hidden: true
       },
       {

@@ -77,7 +77,7 @@
     </el-row>
 <!--    当前展示的为【默认父仓 - 成品仓】的库位数据-->
     <el-row style="margin-bottom: 10px">
-      <el-col :span="8" style="font-size: 20px">当前展示的为: [  <span class="current-house">{{currentHouse.warehousePath}}</span>  ] 的库位数据</el-col>
+      <el-col :span="12" style="font-size: 20px">当前展示的为: [  <span class="current-house">{{currentHouse.warehousePath}}</span>  ] 的库位数据</el-col>
 
     </el-row>
 
@@ -432,7 +432,7 @@ function getCurrentHouse(){
 }
 
 
-queryParams.value.warehouseId=101
+queryParams.value.warehouseId = 121
 
 getList();
 getWarehouseTree();

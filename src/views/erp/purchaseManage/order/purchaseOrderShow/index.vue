@@ -671,7 +671,7 @@ getUnitList();
 
   margin-bottom: 20px !important;
   border-width: 12px !important;
-  width: 90%;
+  width: 100%;
 }
 
 /* 给蒙版添加样式 */
